@@ -555,7 +555,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </ul>
           <div className="flex items-center justify-between border-t border-border/60 px-3 py-2">
             <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Composes severity
+              Condition formation
             </span>
             <span className="text-mono text-xs" style={{ color: tone }}>
               {pct}%
@@ -563,11 +563,44 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </div>
           <p className="text-mono px-3 pb-3 pt-1 text-[10px] leading-relaxed text-muted-foreground">
             Signals → mechanisms → architecture condition. Mechanism share = portion of
-            severity attributable to each form of human compensation.
+            condition formation attributable to each form of human compensation.
           </p>
         </div>
       </details>
 
+      {c.architecturalCauses.length > 0 ? (
+        <details className="group mt-2">
+          <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
+            <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+            Most likely architectural causes
+          </summary>
+          <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+            <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              What the architecture is producing this condition
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-foreground">
+              {c.architecturalCauses.map((cause) => (
+                <li
+                  key={cause}
+                  className="relative pl-4 leading-snug before:absolute before:left-0 before:top-2 before:h-1.5 before:w-1.5 before:rounded-sm before:rotate-45"
+                  style={
+                    {
+                      ["--tw-before-bg" as string]: tone,
+                    } as React.CSSProperties
+                  }
+                >
+                  <span
+                    className="absolute left-0 top-2 h-1.5 w-1.5 rotate-45"
+                    style={{ backgroundColor: tone }}
+                    aria-hidden
+                  />
+                  {cause}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
+      ) : null}
 
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
@@ -582,6 +615,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           ))}
         </ul>
       </details>
+
     </li>
   );
 }
