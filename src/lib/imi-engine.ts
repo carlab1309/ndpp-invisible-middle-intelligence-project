@@ -43,21 +43,30 @@ export interface ConditionContribution {
   family: SignalFamily;
   source: string;
   ts: number;
-  points: number; // signed percentage-point contribution to strength
+  mechanism: string;
+  points: number; // signed percentage-point contribution to severity
+}
+
+export interface ConditionMechanism {
+  label: string;
+  points: number; // percentage points contributed to severity
+  signalNames: string[]; // distinct signals that activated this mechanism
 }
 
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
   description: string;
-  strength: number; // 0..1 — indication strength, not statistical confidence
+  strength: number; // 0..1 — severity of this architecture condition
   severity: SignalSeverity;
   evidenceStrength: "High" | "Medium" | "Low";
   contributingFamilies: SignalFamily[];
   contributingSignalIds: string[];
+  mechanisms: ConditionMechanism[];
   breakdown: ConditionContribution[];
   responseGuidance: string[];
 }
+
 
 
 // --- Signal catalogue (drawn from the taxonomy doc) -----------------
@@ -265,6 +274,69 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   },
 };
 
+// --- Mechanism mapping ---------------------------------------------
+// Each (condition, signal) pair maps to the structural mechanism that
+// signal activates. Mechanisms sit BETWEEN raw signals and the architecture
+// condition — they describe how compensation is forming, not what was observed.
+
+const MECHANISM_MAP: Record<ConditionId, Record<string, string>> = {
+  trust_instability: {
+    "Verification loop": "Verification Burden",
+    "Repeated dashboard checking": "Reassurance Dependency",
+    "Reassurance-seeking message": "Reassurance Dependency",
+    "Case reopened after closure": "Closure Uncertainty",
+    "Repeated AI override": "Interpretive Reliance",
+  },
+  closure_failure: {
+    "Case reopened after closure": "Reopen Recurrence",
+    "Repeated dashboard checking": "Completion Ambiguity",
+    "Reassurance-seeking message": "Completion Ambiguity",
+  },
+  threshold_ambiguity: {
+    "Threshold reinterpretation loop": "Threshold Reinterpretation",
+    "Ownership clarification request": "Severity Inconsistency",
+    "Reassurance-seeking message": "Severity Inconsistency",
+    "Escalation inflation": "Severity Inconsistency",
+    "Delayed intervention": "Delayed Recognition",
+  },
+  ownership_drift: {
+    "Duplicated intervention": "Duplicated Action",
+    "Ownership clarification request": "Ownership Clarification",
+    "Reassurance-seeking message": "Ownership Clarification",
+    "Delayed intervention": "Handoff Gap",
+  },
+  context_fragmentation: {
+    "Handoff context replay": "Context Replay",
+  },
+  ai_burden_transfer: {
+    "Repeated AI override": "Override Burden",
+    "Confidence interpretation query": "Confidence Interpretation",
+    "Verification loop": "Verification Shift",
+  },
+  interpretive_overload: {
+    "Confidence interpretation query": "Meaning Inference",
+    "Delayed intervention": "Urgency Inference",
+  },
+  escalation_instability: {
+    "Escalation inflation": "Escalation Inflation",
+    "Threshold reinterpretation loop": "Threshold-Driven Escalation",
+  },
+  workflow_incoherence: {
+    "Workaround documented": "Local Workaround Proliferation",
+    "Duplicated intervention": "Duplicated Workflow",
+    "Handoff context replay": "Context Loss",
+  },
+  predictability_failure: {
+    "Repeated dashboard checking": "Behavioural Variance",
+    "Workaround documented": "Workaround Documentation",
+  },
+};
+
+function mechanismFor(cid: ConditionId, signalName: string): string {
+  return MECHANISM_MAP[cid]?.[signalName] ?? "Other indicators";
+}
+
+
 // --- Scenarios -----------------------------------------------------
 
 export type ScenarioId = "baseline" | "trust_collapse" | "ai_burden" | "handoff_breakdown" | "flourishing";
@@ -395,7 +467,8 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     if (strength < 0.12) continue;
     const meta = CONDITION_META[cid as ConditionId];
 
-    // Attribute strength back to contributing signals proportionally
+    // Attribute severity back to contributing signals proportionally,
+    // then roll signals up into structural mechanisms.
     const strengthPct = strength * 100;
     const breakdown: ConditionContribution[] = Array.from(acc.perSignal.values())
       .map(({ sig, weighted }) => ({
@@ -404,7 +477,23 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
         family: sig.family,
         source: sig.source,
         ts: sig.ts,
+        mechanism: mechanismFor(cid as ConditionId, sig.name),
         points: acc.raw > 0 ? (weighted / acc.raw) * strengthPct : 0,
+      }))
+      .sort((a, b) => b.points - a.points);
+
+    const mechAcc = new Map<string, { points: number; signals: Set<string> }>();
+    for (const b of breakdown) {
+      const m = mechAcc.get(b.mechanism) ?? { points: 0, signals: new Set() };
+      m.points += b.points;
+      m.signals.add(b.name);
+      mechAcc.set(b.mechanism, m);
+    }
+    const mechanisms: ConditionMechanism[] = Array.from(mechAcc.entries())
+      .map(([label, v]) => ({
+        label,
+        points: v.points,
+        signalNames: Array.from(v.signals),
       }))
       .sort((a, b) => b.points - a.points);
 
@@ -425,10 +514,12 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       evidenceStrength,
       contributingFamilies: Array.from(acc.families),
       contributingSignalIds: acc.signalIds.slice(-6),
+      mechanisms,
       breakdown,
       responseGuidance: meta.responseGuidance,
     });
   }
+
 
   results.sort((a, b) => b.strength - a.strength);
   return results;
