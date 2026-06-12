@@ -354,11 +354,15 @@ function severityFor(strength: number): SignalSeverity {
   return "low";
 }
 
+interface AccEntry {
+  raw: number;
+  families: Set<SignalFamily>;
+  signalIds: string[];
+  perSignal: Map<string, { sig: Signal; weighted: number }>;
+}
+
 export function interpret(signals: Signal[], now = Date.now()): StructuralCondition[] {
-  const conditionAcc: Record<
-    string,
-    { raw: number; families: Set<SignalFamily>; signalIds: string[] }
-  > = {};
+  const conditionAcc: Record<string, AccEntry> = {};
 
   for (const sig of signals) {
     const def = SIGNAL_CATALOGUE.find((d) => d.name === sig.name);
@@ -368,10 +372,19 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       ConditionId,
       number,
     ][]) {
-      const acc = (conditionAcc[cid] ??= { raw: 0, families: new Set(), signalIds: [] });
-      acc.raw += contribution * w;
+      const acc = (conditionAcc[cid] ??= {
+        raw: 0,
+        families: new Set(),
+        signalIds: [],
+        perSignal: new Map(),
+      });
+      const weighted = contribution * w;
+      acc.raw += weighted;
       acc.families.add(sig.family);
       acc.signalIds.push(sig.id);
+      const existing = acc.perSignal.get(sig.id);
+      if (existing) existing.weighted += weighted;
+      else acc.perSignal.set(sig.id, { sig, weighted });
     }
   }
 
@@ -381,14 +394,38 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     const strength = 1 - Math.exp(-acc.raw * 0.9);
     if (strength < 0.12) continue;
     const meta = CONDITION_META[cid as ConditionId];
+
+    // Attribute strength back to contributing signals proportionally
+    const strengthPct = strength * 100;
+    const breakdown: ConditionContribution[] = Array.from(acc.perSignal.values())
+      .map(({ sig, weighted }) => ({
+        signalId: sig.id,
+        name: sig.name,
+        family: sig.family,
+        source: sig.source,
+        ts: sig.ts,
+        points: acc.raw > 0 ? (weighted / acc.raw) * strengthPct : 0,
+      }))
+      .sort((a, b) => b.points - a.points);
+
+    const sev = severityFor(strength);
+    const evidenceStrength: StructuralCondition["evidenceStrength"] =
+      acc.families.size >= 3 && sev !== "low"
+        ? "High"
+        : acc.families.size >= 2
+          ? "Medium"
+          : "Low";
+
     results.push({
       id: cid as ConditionId,
       label: meta.label,
       description: meta.description,
       strength,
-      severity: severityFor(strength),
+      severity: sev,
+      evidenceStrength,
       contributingFamilies: Array.from(acc.families),
       contributingSignalIds: acc.signalIds.slice(-6),
+      breakdown,
       responseGuidance: meta.responseGuidance,
     });
   }
@@ -396,6 +433,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
   results.sort((a, b) => b.strength - a.strength);
   return results;
 }
+
 
 export function familyCounts(signals: Signal[]): Record<SignalFamily, number> {
   const out = {} as Record<SignalFamily, number>;
