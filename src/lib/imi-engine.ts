@@ -635,6 +635,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       contributingSignalIds: acc.signalIds.slice(-6),
       mechanisms,
       breakdown,
+      architecturalCauses: architecturalCausesFor(mechanisms.map((m) => m.label)),
       responseGuidance: meta.responseGuidance,
     });
   }
