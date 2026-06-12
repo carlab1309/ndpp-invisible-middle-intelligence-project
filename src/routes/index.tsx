@@ -428,11 +428,11 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) {
   return (
     <Panel
-      label="Structural conditions"
-      caption="Signals → context → structural condition → response guidance"
+      label="Architecture conditions"
+      caption="Signals → context → architecture condition → response guidance"
     >
       {conditions.length === 0 ? (
-        <EmptyState text="No structural conditions inferred yet." />
+        <EmptyState text="No architecture conditions present yet." />
       ) : (
         <ul className="divide-y divide-border/60">
           {conditions.map((c) => (
@@ -471,9 +471,12 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         </div>
         <div className="shrink-0 text-right">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Structural strength
+            Evidence strength
           </p>
-          <p className="text-mono mt-1 text-lg" style={{ color: tone }}>
+          <p className="text-mono mt-1 text-sm" style={{ color: tone }}>
+            {c.evidenceStrength}
+          </p>
+          <p className="text-mono mt-0.5 text-lg" style={{ color: tone }}>
             {pct}%
           </p>
         </div>
@@ -499,6 +502,48 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-3">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+          Why? · contributing signals
+        </summary>
+        <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60">
+          <ul className="divide-y divide-border/40">
+            {c.breakdown.slice(0, 8).map((b) => (
+              <li key={b.signalId} className="flex items-start justify-between gap-3 px-3 py-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <FamilyTag family={b.family} />
+                    <span className="text-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                      {b.source}
+                    </span>
+                  </div>
+                  <p className="mt-1 truncate text-xs text-foreground">{b.name}</p>
+                </div>
+                <span
+                  className="text-mono shrink-0 text-[11px]"
+                  style={{ color: tone }}
+                >
+                  +{b.points.toFixed(1)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center justify-between border-t border-border/60 px-3 py-2">
+            <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Net structural strength
+            </span>
+            <span className="text-mono text-xs" style={{ color: tone }}>
+              {pct}%
+            </span>
+          </div>
+          <p className="text-mono px-3 pb-3 pt-1 text-[10px] leading-relaxed text-muted-foreground">
+            Recent signals weigh more · contributions attributed proportionally to each
+            signal's weighted evidence toward this condition.
+          </p>
+        </div>
+      </details>
+
+      <details className="group mt-2">
+        <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
+          <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
           Response guidance
         </summary>
         <ul className="mt-2 space-y-1 pl-4 text-xs text-foreground">
@@ -512,6 +557,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
     </li>
   );
 }
+
 
 function severityTone(s: StructuralCondition["severity"]) {
   switch (s) {
