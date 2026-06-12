@@ -509,48 +509,65 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-3">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Why? · contributing mechanisms
+          Formed by · structural mechanisms
         </summary>
         <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60">
+          <p className="text-mono px-3 pt-3 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            What humans are being asked to carry
+          </p>
           <ul className="divide-y divide-border/40">
-            {c.mechanisms.map((m) => (
-              <li key={m.label} className="px-3 py-2">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-foreground">{m.label}</span>
-                  <span className="text-mono shrink-0 text-[11px]" style={{ color: tone }}>
-                    +{m.points.toFixed(1)}
-                  </span>
-                </div>
-                <p className="text-mono mt-1 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                  Derived from
-                </p>
-                <ul className="mt-1 space-y-0.5">
-                  {m.signalNames.map((n) => (
-                    <li
-                      key={n}
-                      className="relative pl-3 text-[11px] text-muted-foreground before:absolute before:left-0 before:top-2 before:h-px before:w-1.5 before:bg-border"
-                    >
-                      {n}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
+            {c.mechanisms.map((m) => {
+              const share = pct > 0 ? Math.round((m.points / pct) * 100) : 0;
+              return (
+                <li key={m.label} className="px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-foreground">{m.label}</span>
+                    <span className="text-mono shrink-0 text-[11px]" style={{ color: tone }}>
+                      {share}%
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${share}%`,
+                        backgroundColor: tone,
+                        opacity: 0.7,
+                      }}
+                    />
+                  </div>
+                  <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                    Derived from
+                  </p>
+                  <ul className="mt-1 space-y-0.5">
+                    {m.signalNames.map((n) => (
+                      <li
+                        key={n}
+                        className="relative pl-3 text-[11px] text-muted-foreground before:absolute before:left-0 before:top-2 before:h-px before:w-1.5 before:bg-border"
+                      >
+                        {n}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
           </ul>
           <div className="flex items-center justify-between border-t border-border/60 px-3 py-2">
             <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Net severity
+              Composes severity
             </span>
             <span className="text-mono text-xs" style={{ color: tone }}>
               {pct}%
             </span>
           </div>
           <p className="text-mono px-3 pb-3 pt-1 text-[10px] leading-relaxed text-muted-foreground">
-            Signals → mechanisms → architecture condition. Recent signals weigh more;
-            mechanism points are the share of severity attributable to each.
+            Signals → mechanisms → architecture condition. Mechanism share = portion of
+            severity attributable to each form of human compensation.
           </p>
         </div>
       </details>
+
 
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
