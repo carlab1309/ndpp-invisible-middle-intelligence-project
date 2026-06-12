@@ -41,7 +41,7 @@ export interface StructuralCondition {
   id: ConditionId;
   label: string;
   description: string;
-  confidence: number; // 0..1
+  strength: number; // 0..1 — indication strength, not statistical confidence
   severity: SignalSeverity;
   contributingFamilies: SignalFamily[];
   contributingSignalIds: string[];
@@ -335,10 +335,10 @@ function timeWeight(ts: number, now: number) {
   return Math.pow(0.5, age / HALF_LIFE_MS);
 }
 
-function severityFor(confidence: number): SignalSeverity {
-  if (confidence >= 0.8) return "critical";
-  if (confidence >= 0.55) return "elevated";
-  if (confidence >= 0.3) return "moderate";
+function severityFor(strength: number): SignalSeverity {
+  if (strength >= 0.8) return "critical";
+  if (strength >= 0.55) return "elevated";
+  if (strength >= 0.3) return "moderate";
   return "low";
 }
 
@@ -366,22 +366,22 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
   const results: StructuralCondition[] = [];
   for (const [cid, acc] of Object.entries(conditionAcc)) {
     // Diminishing returns curve
-    const confidence = 1 - Math.exp(-acc.raw * 0.9);
-    if (confidence < 0.12) continue;
+    const strength = 1 - Math.exp(-acc.raw * 0.9);
+    if (strength < 0.12) continue;
     const meta = CONDITION_META[cid as ConditionId];
     results.push({
       id: cid as ConditionId,
       label: meta.label,
       description: meta.description,
-      confidence,
-      severity: severityFor(confidence),
+      strength,
+      severity: severityFor(strength),
       contributingFamilies: Array.from(acc.families),
       contributingSignalIds: acc.signalIds.slice(-6),
       responseGuidance: meta.responseGuidance,
     });
   }
 
-  results.sort((a, b) => b.confidence - a.confidence);
+  results.sort((a, b) => b.strength - a.strength);
   return results;
 }
 
