@@ -340,6 +340,120 @@ function mechanismFor(cid: ConditionId, signalName: string): string {
   return MECHANISM_MAP[cid]?.[signalName] ?? "Residual Compensation";
 }
 
+// --- Architectural causes ------------------------------------------
+// Per mechanism: the system-level architecture gaps that typically *produce*
+// that form of human compensation. This is the layer beneath the mechanism:
+// not what burden is forming, but why the architecture is creating it.
+
+const MECHANISM_CAUSES: Record<string, string[]> = {
+  "Verification Burden": [
+    "Verification ownership unresolved",
+    "System feedback insufficient to confirm action took effect",
+  ],
+  "Reassurance Dependency": [
+    "Closure conditions unclear",
+    "State transitions not communicated back to the user",
+  ],
+  "Closure Uncertainty": [
+    "Completion not durably confirmed",
+    "Reopen criteria not codified",
+  ],
+  "Completion Ambiguity": [
+    "Completion not durably confirmed",
+    "Notifications continue past completion",
+  ],
+  "Oversight Compensation": [
+    "AI recommendation thresholds not aligned to operator trust",
+    "Override expectations not designed into the workflow",
+  ],
+  "Interpretive Reliance": [
+    "Confidence interpretation unsupported",
+    "AI output lacks operational meaning at point of use",
+  ],
+  "Threshold Reinterpretation": [
+    "Severity bands not codified across teams",
+    "Threshold criteria invisible in-context",
+  ],
+  "Severity Inconsistency": [
+    "Severity model interpreted locally, not structurally",
+    "Escalation criteria not anchored to protocol",
+  ],
+  "Recognition Latency": [
+    "First-action ownership unclear",
+    "Alert framing does not communicate urgency",
+  ],
+  "Duplicated Responsibility": [
+    "Ownership not explicit on alert surfaces",
+    "Multiple teams hold overlapping mandate without coordination",
+  ],
+  "Ownership Ambiguity": [
+    "Ownership not explicit on alert surfaces",
+    "Handoff protocol absent for amber-band cases",
+  ],
+  "Handoff Gap": [
+    "Handoff state not preserved between systems",
+    "Receiving team has no inbound queue",
+  ],
+  "Context Reconstruction": [
+    "Case context does not survive handoff",
+    "Decision rationale not preserved on transitions",
+  ],
+  "Meaning Reconstruction": [
+    "Signals require interpretation the system should perform",
+    "Next-step prompts missing at decision points",
+  ],
+  "Urgency Inference": [
+    "Time-criticality not represented in signal surface",
+    "SLA context absent at point of action",
+  ],
+  "Escalation Inflation": [
+    "Proportionate-escalation criteria undefined",
+    "First-line containment under-resourced",
+  ],
+  "Threshold-Driven Escalation": [
+    "Severity bands ambiguous, defaulting to escalation",
+    "Reclassification has no holding state",
+  ],
+  "Workaround Proliferation": [
+    "Workflow logic does not match operational reality",
+    "Local detours are not surfaced back to design",
+  ],
+  "Duplicated Workflow": [
+    "Workflow does not converge across teams",
+    "Comparable cases routed differently by surface",
+  ],
+  "Context Loss": [
+    "Context not carried across system boundaries",
+    "Handoff acts as a context discontinuity",
+  ],
+  "Behavioural Hedging": [
+    "System behaviour is non-deterministic from user perspective",
+    "State changes not announced",
+  ],
+  "Workaround Persistence": [
+    "Workarounds outlive the conditions that produced them",
+    "Workflow design has no retirement loop",
+  ],
+  "Residual Compensation": [
+    "Compensation pattern outside the modelled mechanism library",
+  ],
+};
+
+function architecturalCausesFor(mechanismLabels: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const m of mechanismLabels) {
+    for (const c of MECHANISM_CAUSES[m] ?? []) {
+      if (!seen.has(c)) {
+        seen.add(c);
+        out.push(c);
+      }
+    }
+  }
+  return out.slice(0, 4);
+}
+
+
 
 
 // --- Scenarios -----------------------------------------------------
