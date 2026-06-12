@@ -78,7 +78,7 @@ function Console() {
   const conditions = useMemo(() => interpret(signals, now), [signals, now]);
   const counts = useMemo(() => familyCounts(signals), [signals]);
   const totalBurden = useMemo(
-    () => conditions.reduce((a, c) => a + c.confidence, 0),
+    () => conditions.reduce((a, c) => a + c.strength, 0),
     [conditions]
   );
 
@@ -445,7 +445,7 @@ function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) 
 
 function ConditionRow({ c }: { c: StructuralCondition }) {
   const tone = severityTone(c.severity);
-  const pct = Math.round(c.confidence * 100);
+  const pct = Math.round(c.strength * 100);
   return (
     <li className="px-5 py-4">
       <div className="flex items-start justify-between gap-4">
@@ -470,7 +470,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         </div>
         <div className="shrink-0 text-right">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Confidence
+            Structural strength
           </p>
           <p className="text-mono mt-1 text-lg" style={{ color: tone }}>
             {pct}%
