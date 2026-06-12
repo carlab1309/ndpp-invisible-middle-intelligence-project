@@ -274,6 +274,69 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   },
 };
 
+// --- Mechanism mapping ---------------------------------------------
+// Each (condition, signal) pair maps to the structural mechanism that
+// signal activates. Mechanisms sit BETWEEN raw signals and the architecture
+// condition — they describe how compensation is forming, not what was observed.
+
+const MECHANISM_MAP: Record<ConditionId, Record<string, string>> = {
+  trust_instability: {
+    "Verification loop": "Verification Burden",
+    "Repeated dashboard checking": "Reassurance Dependency",
+    "Reassurance-seeking message": "Reassurance Dependency",
+    "Case reopened after closure": "Closure Uncertainty",
+    "Repeated AI override": "Interpretive Reliance",
+  },
+  closure_failure: {
+    "Case reopened after closure": "Reopen Recurrence",
+    "Repeated dashboard checking": "Completion Ambiguity",
+    "Reassurance-seeking message": "Completion Ambiguity",
+  },
+  threshold_ambiguity: {
+    "Threshold reinterpretation loop": "Threshold Reinterpretation",
+    "Ownership clarification request": "Severity Inconsistency",
+    "Reassurance-seeking message": "Severity Inconsistency",
+    "Escalation inflation": "Severity Inconsistency",
+    "Delayed intervention": "Delayed Recognition",
+  },
+  ownership_drift: {
+    "Duplicated intervention": "Duplicated Action",
+    "Ownership clarification request": "Ownership Clarification",
+    "Reassurance-seeking message": "Ownership Clarification",
+    "Delayed intervention": "Handoff Gap",
+  },
+  context_fragmentation: {
+    "Handoff context replay": "Context Replay",
+  },
+  ai_burden_transfer: {
+    "Repeated AI override": "Override Burden",
+    "Confidence interpretation query": "Confidence Interpretation",
+    "Verification loop": "Verification Shift",
+  },
+  interpretive_overload: {
+    "Confidence interpretation query": "Meaning Inference",
+    "Delayed intervention": "Urgency Inference",
+  },
+  escalation_instability: {
+    "Escalation inflation": "Escalation Inflation",
+    "Threshold reinterpretation loop": "Threshold-Driven Escalation",
+  },
+  workflow_incoherence: {
+    "Workaround documented": "Local Workaround Proliferation",
+    "Duplicated intervention": "Duplicated Workflow",
+    "Handoff context replay": "Context Loss",
+  },
+  predictability_failure: {
+    "Repeated dashboard checking": "Behavioural Variance",
+    "Workaround documented": "Workaround Documentation",
+  },
+};
+
+function mechanismFor(cid: ConditionId, signalName: string): string {
+  return MECHANISM_MAP[cid]?.[signalName] ?? "Other indicators";
+}
+
+
 // --- Scenarios -----------------------------------------------------
 
 export type ScenarioId = "baseline" | "trust_collapse" | "ai_burden" | "handoff_breakdown" | "flourishing";
