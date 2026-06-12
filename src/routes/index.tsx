@@ -469,16 +469,23 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             {c.description}
           </p>
         </div>
-        <div className="shrink-0 text-right">
-          <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Evidence strength
-          </p>
-          <p className="text-mono mt-1 text-sm" style={{ color: tone }}>
-            {c.evidenceStrength}
-          </p>
-          <p className="text-mono mt-0.5 text-lg" style={{ color: tone }}>
-            {pct}%
-          </p>
+        <div className="shrink-0 space-y-1.5 text-right">
+          <div>
+            <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Severity
+            </p>
+            <p className="text-mono mt-0.5 text-lg leading-none" style={{ color: tone }}>
+              {pct}%
+            </p>
+          </div>
+          <div>
+            <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Evidence strength
+            </p>
+            <p className="text-mono mt-0.5 text-sm" style={{ color: tone }}>
+              {c.evidenceStrength}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -502,41 +509,45 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-3">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Why? · contributing signals
+          Why? · contributing mechanisms
         </summary>
         <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60">
           <ul className="divide-y divide-border/40">
-            {c.breakdown.slice(0, 8).map((b) => (
-              <li key={b.signalId} className="flex items-start justify-between gap-3 px-3 py-2">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <FamilyTag family={b.family} />
-                    <span className="text-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                      {b.source}
-                    </span>
-                  </div>
-                  <p className="mt-1 truncate text-xs text-foreground">{b.name}</p>
+            {c.mechanisms.map((m) => (
+              <li key={m.label} className="px-3 py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium text-foreground">{m.label}</span>
+                  <span className="text-mono shrink-0 text-[11px]" style={{ color: tone }}>
+                    +{m.points.toFixed(1)}
+                  </span>
                 </div>
-                <span
-                  className="text-mono shrink-0 text-[11px]"
-                  style={{ color: tone }}
-                >
-                  +{b.points.toFixed(1)}
-                </span>
+                <p className="text-mono mt-1 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                  Derived from
+                </p>
+                <ul className="mt-1 space-y-0.5">
+                  {m.signalNames.map((n) => (
+                    <li
+                      key={n}
+                      className="relative pl-3 text-[11px] text-muted-foreground before:absolute before:left-0 before:top-2 before:h-px before:w-1.5 before:bg-border"
+                    >
+                      {n}
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
           <div className="flex items-center justify-between border-t border-border/60 px-3 py-2">
             <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Net structural strength
+              Net severity
             </span>
             <span className="text-mono text-xs" style={{ color: tone }}>
               {pct}%
             </span>
           </div>
           <p className="text-mono px-3 pb-3 pt-1 text-[10px] leading-relaxed text-muted-foreground">
-            Recent signals weigh more · contributions attributed proportionally to each
-            signal's weighted evidence toward this condition.
+            Signals → mechanisms → architecture condition. Recent signals weigh more;
+            mechanism points are the share of severity attributable to each.
           </p>
         </div>
       </details>
@@ -557,6 +568,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
     </li>
   );
 }
+
 
 
 function severityTone(s: StructuralCondition["severity"]) {
