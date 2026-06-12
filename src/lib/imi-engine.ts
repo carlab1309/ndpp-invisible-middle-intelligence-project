@@ -467,7 +467,8 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     if (strength < 0.12) continue;
     const meta = CONDITION_META[cid as ConditionId];
 
-    // Attribute strength back to contributing signals proportionally
+    // Attribute severity back to contributing signals proportionally,
+    // then roll signals up into structural mechanisms.
     const strengthPct = strength * 100;
     const breakdown: ConditionContribution[] = Array.from(acc.perSignal.values())
       .map(({ sig, weighted }) => ({
@@ -476,7 +477,23 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
         family: sig.family,
         source: sig.source,
         ts: sig.ts,
+        mechanism: mechanismFor(cid as ConditionId, sig.name),
         points: acc.raw > 0 ? (weighted / acc.raw) * strengthPct : 0,
+      }))
+      .sort((a, b) => b.points - a.points);
+
+    const mechAcc = new Map<string, { points: number; signals: Set<string> }>();
+    for (const b of breakdown) {
+      const m = mechAcc.get(b.mechanism) ?? { points: 0, signals: new Set() };
+      m.points += b.points;
+      m.signals.add(b.name);
+      mechAcc.set(b.mechanism, m);
+    }
+    const mechanisms: ConditionMechanism[] = Array.from(mechAcc.entries())
+      .map(([label, v]) => ({
+        label,
+        points: v.points,
+        signalNames: Array.from(v.signals),
       }))
       .sort((a, b) => b.points - a.points);
 
@@ -497,10 +514,12 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       evidenceStrength,
       contributingFamilies: Array.from(acc.families),
       contributingSignalIds: acc.signalIds.slice(-6),
+      mechanisms,
       breakdown,
       responseGuidance: meta.responseGuidance,
     });
   }
+
 
   results.sort((a, b) => b.strength - a.strength);
   return results;
