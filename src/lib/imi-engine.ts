@@ -64,8 +64,10 @@ export interface StructuralCondition {
   contributingSignalIds: string[];
   mechanisms: ConditionMechanism[];
   breakdown: ConditionContribution[];
+  architecturalCauses: string[];
   responseGuidance: string[];
 }
+
 
 
 
