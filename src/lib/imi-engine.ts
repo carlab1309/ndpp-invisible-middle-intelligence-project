@@ -37,16 +37,28 @@ export type ConditionId =
   | "workflow_incoherence"
   | "predictability_failure";
 
+export interface ConditionContribution {
+  signalId: string;
+  name: string;
+  family: SignalFamily;
+  source: string;
+  ts: number;
+  points: number; // signed percentage-point contribution to strength
+}
+
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
   description: string;
   strength: number; // 0..1 — indication strength, not statistical confidence
   severity: SignalSeverity;
+  evidenceStrength: "High" | "Medium" | "Low";
   contributingFamilies: SignalFamily[];
   contributingSignalIds: string[];
+  breakdown: ConditionContribution[];
   responseGuidance: string[];
 }
+
 
 // --- Signal catalogue (drawn from the taxonomy doc) -----------------
 
