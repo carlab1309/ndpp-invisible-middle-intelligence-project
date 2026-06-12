@@ -580,17 +580,9 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-foreground">
               {c.architecturalCauses.map((cause) => (
-                <li
-                  key={cause}
-                  className="relative pl-4 leading-snug before:absolute before:left-0 before:top-2 before:h-1.5 before:w-1.5 before:rounded-sm before:rotate-45"
-                  style={
-                    {
-                      ["--tw-before-bg" as string]: tone,
-                    } as React.CSSProperties
-                  }
-                >
+                <li key={cause} className="relative pl-4 leading-snug">
                   <span
-                    className="absolute left-0 top-2 h-1.5 w-1.5 rotate-45"
+                    className="absolute left-0 top-1.5 h-1.5 w-1.5 rotate-45"
                     style={{ backgroundColor: tone }}
                     aria-hidden
                   />
@@ -598,6 +590,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                 </li>
               ))}
             </ul>
+
           </div>
         </details>
       ) : null}
