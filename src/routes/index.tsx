@@ -368,15 +368,15 @@ function ContainmentGauge({
 }) {
   const status =
     score >= 75
-      ? { label: "Healthy containment", tone: "var(--flourish)" }
+      ? { label: "Stable architecture", tone: "var(--flourish)" }
       : score >= 50
-        ? { label: "Hidden burden forming", tone: "var(--signal-moderate)" }
+        ? { label: "Weakening architecture", tone: "var(--signal-moderate)" }
         : score >= 25
-          ? { label: "Structural instability", tone: "var(--signal-elevated)" }
-          : { label: "Compensation overload", tone: "var(--signal-critical)" };
+          ? { label: "Unstable architecture", tone: "var(--signal-elevated)" }
+          : { label: "Architecture failing", tone: "var(--signal-critical)" };
 
   return (
-    <Panel label="System containment" caption="Capacity to hold strain without redistributing it to humans">
+    <Panel label="System containment" caption="Anchor metric · structural stability across all observed conditions">
       <div className="px-6 py-6">
         <div className="flex items-end justify-between gap-6">
           <div>
@@ -386,6 +386,7 @@ function ContainmentGauge({
             >
               {status.label}
             </p>
+            <p className="mt-1 text-xs text-muted-foreground">Structural stability</p>
             <p className="mt-2 text-5xl font-semibold tracking-tight text-foreground">
               {score}
               <span className="text-2xl text-muted-foreground">/100</span>
@@ -393,7 +394,7 @@ function ContainmentGauge({
           </div>
           <div className="grid grid-cols-2 gap-4 text-right">
             <Metric label="Conditions" value={conditionsCount} />
-            <Metric label="Burden index" value={burden.toFixed(2)} />
+            <Metric label="Structural load" value={burden.toFixed(2)} />
           </div>
         </div>
         <div className="relative mt-6 h-3 overflow-hidden rounded-full bg-surface-2">
@@ -427,7 +428,7 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) {
   return (
     <Panel
-      label="Structural inference"
+      label="Structural conditions"
       caption="Signals → context → structural condition → response guidance"
     >
       {conditions.length === 0 ? (
