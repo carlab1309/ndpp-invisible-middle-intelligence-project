@@ -43,21 +43,30 @@ export interface ConditionContribution {
   family: SignalFamily;
   source: string;
   ts: number;
-  points: number; // signed percentage-point contribution to strength
+  mechanism: string;
+  points: number; // signed percentage-point contribution to severity
+}
+
+export interface ConditionMechanism {
+  label: string;
+  points: number; // percentage points contributed to severity
+  signalNames: string[]; // distinct signals that activated this mechanism
 }
 
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
   description: string;
-  strength: number; // 0..1 — indication strength, not statistical confidence
+  strength: number; // 0..1 — severity of this architecture condition
   severity: SignalSeverity;
   evidenceStrength: "High" | "Medium" | "Low";
   contributingFamilies: SignalFamily[];
   contributingSignalIds: string[];
+  mechanisms: ConditionMechanism[];
   breakdown: ConditionContribution[];
   responseGuidance: string[];
 }
+
 
 
 // --- Signal catalogue (drawn from the taxonomy doc) -----------------
