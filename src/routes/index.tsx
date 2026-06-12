@@ -1,29 +1,572 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  SCENARIOS,
+  type ScenarioId,
+  type Signal,
+  type SignalFamily,
+  type StructuralCondition,
+  generateSignal,
+  interpret,
+  familyCounts,
+} from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Invisible Middle Intelligence — Live Console" },
+      {
+        name: "description",
+        content:
+          "An interactive prototype of the Invisible Middle Intelligence Layer: structural interpretation of hidden human compensation beneath functional systems.",
+      },
+      { property: "og:title", content: "Invisible Middle Intelligence — Live Console" },
+      {
+        property: "og:description",
+        content:
+          "Detect hidden compensation, burden transfer and containment instability beneath outwardly functional operations.",
+      },
     ],
   }),
-  component: Index,
+  component: Console,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const FAMILIES: SignalFamily[] = [
+  "Behavioural",
+  "Workflow",
+  "Communication",
+  "Governance",
+  "AI Interaction",
+  "Escalation",
+  "Closure",
+  "Trust",
+  "Continuity",
+  "Compensation",
+];
+
+function Console() {
+  const [scenario, setScenario] = useState<ScenarioId>("baseline");
+  const [running, setRunning] = useState(true);
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [now, setNow] = useState(Date.now());
+  const timer = useRef<number | null>(null);
+  const tick = useRef<number | null>(null);
+
+  // Signal generator
+  useEffect(() => {
+    if (!running) return;
+    const interval = scenario === "flourishing" ? 3500 : 1800;
+    timer.current = window.setInterval(() => {
+      setSignals((prev) => {
+        const next = [...prev, generateSignal(scenario)];
+        return next.slice(-60);
+      });
+    }, interval);
+    return () => {
+      if (timer.current) window.clearInterval(timer.current);
+    };
+  }, [running, scenario]);
+
+  // Clock for time-weighting
+  useEffect(() => {
+    tick.current = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => {
+      if (tick.current) window.clearInterval(tick.current);
+    };
+  }, []);
+
+  const conditions = useMemo(() => interpret(signals, now), [signals, now]);
+  const counts = useMemo(() => familyCounts(signals), [signals]);
+  const totalBurden = useMemo(
+    () => conditions.reduce((a, c) => a + c.confidence, 0),
+    [conditions]
+  );
+
+  const containmentScore = Math.max(
+    0,
+    Math.min(100, Math.round(100 - totalBurden * 18))
+  );
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background text-foreground">
+      <Header />
+
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 lg:px-10">
+        <Intro />
+
+        <ScenarioBar
+          scenario={scenario}
+          onChange={setScenario}
+          running={running}
+          onToggleRunning={() => setRunning((r) => !r)}
+          onReset={() => setSignals([])}
+        />
+
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Left: signal stream + families */}
+          <section className="lg:col-span-5 flex flex-col gap-6">
+            <SignalStream signals={signals.slice().reverse()} />
+            <FamilyPanel counts={counts} />
+          </section>
+
+          {/* Right: structural conditions + score */}
+          <section className="lg:col-span-7 flex flex-col gap-6">
+            <ContainmentGauge
+              score={containmentScore}
+              burden={totalBurden}
+              conditionsCount={conditions.length}
+            />
+            <ConditionsPanel conditions={conditions} />
+          </section>
+        </div>
+
+        <Footer />
+      </main>
     </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+
+function Header() {
+  return (
+    <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
+        <div className="flex items-center gap-3">
+          <div className="relative h-2.5 w-2.5">
+            <span className="absolute inset-0 rounded-full bg-primary animate-pulse-dot" />
+          </div>
+          <span className="text-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            NDPP / Invisible Middle Intelligence
+          </span>
+        </div>
+        <span className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          v1 · live console
+        </span>
+      </div>
+    </header>
+  );
+}
+
+function Intro() {
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-surface">
+      <div className="absolute inset-0 grid-bg opacity-30" aria-hidden />
+      <div className="relative px-6 py-10 lg:px-10 lg:py-14">
+        <p className="text-mono text-[11px] uppercase tracking-[0.2em] text-primary">
+          Structural systems intelligence
+        </p>
+        <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-foreground sm:text-4xl lg:text-5xl">
+          The system looks functional.
+          <br />
+          <span className="text-muted-foreground">Humans are quietly carrying the rest.</span>
+        </h1>
+        <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          The Invisible Middle Intelligence Layer interprets operational signals against
+          surrounding system conditions to detect hidden compensation, interpretive burden,
+          closure failure and AI-driven oversight load — beneath outwardly normal operations.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+
+function ScenarioBar({
+  scenario,
+  onChange,
+  running,
+  onToggleRunning,
+  onReset,
+}: {
+  scenario: ScenarioId;
+  onChange: (id: ScenarioId) => void;
+  running: boolean;
+  onToggleRunning: () => void;
+  onReset: () => void;
+}) {
+  const ids = Object.keys(SCENARIOS) as ScenarioId[];
+  return (
+    <div className="mt-8 rounded-xl border border-border/60 bg-surface p-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Inject scenario
+          </p>
+          <p className="mt-1 text-sm text-foreground">
+            {SCENARIOS[scenario].description}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={onToggleRunning}
+            className="text-mono rounded-md border border-border bg-surface-2 px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary/60 hover:text-primary"
+          >
+            {running ? "⏸ Pause" : "▶ Resume"}
+          </button>
+          <button
+            onClick={onReset}
+            className="text-mono rounded-md border border-border bg-surface-2 px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary/60 hover:text-primary"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {ids.map((id) => {
+          const active = id === scenario;
+          return (
+            <button
+              key={id}
+              onClick={() => onChange(id)}
+              className={`text-mono rounded-md border px-3 py-2 text-[11px] uppercase tracking-[0.14em] transition-all ${
+                active
+                  ? "border-primary bg-primary/10 text-primary glow-primary"
+                  : "border-border bg-surface-2 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              }`}
+            >
+              {SCENARIOS[id].label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+
+function SignalStream({ signals }: { signals: Signal[] }) {
+  return (
+    <Panel
+      label="Signal intake"
+      caption="Raw operational signals · interpreted, not assumed"
+    >
+      <div className="max-h-[420px] overflow-y-auto">
+        {signals.length === 0 ? (
+          <EmptyState text="Awaiting first signal…" />
+        ) : (
+          <ul className="divide-y divide-border/60">
+            {signals.map((s) => (
+              <li key={s.id} className="animate-signal-in px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <FamilyTag family={s.family} />
+                      <span className="text-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                        {s.source}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 truncate text-sm font-medium text-foreground">
+                      {s.name}
+                    </p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                      {s.detail}
+                    </p>
+                  </div>
+                  <span className="text-mono shrink-0 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                    {timeAgo(s.ts)}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </Panel>
+  );
+}
+
+function timeAgo(ts: number) {
+  const sec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+  if (sec < 5) return "now";
+  if (sec < 60) return `${sec}s`;
+  return `${Math.floor(sec / 60)}m`;
+}
+
+const FAMILY_HUE: Record<SignalFamily, string> = {
+  Behavioural: "oklch(0.78 0.14 280)",
+  Workflow: "oklch(0.78 0.14 200)",
+  Communication: "oklch(0.78 0.14 320)",
+  Governance: "oklch(0.78 0.14 60)",
+  "AI Interaction": "oklch(0.78 0.16 195)",
+  Escalation: "oklch(0.72 0.18 45)",
+  Closure: "oklch(0.75 0.16 155)",
+  Trust: "oklch(0.78 0.14 350)",
+  Continuity: "oklch(0.78 0.14 240)",
+  Compensation: "oklch(0.72 0.18 25)",
+};
+
+function FamilyTag({ family }: { family: SignalFamily }) {
+  const color = FAMILY_HUE[family];
+  return (
+    <span
+      className="text-mono inline-flex items-center gap-1.5 rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em]"
+      style={{
+        borderColor: `color-mix(in oklch, ${color} 40%, transparent)`,
+        color,
+        backgroundColor: `color-mix(in oklch, ${color} 8%, transparent)`,
+      }}
+    >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      {family}
+    </span>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+
+function FamilyPanel({ counts }: { counts: Record<SignalFamily, number> }) {
+  const max = Math.max(1, ...FAMILIES.map((f) => counts[f] ?? 0));
+  return (
+    <Panel label="Signal families" caption="Cross-family correlation strengthens inference">
+      <div className="space-y-2 px-4 py-4">
+        {FAMILIES.map((f) => {
+          const n = counts[f] ?? 0;
+          const pct = (n / max) * 100;
+          const color = FAMILY_HUE[f];
+          return (
+            <div key={f} className="flex items-center gap-3">
+              <span className="text-mono w-32 shrink-0 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                {f}
+              </span>
+              <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${pct}%`,
+                    backgroundColor: color,
+                    boxShadow: n > 0 ? `0 0 12px -4px ${color}` : undefined,
+                  }}
+                />
+              </div>
+              <span className="text-mono w-6 text-right text-[11px] text-muted-foreground">
+                {n}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+
+function ContainmentGauge({
+  score,
+  burden,
+  conditionsCount,
+}: {
+  score: number;
+  burden: number;
+  conditionsCount: number;
+}) {
+  const status =
+    score >= 75
+      ? { label: "Healthy containment", tone: "var(--flourish)" }
+      : score >= 50
+        ? { label: "Hidden burden forming", tone: "var(--signal-moderate)" }
+        : score >= 25
+          ? { label: "Structural instability", tone: "var(--signal-elevated)" }
+          : { label: "Compensation overload", tone: "var(--signal-critical)" };
+
+  return (
+    <Panel label="System containment" caption="Capacity to hold strain without redistributing it to humans">
+      <div className="px-6 py-6">
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <p
+              className="text-mono text-[11px] uppercase tracking-[0.18em]"
+              style={{ color: status.tone }}
+            >
+              {status.label}
+            </p>
+            <p className="mt-2 text-5xl font-semibold tracking-tight text-foreground">
+              {score}
+              <span className="text-2xl text-muted-foreground">/100</span>
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-right">
+            <Metric label="Conditions" value={conditionsCount} />
+            <Metric label="Burden index" value={burden.toFixed(2)} />
+          </div>
+        </div>
+        <div className="relative mt-6 h-3 overflow-hidden rounded-full bg-surface-2">
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{
+              width: `${score}%`,
+              background: `linear-gradient(90deg, ${status.tone}, color-mix(in oklch, ${status.tone} 60%, transparent))`,
+              boxShadow: `0 0 16px -4px ${status.tone}`,
+            }}
+          />
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div>
+      <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="text-mono mt-1 text-lg text-foreground">{value}</p>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+
+function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) {
+  return (
+    <Panel
+      label="Structural inference"
+      caption="Signals → context → structural condition → response guidance"
+    >
+      {conditions.length === 0 ? (
+        <EmptyState text="No structural conditions inferred yet." />
+      ) : (
+        <ul className="divide-y divide-border/60">
+          {conditions.map((c) => (
+            <ConditionRow key={c.id} c={c} />
+          ))}
+        </ul>
+      )}
+    </Panel>
+  );
+}
+
+function ConditionRow({ c }: { c: StructuralCondition }) {
+  const tone = severityTone(c.severity);
+  const pct = Math.round(c.confidence * 100);
+  return (
+    <li className="px-5 py-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="text-mono inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[10px] uppercase tracking-[0.12em]"
+              style={{
+                color: tone,
+                borderColor: `color-mix(in oklch, ${tone} 40%, transparent)`,
+                backgroundColor: `color-mix(in oklch, ${tone} 10%, transparent)`,
+                border: "1px solid",
+              }}
+            >
+              {c.severity}
+            </span>
+            <h3 className="text-sm font-semibold text-foreground">{c.label}</h3>
+          </div>
+          <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+            {c.description}
+          </p>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Confidence
+          </p>
+          <p className="text-mono mt-1 text-lg" style={{ color: tone }}>
+            {pct}%
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${pct}%`,
+            backgroundColor: tone,
+            boxShadow: `0 0 10px -3px ${tone}`,
+          }}
+        />
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {c.contributingFamilies.map((f) => (
+          <FamilyTag key={f} family={f} />
+        ))}
+      </div>
+
+      <details className="group mt-3">
+        <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
+          <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+          Response guidance
+        </summary>
+        <ul className="mt-2 space-y-1 pl-4 text-xs text-foreground">
+          {c.responseGuidance.map((g) => (
+            <li key={g} className="relative before:absolute before:-left-3 before:top-1.5 before:h-1 before:w-1 before:rounded-full before:bg-primary">
+              {g}
+            </li>
+          ))}
+        </ul>
+      </details>
+    </li>
+  );
+}
+
+function severityTone(s: StructuralCondition["severity"]) {
+  switch (s) {
+    case "critical":
+      return "var(--signal-critical)";
+    case "elevated":
+      return "var(--signal-elevated)";
+    case "moderate":
+      return "var(--signal-moderate)";
+    default:
+      return "var(--signal-low)";
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+
+function Panel({
+  label,
+  caption,
+  children,
+}: {
+  label: string;
+  caption?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-border/60 bg-surface">
+      <div className="flex items-baseline justify-between border-b border-border/60 px-5 py-3">
+        <p className="text-mono text-[11px] uppercase tracking-[0.18em] text-foreground">
+          {label}
+        </p>
+        {caption ? (
+          <p className="text-mono hidden text-[10px] uppercase tracking-[0.14em] text-muted-foreground sm:block">
+            {caption}
+          </p>
+        ) : null}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <div className="text-mono px-5 py-10 text-center text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+      {text}
+    </div>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="mt-16 border-t border-border/60 pt-6">
+      <p className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        Prototype · interpretation logic for demonstration only · NDPP
+      </p>
+    </footer>
   );
 }
