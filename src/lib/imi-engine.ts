@@ -275,9 +275,11 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
 };
 
 // --- Mechanism mapping ---------------------------------------------
-// Each (condition, signal) pair maps to the structural mechanism that
-// signal activates. Mechanisms sit BETWEEN raw signals and the architecture
-// condition — they describe how compensation is forming, not what was observed.
+// Mechanisms describe WHAT BURDEN HUMANS ARE BEING ASKED TO CARRY when a
+// signal occurs in the context of a given architecture condition.
+// They are deliberately phrased structurally ("Verification Burden",
+// "Oversight Compensation"), not behaviourally ("verification loop",
+// "override"). This is the NDPP causal layer: signal → burden → condition.
 
 const MECHANISM_MAP: Record<ConditionId, Record<string, string>> = {
   trust_instability: {
@@ -285,10 +287,10 @@ const MECHANISM_MAP: Record<ConditionId, Record<string, string>> = {
     "Repeated dashboard checking": "Reassurance Dependency",
     "Reassurance-seeking message": "Reassurance Dependency",
     "Case reopened after closure": "Closure Uncertainty",
-    "Repeated AI override": "Interpretive Reliance",
+    "Repeated AI override": "Oversight Compensation",
   },
   closure_failure: {
-    "Case reopened after closure": "Reopen Recurrence",
+    "Case reopened after closure": "Closure Uncertainty",
     "Repeated dashboard checking": "Completion Ambiguity",
     "Reassurance-seeking message": "Completion Ambiguity",
   },
@@ -297,24 +299,24 @@ const MECHANISM_MAP: Record<ConditionId, Record<string, string>> = {
     "Ownership clarification request": "Severity Inconsistency",
     "Reassurance-seeking message": "Severity Inconsistency",
     "Escalation inflation": "Severity Inconsistency",
-    "Delayed intervention": "Delayed Recognition",
+    "Delayed intervention": "Recognition Latency",
   },
   ownership_drift: {
-    "Duplicated intervention": "Duplicated Action",
-    "Ownership clarification request": "Ownership Clarification",
-    "Reassurance-seeking message": "Ownership Clarification",
+    "Duplicated intervention": "Duplicated Responsibility",
+    "Ownership clarification request": "Ownership Ambiguity",
+    "Reassurance-seeking message": "Ownership Ambiguity",
     "Delayed intervention": "Handoff Gap",
   },
   context_fragmentation: {
-    "Handoff context replay": "Context Replay",
+    "Handoff context replay": "Context Reconstruction",
   },
   ai_burden_transfer: {
-    "Repeated AI override": "Override Burden",
-    "Confidence interpretation query": "Confidence Interpretation",
-    "Verification loop": "Verification Shift",
+    "Repeated AI override": "Oversight Compensation",
+    "Confidence interpretation query": "Interpretive Reliance",
+    "Verification loop": "Verification Burden",
   },
   interpretive_overload: {
-    "Confidence interpretation query": "Meaning Inference",
+    "Confidence interpretation query": "Meaning Reconstruction",
     "Delayed intervention": "Urgency Inference",
   },
   escalation_instability: {
@@ -322,19 +324,20 @@ const MECHANISM_MAP: Record<ConditionId, Record<string, string>> = {
     "Threshold reinterpretation loop": "Threshold-Driven Escalation",
   },
   workflow_incoherence: {
-    "Workaround documented": "Local Workaround Proliferation",
+    "Workaround documented": "Workaround Proliferation",
     "Duplicated intervention": "Duplicated Workflow",
     "Handoff context replay": "Context Loss",
   },
   predictability_failure: {
-    "Repeated dashboard checking": "Behavioural Variance",
-    "Workaround documented": "Workaround Documentation",
+    "Repeated dashboard checking": "Behavioural Hedging",
+    "Workaround documented": "Workaround Persistence",
   },
 };
 
 function mechanismFor(cid: ConditionId, signalName: string): string {
-  return MECHANISM_MAP[cid]?.[signalName] ?? "Other indicators";
+  return MECHANISM_MAP[cid]?.[signalName] ?? "Residual Compensation";
 }
+
 
 
 // --- Scenarios -----------------------------------------------------
