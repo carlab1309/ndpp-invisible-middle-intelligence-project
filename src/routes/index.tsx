@@ -576,24 +576,40 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </summary>
           <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              What the architecture is producing this condition
+              What structural conditions are most likely creating this pattern
             </p>
-            <ul className="mt-2 space-y-1.5 text-xs text-foreground">
-              {c.architecturalCauses.map((cause) => (
-                <li key={cause} className="relative pl-4 leading-snug">
-                  <span
-                    className="absolute left-0 top-1.5 h-1.5 w-1.5 rotate-45"
-                    style={{ backgroundColor: tone }}
-                    aria-hidden
-                  />
-                  {cause}
-                </li>
+            <div className="mt-3 space-y-3">
+              {c.architecturalCauses.map((group) => (
+                <div key={group.category}>
+                  <p
+                    className="text-mono text-[10px] uppercase tracking-[0.14em]"
+                    style={{ color: tone }}
+                  >
+                    {group.category}
+                  </p>
+                  <ul className="mt-1.5 space-y-1 text-xs text-foreground">
+                    {group.items.map((cause) => (
+                      <li key={cause} className="relative pl-4 leading-snug">
+                        <span
+                          className="absolute left-0 top-1.5 h-1.5 w-1.5 rotate-45"
+                          style={{ backgroundColor: tone }}
+                          aria-hidden
+                        />
+                        {cause}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
-
+            </div>
+            <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+              Architecture conditions don't produce the pattern directly — they shape the
+              compensation mechanisms above, which in turn form this condition.
+            </p>
           </div>
         </details>
       ) : null}
+
 
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
