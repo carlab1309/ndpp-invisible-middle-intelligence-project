@@ -154,7 +154,7 @@ function Intro() {
       <div className="absolute inset-0 grid-bg opacity-30" aria-hidden />
       <div className="relative px-6 py-10 lg:px-10 lg:py-14">
         <p className="text-mono text-[11px] uppercase tracking-[0.2em] text-primary">
-          Structural systems intelligence
+          Condition formation intelligence
         </p>
         <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-foreground sm:text-4xl lg:text-5xl">
           The system looks functional.
@@ -162,10 +162,22 @@ function Intro() {
           <span className="text-muted-foreground">Humans are quietly carrying the rest.</span>
         </h1>
         <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          The Invisible Middle Intelligence Layer interprets operational signals against
-          surrounding system conditions to detect hidden compensation, interpretive burden,
-          closure failure and AI-driven oversight load — beneath outwardly normal operations.
+          The Invisible Middle Intelligence Engine interprets how operational signals
+          accumulate into hidden compensation, how compensation forms architecture conditions,
+          and how those conditions trace back to underlying system design.
         </p>
+        <div className="text-mono mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+          <span>Operational signals</span>
+          <span className="text-primary">→</span>
+          <span>Compensation mechanisms</span>
+          <span className="text-primary">→</span>
+          <span>Architecture conditions</span>
+          <span className="text-primary">→</span>
+          <span>Architectural attribution</span>
+          <span className="text-primary">→</span>
+          <span>Response guidance</span>
+        </div>
+
       </div>
     </div>
   );
