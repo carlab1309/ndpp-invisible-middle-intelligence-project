@@ -561,6 +561,22 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                       </li>
                     ))}
                   </ul>
+                  <details className="group/why mt-2">
+                    <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
+                      <span className="inline-block transition-transform group-open/why:rotate-90">▸</span>{" "}
+                      Why this mechanism?
+                    </summary>
+                    <ul className="mt-1.5 space-y-0.5 pl-3">
+                      {m.evidence.map((e) => (
+                        <li
+                          key={e}
+                          className="relative pl-3 text-[11px] text-muted-foreground before:absolute before:left-0 before:top-[7px] before:h-1 before:w-1 before:rounded-full before:bg-border"
+                        >
+                          {e}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
                 </li>
               );
             })}
