@@ -480,6 +480,137 @@ function architecturalCausesFor(mechanismLabels: string[]): ArchitecturalAttribu
     .map((cat) => ({ category: cat, items: groups.get(cat)! }));
 }
 
+// --- Evidence logic ------------------------------------------------
+// Per mechanism: the rationale used to interpret a signal as this specific
+// form of human compensation. This is the "Why this mechanism?" layer.
+// It explains the interpretive logic, not the signal itself.
+
+const MECHANISM_EVIDENCE: Record<string, string[]> = {
+  "Verification Burden": [
+    "repeated confirmation behaviour present",
+    "trust signal active across reviewers",
+    "evidence of redundant validation effort",
+  ],
+  "Reassurance Dependency": [
+    "confirmation behaviour repeated",
+    "unresolved completion signal present",
+    "communication seeking external assurance",
+  ],
+  "Closure Uncertainty": [
+    "completion state reversed or reopened",
+    "closure not durably held by the system",
+    "trust evidence around finality active",
+  ],
+  "Completion Ambiguity": [
+    "post-closure attention persists",
+    "users acting as if completion is provisional",
+    "signal recurrence around finished state",
+  ],
+  "Oversight Compensation": [
+    "operator overriding system recommendation",
+    "trust signal active toward automated layer",
+    "oversight load held by human, not architecture",
+  ],
+  "Interpretive Reliance": [
+    "users requesting meaning the system should supply",
+    "confidence output not operationally legible",
+    "interpretation burden carried by operator",
+  ],
+  "Threshold Reinterpretation": [
+    "severity reclassified within short window",
+    "threshold boundaries treated as negotiable",
+    "governance signal active on classification",
+  ],
+  "Severity Inconsistency": [
+    "comparable cases handled at different severities",
+    "escalation or ownership query indicates band ambiguity",
+    "governance signal active",
+  ],
+  "Recognition Latency": [
+    "action delayed past threshold",
+    "alert framing did not trigger timely response",
+    "interpretive lag observed",
+  ],
+  "Duplicated Responsibility": [
+    "multiple actors intervened on same alert",
+    "ownership not exclusively held",
+    "workflow signal indicates parallel action",
+  ],
+  "Ownership Ambiguity": [
+    "explicit query about who owns response",
+    "reassurance pattern around responsibility",
+    "governance signal active",
+  ],
+  "Handoff Gap": [
+    "delay observed at transition point",
+    "ownership unclear across teams",
+    "workflow continuity signal weak",
+  ],
+  "Context Reconstruction": [
+    "receiving party requested re-explanation",
+    "case context did not survive transition",
+    "continuity signal active",
+  ],
+  "Meaning Reconstruction": [
+    "operator inferring meaning the system should contain",
+    "AI interaction signal active",
+    "interpretive load held by human",
+  ],
+  "Urgency Inference": [
+    "time-criticality not surfaced by system",
+    "operator inferring urgency from indirect cues",
+    "workflow signal indicates latency",
+  ],
+  "Escalation Inflation": [
+    "escalation exceeded protocol tier",
+    "containment at first line insufficient",
+    "escalation signal active",
+  ],
+  "Threshold-Driven Escalation": [
+    "reclassification triggered escalation",
+    "severity ambiguity defaulted upward",
+    "governance signal active",
+  ],
+  "Workaround Proliferation": [
+    "new local workaround documented",
+    "workflow signal indicates design–reality gap",
+    "workaround treated as durable solution",
+  ],
+  "Duplicated Workflow": [
+    "comparable cases routed differently",
+    "workflow signal active across surfaces",
+    "convergence absent across teams",
+  ],
+  "Context Loss": [
+    "context did not carry across boundary",
+    "continuity signal active at handoff",
+    "re-explanation effort observed",
+  ],
+  "Behavioural Hedging": [
+    "users monitoring without acting",
+    "behavioural signal indicates uncertainty about state",
+    "predictability eroded from user perspective",
+  ],
+  "Workaround Persistence": [
+    "workaround persists beyond originating condition",
+    "governance signal indicates no retirement loop",
+    "workflow signal active",
+  ],
+  "Residual Compensation": [
+    "compensation pattern outside modelled library",
+    "rationale derived from generic burden inference",
+  ],
+};
+
+function evidenceFor(label: string, signalCount: number): string[] {
+  const base = MECHANISM_EVIDENCE[label] ?? MECHANISM_EVIDENCE["Residual Compensation"];
+  const items = base.slice(0, 3);
+  if (signalCount > 1) {
+    items.push("signal recurrence increased within current scenario window");
+  }
+  return items;
+}
+
 
 
 
