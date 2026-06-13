@@ -772,6 +772,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
         label,
         points: v.points,
         signalNames: Array.from(v.signals),
+        evidence: evidenceFor(label, v.signals.size),
       }))
       .sort((a, b) => b.points - a.points);
 
