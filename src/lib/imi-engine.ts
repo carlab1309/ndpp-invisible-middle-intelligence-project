@@ -47,6 +47,18 @@ export interface ConditionContribution {
   points: number; // signed percentage-point contribution to severity
 }
 
+export type ArchitectureCategory =
+  | "Governance"
+  | "Feedback Architecture"
+  | "Decision Architecture"
+  | "Workflow Architecture"
+  | "Continuity Architecture";
+
+export interface ArchitecturalAttributionGroup {
+  category: ArchitectureCategory;
+  items: string[];
+}
+
 export interface ConditionMechanism {
   label: string;
   points: number; // percentage points contributed to severity
