@@ -63,6 +63,7 @@ export interface ConditionMechanism {
   label: string;
   points: number; // percentage points contributed to severity
   signalNames: string[]; // distinct signals that activated this mechanism
+  evidence: string[]; // why this signal was interpreted as this mechanism
 }
 
 export interface StructuralCondition {
