@@ -154,7 +154,7 @@ function Intro() {
       <div className="absolute inset-0 grid-bg opacity-30" aria-hidden />
       <div className="relative px-6 py-10 lg:px-10 lg:py-14">
         <p className="text-mono text-[11px] uppercase tracking-[0.2em] text-primary">
-          Structural systems intelligence
+          Condition formation intelligence
         </p>
         <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-foreground sm:text-4xl lg:text-5xl">
           The system looks functional.
@@ -162,10 +162,22 @@ function Intro() {
           <span className="text-muted-foreground">Humans are quietly carrying the rest.</span>
         </h1>
         <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          The Invisible Middle Intelligence Layer interprets operational signals against
-          surrounding system conditions to detect hidden compensation, interpretive burden,
-          closure failure and AI-driven oversight load — beneath outwardly normal operations.
+          The Invisible Middle Intelligence Engine interprets how operational signals
+          accumulate into hidden compensation, how compensation forms architecture conditions,
+          and how those conditions trace back to underlying system design.
         </p>
+        <div className="text-mono mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+          <span>Operational signals</span>
+          <span className="text-primary">→</span>
+          <span>Compensation mechanisms</span>
+          <span className="text-primary">→</span>
+          <span>Architecture conditions</span>
+          <span className="text-primary">→</span>
+          <span>Architectural attribution</span>
+          <span className="text-primary">→</span>
+          <span>Response guidance</span>
+        </div>
+
       </div>
     </div>
   );
@@ -429,7 +441,7 @@ function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) 
   return (
     <Panel
       label="Architecture conditions"
-      caption="Signals → context → architecture condition → response guidance"
+      caption="Signals → mechanisms → condition → attribution → guidance"
     >
       {conditions.length === 0 ? (
         <EmptyState text="No architecture conditions present yet." />
@@ -576,24 +588,40 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </summary>
           <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              What the architecture is producing this condition
+              What structural conditions are most likely creating this pattern
             </p>
-            <ul className="mt-2 space-y-1.5 text-xs text-foreground">
-              {c.architecturalCauses.map((cause) => (
-                <li key={cause} className="relative pl-4 leading-snug">
-                  <span
-                    className="absolute left-0 top-1.5 h-1.5 w-1.5 rotate-45"
-                    style={{ backgroundColor: tone }}
-                    aria-hidden
-                  />
-                  {cause}
-                </li>
+            <div className="mt-3 space-y-3">
+              {c.architecturalCauses.map((group) => (
+                <div key={group.category}>
+                  <p
+                    className="text-mono text-[10px] uppercase tracking-[0.14em]"
+                    style={{ color: tone }}
+                  >
+                    {group.category}
+                  </p>
+                  <ul className="mt-1.5 space-y-1 text-xs text-foreground">
+                    {group.items.map((cause) => (
+                      <li key={cause} className="relative pl-4 leading-snug">
+                        <span
+                          className="absolute left-0 top-1.5 h-1.5 w-1.5 rotate-45"
+                          style={{ backgroundColor: tone }}
+                          aria-hidden
+                        />
+                        {cause}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
-
+            </div>
+            <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+              Architecture conditions don't produce the pattern directly — they shape the
+              compensation mechanisms above, which in turn form this condition.
+            </p>
           </div>
         </details>
       ) : null}
+
 
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">

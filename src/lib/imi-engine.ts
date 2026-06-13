@@ -47,6 +47,18 @@ export interface ConditionContribution {
   points: number; // signed percentage-point contribution to severity
 }
 
+export type ArchitectureCategory =
+  | "Governance"
+  | "Feedback Architecture"
+  | "Decision Architecture"
+  | "Workflow Architecture"
+  | "Continuity Architecture";
+
+export interface ArchitecturalAttributionGroup {
+  category: ArchitectureCategory;
+  items: string[];
+}
+
 export interface ConditionMechanism {
   label: string;
   points: number; // percentage points contributed to severity
@@ -64,7 +76,7 @@ export interface StructuralCondition {
   contributingSignalIds: string[];
   mechanisms: ConditionMechanism[];
   breakdown: ConditionContribution[];
-  architecturalCauses: string[];
+  architecturalCauses: ArchitecturalAttributionGroup[];
   responseGuidance: string[];
 }
 
@@ -345,113 +357,128 @@ function mechanismFor(cid: ConditionId, signalName: string): string {
 // that form of human compensation. This is the layer beneath the mechanism:
 // not what burden is forming, but why the architecture is creating it.
 
-const MECHANISM_CAUSES: Record<string, string[]> = {
+type CauseEntry = { category: ArchitectureCategory; text: string };
+
+const MECHANISM_CAUSES: Record<string, CauseEntry[]> = {
   "Verification Burden": [
-    "Verification ownership unresolved",
-    "System feedback insufficient to confirm action took effect",
+    { category: "Governance", text: "Verification ownership unresolved" },
+    { category: "Feedback Architecture", text: "System feedback insufficient to confirm action took effect" },
   ],
   "Reassurance Dependency": [
-    "Closure conditions unclear",
-    "State transitions not communicated back to the user",
+    { category: "Feedback Architecture", text: "Closure conditions unclear" },
+    { category: "Feedback Architecture", text: "State transitions not communicated back to the user" },
   ],
   "Closure Uncertainty": [
-    "Completion not durably confirmed",
-    "Reopen criteria not codified",
+    { category: "Feedback Architecture", text: "Completion not durably confirmed" },
+    { category: "Governance", text: "Reopen criteria not codified" },
   ],
   "Completion Ambiguity": [
-    "Completion not durably confirmed",
-    "Notifications continue past completion",
+    { category: "Feedback Architecture", text: "Completion not durably confirmed" },
+    { category: "Feedback Architecture", text: "Notifications continue past completion" },
   ],
   "Oversight Compensation": [
-    "AI recommendation thresholds not aligned to operator trust",
-    "Override expectations not designed into the workflow",
+    { category: "Decision Architecture", text: "AI recommendation thresholds not aligned to operator trust" },
+    { category: "Governance", text: "Override expectations not designed into the workflow" },
   ],
   "Interpretive Reliance": [
-    "Confidence interpretation unsupported",
-    "AI output lacks operational meaning at point of use",
+    { category: "Decision Architecture", text: "Confidence interpretation unsupported" },
+    { category: "Decision Architecture", text: "AI output lacks operational meaning at point of use" },
   ],
   "Threshold Reinterpretation": [
-    "Severity bands not codified across teams",
-    "Threshold criteria invisible in-context",
+    { category: "Governance", text: "Severity bands not codified across teams" },
+    { category: "Decision Architecture", text: "Threshold criteria invisible in-context" },
   ],
   "Severity Inconsistency": [
-    "Severity model interpreted locally, not structurally",
-    "Escalation criteria not anchored to protocol",
+    { category: "Governance", text: "Severity model interpreted locally, not structurally" },
+    { category: "Governance", text: "Escalation criteria not anchored to protocol" },
   ],
   "Recognition Latency": [
-    "First-action ownership unclear",
-    "Alert framing does not communicate urgency",
+    { category: "Governance", text: "First-action ownership unclear" },
+    { category: "Feedback Architecture", text: "Alert framing does not communicate urgency" },
   ],
   "Duplicated Responsibility": [
-    "Ownership not explicit on alert surfaces",
-    "Multiple teams hold overlapping mandate without coordination",
+    { category: "Governance", text: "Ownership not explicit on alert surfaces" },
+    { category: "Governance", text: "Multiple teams hold overlapping mandate without coordination" },
   ],
   "Ownership Ambiguity": [
-    "Ownership not explicit on alert surfaces",
-    "Handoff protocol absent for amber-band cases",
+    { category: "Governance", text: "Ownership not explicit on alert surfaces" },
+    { category: "Workflow Architecture", text: "Handoff protocol absent for amber-band cases" },
   ],
   "Handoff Gap": [
-    "Handoff state not preserved between systems",
-    "Receiving team has no inbound queue",
+    { category: "Workflow Architecture", text: "Handoff state not preserved between systems" },
+    { category: "Workflow Architecture", text: "Receiving team has no inbound queue" },
   ],
   "Context Reconstruction": [
-    "Case context does not survive handoff",
-    "Decision rationale not preserved on transitions",
+    { category: "Continuity Architecture", text: "Case context does not survive handoff" },
+    { category: "Continuity Architecture", text: "Decision rationale not preserved on transitions" },
   ],
   "Meaning Reconstruction": [
-    "Signals require interpretation the system should perform",
-    "Next-step prompts missing at decision points",
+    { category: "Decision Architecture", text: "Signals require interpretation the system should perform" },
+    { category: "Decision Architecture", text: "Next-step prompts missing at decision points" },
   ],
   "Urgency Inference": [
-    "Time-criticality not represented in signal surface",
-    "SLA context absent at point of action",
+    { category: "Feedback Architecture", text: "Time-criticality not represented in signal surface" },
+    { category: "Feedback Architecture", text: "SLA context absent at point of action" },
   ],
   "Escalation Inflation": [
-    "Proportionate-escalation criteria undefined",
-    "First-line containment under-resourced",
+    { category: "Governance", text: "Proportionate-escalation criteria undefined" },
+    { category: "Workflow Architecture", text: "First-line containment under-resourced" },
   ],
   "Threshold-Driven Escalation": [
-    "Severity bands ambiguous, defaulting to escalation",
-    "Reclassification has no holding state",
+    { category: "Decision Architecture", text: "Severity bands ambiguous, defaulting to escalation" },
+    { category: "Workflow Architecture", text: "Reclassification has no holding state" },
   ],
   "Workaround Proliferation": [
-    "Workflow logic does not match operational reality",
-    "Local detours are not surfaced back to design",
+    { category: "Workflow Architecture", text: "Workflow logic does not match operational reality" },
+    { category: "Governance", text: "Local detours are not surfaced back to design" },
   ],
   "Duplicated Workflow": [
-    "Workflow does not converge across teams",
-    "Comparable cases routed differently by surface",
+    { category: "Workflow Architecture", text: "Workflow does not converge across teams" },
+    { category: "Workflow Architecture", text: "Comparable cases routed differently by surface" },
   ],
   "Context Loss": [
-    "Context not carried across system boundaries",
-    "Handoff acts as a context discontinuity",
+    { category: "Continuity Architecture", text: "Context not carried across system boundaries" },
+    { category: "Continuity Architecture", text: "Handoff acts as a context discontinuity" },
   ],
   "Behavioural Hedging": [
-    "System behaviour is non-deterministic from user perspective",
-    "State changes not announced",
+    { category: "Feedback Architecture", text: "System behaviour is non-deterministic from user perspective" },
+    { category: "Feedback Architecture", text: "State changes not announced" },
   ],
   "Workaround Persistence": [
-    "Workarounds outlive the conditions that produced them",
-    "Workflow design has no retirement loop",
+    { category: "Governance", text: "Workarounds outlive the conditions that produced them" },
+    { category: "Workflow Architecture", text: "Workflow design has no retirement loop" },
   ],
   "Residual Compensation": [
-    "Compensation pattern outside the modelled mechanism library",
+    { category: "Governance", text: "Compensation pattern outside the modelled mechanism library" },
   ],
 };
 
-function architecturalCausesFor(mechanismLabels: string[]): string[] {
+const CATEGORY_ORDER: ArchitectureCategory[] = [
+  "Governance",
+  "Feedback Architecture",
+  "Decision Architecture",
+  "Workflow Architecture",
+  "Continuity Architecture",
+];
+
+function architecturalCausesFor(mechanismLabels: string[]): ArchitecturalAttributionGroup[] {
   const seen = new Set<string>();
-  const out: string[] = [];
+  const groups = new Map<ArchitectureCategory, string[]>();
   for (const m of mechanismLabels) {
     for (const c of MECHANISM_CAUSES[m] ?? []) {
-      if (!seen.has(c)) {
-        seen.add(c);
-        out.push(c);
-      }
+      const key = `${c.category}::${c.text}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const list = groups.get(c.category) ?? [];
+      list.push(c.text);
+      groups.set(c.category, list);
     }
   }
-  return out.slice(0, 4);
+  return CATEGORY_ORDER
+    .filter((cat) => groups.has(cat))
+    .map((cat) => ({ category: cat, items: groups.get(cat)! }));
 }
+
 
 
 
