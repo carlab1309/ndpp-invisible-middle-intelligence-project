@@ -441,7 +441,7 @@ function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) 
   return (
     <Panel
       label="Architecture conditions"
-      caption="Signals → context → architecture condition → response guidance"
+      caption="Signals → mechanisms → condition → attribution → guidance"
     >
       {conditions.length === 0 ? (
         <EmptyState text="No architecture conditions present yet." />
