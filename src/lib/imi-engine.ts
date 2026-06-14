@@ -72,7 +72,8 @@ export interface StructuralCondition {
   description: string;
   strength: number; // 0..1 — severity of this architecture condition
   severity: SignalSeverity;
-  evidenceStrength: "High" | "Medium" | "Low";
+  evidenceMaturity: "Emerging" | "Developing" | "Established" | "Entrenched";
+  evidenceRationale: string[]; // why the engine assigned this maturity level
   contributingFamilies: SignalFamily[];
   contributingSignalIds: string[];
   mechanisms: ConditionMechanism[];
