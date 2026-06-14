@@ -6,9 +6,11 @@ import {
   type Signal,
   type SignalFamily,
   type StructuralCondition,
+  type ConditionStrengthSample,
   generateSignal,
   interpret,
   familyCounts,
+  computeTrajectory,
 } from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
@@ -75,7 +77,43 @@ function Console() {
     };
   }, []);
 
-  const conditions = useMemo(() => interpret(signals, now), [signals, now]);
+  const rawConditions = useMemo(() => interpret(signals, now), [signals, now]);
+
+  // Maintain a short rolling history of per-condition strength so we can
+  // compute trajectory (NDPP: condition formation through time).
+  const historyRef = useRef<Record<string, ConditionStrengthSample[]>>({});
+  useEffect(() => {
+    const store = historyRef.current;
+    const active = new Set(rawConditions.map((c) => c.id));
+    for (const c of rawConditions) {
+      const arr = store[c.id] ?? [];
+      arr.push({ ts: now, strength: c.strength });
+      // keep last ~90s of samples, cap at 60 entries
+      const cutoff = now - 90_000;
+      store[c.id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
+    }
+    // Decay disappeared conditions toward zero so Recovering/Resolved can register
+    for (const id of Object.keys(store)) {
+      if (active.has(id as StructuralCondition["id"])) continue;
+      const arr = store[id];
+      const lastSample = arr[arr.length - 1];
+      if (lastSample && lastSample.strength > 0.02) {
+        arr.push({ ts: now, strength: 0 });
+        const cutoff = now - 90_000;
+        store[id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
+      }
+    }
+  }, [rawConditions, now]);
+
+  const conditions = useMemo<StructuralCondition[]>(
+    () =>
+      rawConditions.map((c) => ({
+        ...c,
+        trajectory: computeTrajectory(historyRef.current[c.id] ?? [], c.strength, now),
+      })),
+    [rawConditions, now]
+  );
+
   const counts = useMemo(() => familyCounts(signals), [signals]);
   const totalBurden = useMemo(
     () => conditions.reduce((a, c) => a + c.strength, 0),
@@ -514,6 +552,39 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               ))}
             </ul>
           </details>
+          {c.trajectory && (
+            <div className="mt-2">
+              <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Trajectory
+              </p>
+              <p
+                className="text-mono mt-0.5 inline-flex items-center gap-1 text-sm"
+                style={{ color: trajectoryTone(c.trajectory.state, tone) }}
+              >
+                <span aria-hidden>{trajectoryGlyph(c.trajectory.state)}</span>
+                {c.trajectory.state}
+              </p>
+              <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                {c.trajectory.description}
+              </p>
+              <details className="group/tr mt-1">
+                <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
+                  <span className="inline-block transition-transform group-open/tr:rotate-90">▸</span>{" "}
+                  Why this trajectory?
+                </summary>
+                <ul className="mt-1.5 space-y-0.5 pl-3">
+                  {c.trajectory.rationale.map((r) => (
+                    <li
+                      key={r}
+                      className="relative pl-3 text-[11px] text-muted-foreground before:absolute before:left-0 before:top-[7px] before:h-1 before:w-1 before:rounded-full before:bg-border"
+                    >
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          )}
         </div>
       </div>
 
@@ -685,6 +756,47 @@ function severityTone(s: StructuralCondition["severity"]) {
       return "var(--signal-moderate)";
     default:
       return "var(--signal-low)";
+  }
+}
+
+function trajectoryTone(
+  state: NonNullable<StructuralCondition["trajectory"]>["state"],
+  severityColor: string
+) {
+  switch (state) {
+    case "Escalating":
+      return "var(--signal-critical)";
+    case "Entrenching":
+      return "var(--signal-elevated)";
+    case "Stabilising":
+      return "var(--signal-moderate)";
+    case "Recovering":
+      return "var(--signal-low)";
+    case "Resolved":
+      return "var(--muted-foreground)";
+    case "Emerging":
+    default:
+      return severityColor;
+  }
+}
+
+function trajectoryGlyph(
+  state: NonNullable<StructuralCondition["trajectory"]>["state"]
+) {
+  switch (state) {
+    case "Escalating":
+      return "▲";
+    case "Recovering":
+      return "▼";
+    case "Entrenching":
+      return "■";
+    case "Stabilising":
+      return "▬";
+    case "Resolved":
+      return "○";
+    case "Emerging":
+    default:
+      return "◌";
   }
 }
 
