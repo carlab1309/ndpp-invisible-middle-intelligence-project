@@ -66,6 +66,25 @@ export interface ConditionMechanism {
   evidence: string[]; // why this signal was interpreted as this mechanism
 }
 
+export type ConditionTrajectoryState =
+  | "Emerging"
+  | "Escalating"
+  | "Entrenching"
+  | "Stabilising"
+  | "Recovering"
+  | "Resolved";
+
+export interface ConditionTrajectory {
+  state: ConditionTrajectoryState;
+  description: string; // short caption shown under the label
+  rationale: string[]; // why the engine assigned this trajectory
+}
+
+export interface ConditionStrengthSample {
+  ts: number;
+  strength: number;
+}
+
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
@@ -80,6 +99,7 @@ export interface StructuralCondition {
   breakdown: ConditionContribution[];
   architecturalCauses: ArchitecturalAttributionGroup[];
   responseGuidance: string[];
+  trajectory?: ConditionTrajectory;
 }
 
 
