@@ -6,9 +6,11 @@ import {
   type Signal,
   type SignalFamily,
   type StructuralCondition,
+  type ConditionStrengthSample,
   generateSignal,
   interpret,
   familyCounts,
+  computeTrajectory,
 } from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
