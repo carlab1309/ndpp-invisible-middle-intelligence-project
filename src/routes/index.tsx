@@ -759,6 +759,47 @@ function severityTone(s: StructuralCondition["severity"]) {
   }
 }
 
+function trajectoryTone(
+  state: NonNullable<StructuralCondition["trajectory"]>["state"],
+  severityColor: string
+) {
+  switch (state) {
+    case "Escalating":
+      return "var(--signal-critical)";
+    case "Entrenching":
+      return "var(--signal-elevated)";
+    case "Stabilising":
+      return "var(--signal-moderate)";
+    case "Recovering":
+      return "var(--signal-low)";
+    case "Resolved":
+      return "var(--muted-foreground)";
+    case "Emerging":
+    default:
+      return severityColor;
+  }
+}
+
+function trajectoryGlyph(
+  state: NonNullable<StructuralCondition["trajectory"]>["state"]
+) {
+  switch (state) {
+    case "Escalating":
+      return "▲";
+    case "Recovering":
+      return "▼";
+    case "Entrenching":
+      return "■";
+    case "Stabilising":
+      return "▬";
+    case "Resolved":
+      return "○";
+    case "Emerging":
+    default:
+      return "◌";
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 
 function Panel({
