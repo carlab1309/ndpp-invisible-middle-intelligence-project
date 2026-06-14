@@ -77,7 +77,43 @@ function Console() {
     };
   }, []);
 
-  const conditions = useMemo(() => interpret(signals, now), [signals, now]);
+  const rawConditions = useMemo(() => interpret(signals, now), [signals, now]);
+
+  // Maintain a short rolling history of per-condition strength so we can
+  // compute trajectory (NDPP: condition formation through time).
+  const historyRef = useRef<Record<string, ConditionStrengthSample[]>>({});
+  useEffect(() => {
+    const store = historyRef.current;
+    const active = new Set(rawConditions.map((c) => c.id));
+    for (const c of rawConditions) {
+      const arr = store[c.id] ?? [];
+      arr.push({ ts: now, strength: c.strength });
+      // keep last ~90s of samples, cap at 60 entries
+      const cutoff = now - 90_000;
+      store[c.id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
+    }
+    // Decay disappeared conditions toward zero so Recovering/Resolved can register
+    for (const id of Object.keys(store)) {
+      if (active.has(id)) continue;
+      const arr = store[id];
+      const lastSample = arr[arr.length - 1];
+      if (lastSample && lastSample.strength > 0.02) {
+        arr.push({ ts: now, strength: 0 });
+        const cutoff = now - 90_000;
+        store[id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
+      }
+    }
+  }, [rawConditions, now]);
+
+  const conditions = useMemo<StructuralCondition[]>(
+    () =>
+      rawConditions.map((c) => ({
+        ...c,
+        trajectory: computeTrajectory(historyRef.current[c.id] ?? [], c.strength, now),
+      })),
+    [rawConditions, now]
+  );
+
   const counts = useMemo(() => familyCounts(signals), [signals]);
   const totalBurden = useMemo(
     () => conditions.reduce((a, c) => a + c.strength, 0),
