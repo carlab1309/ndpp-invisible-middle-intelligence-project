@@ -492,12 +492,28 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </div>
           <div>
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Evidence strength
+              Evidence formation
             </p>
             <p className="text-mono mt-0.5 text-sm" style={{ color: tone }}>
-              {c.evidenceStrength}
+              {c.evidenceMaturity}
             </p>
           </div>
+          <details className="group/ev mt-1">
+            <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
+              <span className="inline-block transition-transform group-open/ev:rotate-90">▸</span>{" "}
+              Why this evidence formation?
+            </summary>
+            <ul className="mt-1.5 space-y-0.5 pl-3">
+              {c.evidenceRationale.map((r) => (
+                <li
+                  key={r}
+                  className="relative pl-3 text-[11px] text-muted-foreground before:absolute before:left-0 before:top-[7px] before:h-1 before:w-1 before:rounded-full before:bg-border"
+                >
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </details>
         </div>
       </div>
 
