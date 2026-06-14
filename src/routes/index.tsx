@@ -94,7 +94,7 @@ function Console() {
     }
     // Decay disappeared conditions toward zero so Recovering/Resolved can register
     for (const id of Object.keys(store)) {
-      if (active.has(id)) continue;
+      if (active.has(id as StructuralCondition["id"])) continue;
       const arr = store[id];
       const lastSample = arr[arr.length - 1];
       if (lastSample && lastSample.strength > 0.02) {
