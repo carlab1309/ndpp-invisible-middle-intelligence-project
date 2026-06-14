@@ -879,3 +879,117 @@ export function familyCounts(signals: Signal[]): Record<SignalFamily, number> {
   for (const s of signals) out[s.family] = (out[s.family] ?? 0) + 1;
   return out;
 }
+
+// --- Trajectory ----------------------------------------------------
+// NDPP is interested in *condition formation through time*. Trajectory
+// reads a short history of strength samples for a given condition and
+// describes whether the pattern is forming, escalating, entrenching,
+// stabilising, recovering or resolved.
+
+const TRAJECTORY_WINDOW_MS = 60_000; // observation window
+const TRAJECTORY_MIN_SAMPLES = 3;
+
+export function computeTrajectory(
+  history: ConditionStrengthSample[],
+  currentStrength: number,
+  now = Date.now()
+): ConditionTrajectory {
+  const recent = history.filter((s) => now - s.ts <= TRAJECTORY_WINDOW_MS);
+  const samples = recent.length ? recent : history.slice(-TRAJECTORY_MIN_SAMPLES);
+
+  if (samples.length < TRAJECTORY_MIN_SAMPLES) {
+    return {
+      state: "Emerging",
+      description: "Signals and mechanisms are beginning to align.",
+      rationale: [
+        "observation window too short for stable trajectory",
+        "pattern forming but not yet confirmed across windows",
+      ],
+    };
+  }
+
+  const first = samples[0].strength;
+  const last = samples[samples.length - 1].strength;
+  const mid = samples[Math.floor(samples.length / 2)].strength;
+  const fullDelta = last - first;
+  const earlyDelta = mid - first;
+  const lateDelta = last - mid;
+
+  // Resolved — condition has dropped below formation threshold and
+  // is no longer materially present.
+  if (currentStrength < 0.15 && first >= 0.3) {
+    return {
+      state: "Resolved",
+      description: "Condition no longer exceeds formation thresholds.",
+      rationale: [
+        "severity has dropped below the formation threshold",
+        "supporting mechanisms no longer reinforcing the pattern",
+        "previous severity was materially higher in the observation window",
+      ],
+    };
+  }
+
+  // Recovering — clear sustained decrease.
+  if (fullDelta < -0.08 && lateDelta <= -0.02) {
+    return {
+      state: "Recovering",
+      description: "Condition severity and supporting mechanisms are decreasing.",
+      rationale: [
+        "severity decreasing across the observation window",
+        "supporting mechanism strength reducing",
+        "trajectory direction negative",
+      ],
+    };
+  }
+
+  // Escalating — sustained increase.
+  if (fullDelta > 0.08) {
+    return {
+      state: "Escalating",
+      description: "Condition severity and supporting evidence are increasing.",
+      rationale: [
+        "severity rising across the observation window",
+        "supporting mechanisms gaining weight",
+        "trajectory direction positive",
+      ],
+    };
+  }
+
+  // Stabilising — was rising, now flat at elevated level.
+  if (currentStrength >= 0.55 && earlyDelta > 0.05 && Math.abs(lateDelta) < 0.03) {
+    return {
+      state: "Stabilising",
+      description: "Severity remains elevated but growth has slowed.",
+      rationale: [
+        "severity remains elevated",
+        "earlier rise has plateaued",
+        "recent samples show limited movement",
+      ],
+    };
+  }
+
+  // Entrenching — high, stable, persistent.
+  if (currentStrength >= 0.55 && Math.abs(fullDelta) < 0.05 && samples.length >= 5) {
+    return {
+      state: "Entrenching",
+      description:
+        "Condition has remained stable at elevated severity across multiple observation windows.",
+      rationale: [
+        "severity persistently elevated",
+        "low variance across the observation window",
+        "compensation pattern repeating across windows",
+      ],
+    };
+  }
+
+  // Default — pattern still forming.
+  return {
+    state: "Emerging",
+    description: "Signals and mechanisms are beginning to align.",
+    rationale: [
+      "supporting evidence present but not yet trending",
+      "pattern observed but trajectory not yet stable",
+    ],
+  };
+}
+
