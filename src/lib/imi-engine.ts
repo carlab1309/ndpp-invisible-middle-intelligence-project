@@ -72,7 +72,8 @@ export interface StructuralCondition {
   description: string;
   strength: number; // 0..1 — severity of this architecture condition
   severity: SignalSeverity;
-  evidenceStrength: "High" | "Medium" | "Low";
+  evidenceMaturity: "Emerging" | "Developing" | "Established" | "Entrenched";
+  evidenceRationale: string[]; // why the engine assigned this maturity level
   contributingFamilies: SignalFamily[];
   contributingSignalIds: string[];
   mechanisms: ConditionMechanism[];
@@ -611,9 +612,55 @@ function evidenceFor(label: string, signalCount: number): string[] {
   return items;
 }
 
-
-
-
+function evidenceMaturityFor(
+  familyCount: number,
+  mechanismCount: number,
+  severity: SignalSeverity,
+  signalCount: number
+): { maturity: StructuralCondition["evidenceMaturity"]; rationale: string[] } {
+  if (familyCount >= 4 && (severity === "critical" || severity === "elevated") && mechanismCount >= 3) {
+    return {
+      maturity: "Entrenched",
+      rationale: [
+        "persistent condition formation observed",
+        "repeated compensation across multiple mechanisms",
+        "architecture pattern strongly evidenced",
+        "multi-domain support with strong recurrence",
+      ],
+    };
+  }
+  if (familyCount >= 3 && severity !== "low" && mechanismCount >= 2) {
+    return {
+      maturity: "Established",
+      rationale: [
+        "signals present across multiple domains",
+        "multiple mechanisms support the condition",
+        "evidence is recurring rather than isolated",
+        "recent signals reinforce the same interpretation",
+      ],
+    };
+  }
+  if (familyCount >= 2 && mechanismCount >= 1) {
+    return {
+      maturity: "Developing",
+      rationale: [
+        "evidence present but concentrated in limited domains",
+        "mechanism alignment present",
+        "signal recurrence inconsistent",
+        "pattern forming but not yet stable",
+      ],
+    };
+  }
+  return {
+    maturity: "Emerging",
+    rationale: [
+      "evidence is sparse",
+      "interpretation relies on few signals",
+      "mechanism support is limited",
+      "pattern may be emerging but not yet established",
+    ],
+  };
+}
 
 // --- Scenarios -----------------------------------------------------
 
@@ -777,12 +824,12 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       .sort((a, b) => b.points - a.points);
 
     const sev = severityFor(strength);
-    const evidenceStrength: StructuralCondition["evidenceStrength"] =
-      acc.families.size >= 3 && sev !== "low"
-        ? "High"
-        : acc.families.size >= 2
-          ? "Medium"
-          : "Low";
+    const { maturity, rationale } = evidenceMaturityFor(
+      acc.families.size,
+      mechanisms.length,
+      sev,
+      acc.signalIds.length
+    );
 
     results.push({
       id: cid as ConditionId,
@@ -790,7 +837,8 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       description: meta.description,
       strength,
       severity: sev,
-      evidenceStrength,
+      evidenceMaturity: maturity,
+      evidenceRationale: rationale,
       contributingFamilies: Array.from(acc.families),
       contributingSignalIds: acc.signalIds.slice(-6),
       mechanisms,
