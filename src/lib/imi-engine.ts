@@ -778,12 +778,12 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       .sort((a, b) => b.points - a.points);
 
     const sev = severityFor(strength);
-    const evidenceStrength: StructuralCondition["evidenceStrength"] =
-      acc.families.size >= 3 && sev !== "low"
-        ? "High"
-        : acc.families.size >= 2
-          ? "Medium"
-          : "Low";
+    const { maturity, rationale } = evidenceMaturityFor(
+      acc.families.size,
+      mechanisms.length,
+      sev,
+      acc.signalIds.length
+    );
 
     results.push({
       id: cid as ConditionId,
@@ -791,7 +791,8 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       description: meta.description,
       strength,
       severity: sev,
-      evidenceStrength,
+      evidenceMaturity: maturity,
+      evidenceRationale: rationale,
       contributingFamilies: Array.from(acc.families),
       contributingSignalIds: acc.signalIds.slice(-6),
       mechanisms,
