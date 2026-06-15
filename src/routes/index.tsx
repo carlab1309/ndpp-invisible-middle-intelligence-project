@@ -623,6 +623,10 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         ))}
       </div>
 
+      {c.drivers && (c.drivers.drivers.length > 0 || c.drivers.stabilisers.length > 0) ? (
+        <DriversBlock drivers={c.drivers} tone={tone} />
+      ) : null}
+
       <details className="group mt-3">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
