@@ -768,6 +768,95 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
 
 
 
+function DriversBlock({
+  drivers,
+  tone,
+}: {
+  drivers: NonNullable<StructuralCondition["drivers"]>;
+  tone: string;
+}) {
+  return (
+    <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+      <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        Primary condition drivers
+      </p>
+      <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
+        Which mechanisms are currently increasing or reducing condition formation
+      </p>
+
+      <div className="mt-3">
+        <p
+          className="text-mono text-[10px] uppercase tracking-[0.14em]"
+          style={{ color: tone }}
+        >
+          Primary drivers
+        </p>
+        {drivers.drivers.length === 0 ? (
+          <p className="text-mono mt-1 text-[11px] text-muted-foreground">
+            None observed.
+          </p>
+        ) : (
+          <ul className="mt-1.5 space-y-2">
+            {drivers.drivers.map((d) => (
+              <DriverRow key={d.label} d={d} tone={tone} />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="mt-3 border-t border-border/60 pt-2.5">
+        <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          Stabilising factors
+        </p>
+        {drivers.stabilisers.length === 0 ? (
+          <p className="text-mono mt-1 text-[11px] text-muted-foreground">
+            None observed.
+          </p>
+        ) : (
+          <ul className="mt-1.5 space-y-2">
+            {drivers.stabilisers.map((d) => (
+              <DriverRow key={d.label} d={d} tone="var(--signal-low)" />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+        Conditions don't worsen independently — mechanisms drive them. Drivers show
+        which compensation patterns are pushing this condition's formation right now.
+      </p>
+    </div>
+  );
+}
+
+function DriverRow({
+  d,
+  tone,
+}: {
+  d: NonNullable<StructuralCondition["drivers"]>["drivers"][number];
+  tone: string;
+}) {
+  const arrow = d.direction === "up" ? "↑" : "↓";
+  return (
+    <li>
+      <div className="flex items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+          <span aria-hidden style={{ color: tone }}>
+            {arrow}
+          </span>
+          {d.label}
+        </span>
+        <span className="text-mono shrink-0 text-[10px] uppercase tracking-[0.12em]" style={{ color: tone }}>
+          {d.contribution}
+        </span>
+      </div>
+      <p className="mt-1 pl-4 text-[11px] leading-snug text-muted-foreground">
+        {d.reason}
+      </p>
+    </li>
+  );
+}
+
 function severityTone(s: StructuralCondition["severity"]) {
   switch (s) {
     case "critical":
