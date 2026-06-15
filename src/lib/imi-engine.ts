@@ -85,6 +85,25 @@ export interface ConditionStrengthSample {
   strength: number;
 }
 
+export interface MechanismStrengthSample {
+  ts: number;
+  points: Record<string, number>;
+}
+
+export type DriverContribution = "High" | "Medium" | "Low";
+
+export interface ConditionDriver {
+  label: string;
+  direction: "up" | "down";
+  contribution: DriverContribution;
+  reason: string;
+}
+
+export interface ConditionDrivers {
+  drivers: ConditionDriver[]; // mechanisms currently increasing condition formation
+  stabilisers: ConditionDriver[]; // mechanisms currently reducing condition formation
+}
+
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
@@ -100,6 +119,7 @@ export interface StructuralCondition {
   architecturalCauses: ArchitecturalAttributionGroup[];
   responseGuidance: string[];
   trajectory?: ConditionTrajectory;
+  drivers?: ConditionDrivers;
 }
 
 
