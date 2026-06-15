@@ -603,9 +603,6 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               </details>
             </div>
           )}
-          {c.drivers && (c.drivers.drivers.length > 0 || c.drivers.stabilisers.length > 0) && (
-            <DriversBlock drivers={c.drivers} tone={tone} />
-          )}
         </div>
       </div>
 
