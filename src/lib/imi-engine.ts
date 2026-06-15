@@ -85,6 +85,25 @@ export interface ConditionStrengthSample {
   strength: number;
 }
 
+export interface MechanismStrengthSample {
+  ts: number;
+  points: Record<string, number>;
+}
+
+export type DriverContribution = "High" | "Medium" | "Low";
+
+export interface ConditionDriver {
+  label: string;
+  direction: "up" | "down";
+  contribution: DriverContribution;
+  reason: string;
+}
+
+export interface ConditionDrivers {
+  drivers: ConditionDriver[]; // mechanisms currently increasing condition formation
+  stabilisers: ConditionDriver[]; // mechanisms currently reducing condition formation
+}
+
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
@@ -100,6 +119,7 @@ export interface StructuralCondition {
   architecturalCauses: ArchitecturalAttributionGroup[];
   responseGuidance: string[];
   trajectory?: ConditionTrajectory;
+  drivers?: ConditionDrivers;
 }
 
 
@@ -993,3 +1013,114 @@ export function computeTrajectory(
   };
 }
 
+
+// --- Condition drivers --------------------------------------------
+// Conditions don't worsen independently — mechanisms drive them. Drivers
+// identify which compensation mechanisms are currently increasing or
+// reducing condition formation, by comparing each mechanism's current
+// contribution against its level earlier in the observation window.
+
+const DRIVER_WINDOW_MS = 60_000;
+
+const MECHANISM_REASON_UP: Record<string, string> = {
+  "Verification Burden": "Verification loops increasing across recent observation windows.",
+  "Reassurance Dependency": "Reassurance-seeking signals recurring across communication channels.",
+  "Closure Uncertainty": "Reopen and post-closure attention patterns intensifying.",
+  "Completion Ambiguity": "Users continuing to act on completed work, weight rising.",
+  "Oversight Compensation": "Operator override frequency rising against the automated layer.",
+  "Interpretive Reliance": "Requests for AI meaning interpretation gaining frequency.",
+  "Threshold Reinterpretation": "Severity reclassification activity rising within short windows.",
+  "Severity Inconsistency": "Cross-team severity divergence becoming more frequent.",
+  "Recognition Latency": "First-action delay widening relative to threshold.",
+  "Duplicated Responsibility": "Parallel interventions on the same alert increasing.",
+  "Ownership Ambiguity": "Explicit ownership queries increasing across surfaces.",
+  "Handoff Gap": "Delays at transition points lengthening.",
+  "Context Reconstruction": "Re-explanation requests rising across handoffs.",
+  "Meaning Reconstruction": "Operator-side meaning inference load increasing.",
+  "Urgency Inference": "Operators continuing to infer urgency from indirect cues.",
+  "Escalation Inflation": "Escalations exceeding protocol tier more frequently.",
+  "Threshold-Driven Escalation": "Reclassification-triggered escalations becoming more common.",
+  "Workaround Proliferation": "New local workarounds being documented at higher rate.",
+  "Duplicated Workflow": "Divergent routing of comparable cases increasing.",
+  "Context Loss": "Continuity discontinuities at handoff increasing.",
+  "Behavioural Hedging": "Monitoring-without-action behaviour persisting and widening.",
+  "Workaround Persistence": "Legacy workarounds continuing to outlive originating conditions.",
+  "Residual Compensation": "Unmodelled compensation pattern weight increasing.",
+};
+
+const MECHANISM_REASON_DOWN: Record<string, string> = {
+  "Verification Burden": "Verification activity easing across recent windows.",
+  "Reassurance Dependency": "Reassurance-seeking signals reducing in frequency.",
+  "Closure Uncertainty": "Reopen and post-closure attention reducing.",
+  "Completion Ambiguity": "Users increasingly treating completion as final.",
+  "Oversight Compensation": "Override frequency reducing as alignment improves.",
+  "Interpretive Reliance": "Confidence interpretation queries reducing.",
+  "Threshold Reinterpretation": "Reclassification activity slowing.",
+  "Severity Inconsistency": "Severity bands stabilising across teams.",
+  "Recognition Latency": "First-action timing improving relative to threshold.",
+  "Duplicated Responsibility": "Parallel interventions reducing.",
+  "Ownership Ambiguity": "Ownership clarification activity has increased, reducing ambiguity.",
+  "Handoff Gap": "Transition delays narrowing.",
+  "Context Reconstruction": "Re-explanation requests reducing across handoffs.",
+  "Meaning Reconstruction": "System now containing meaning the operator previously inferred.",
+  "Urgency Inference": "Urgency now better represented in signal surface.",
+  "Escalation Inflation": "Escalations now closer to protocol tier.",
+  "Threshold-Driven Escalation": "Reclassification-triggered escalations reducing.",
+  "Workaround Proliferation": "Rate of new workaround documentation slowing.",
+  "Duplicated Workflow": "Routing of comparable cases converging.",
+  "Context Loss": "Continuity holding better across handoffs.",
+  "Behavioural Hedging": "Monitoring-without-action behaviour reducing.",
+  "Workaround Persistence": "Legacy workarounds being retired.",
+  "Residual Compensation": "Unmodelled compensation pattern weight reducing.",
+};
+
+function contributionFor(delta: number): DriverContribution {
+  const abs = Math.abs(delta);
+  if (abs >= 8) return "High";
+  if (abs >= 3) return "Medium";
+  return "Low";
+}
+
+export function computeDrivers(
+  history: MechanismStrengthSample[],
+  currentMechanisms: ConditionMechanism[],
+  now = Date.now()
+): ConditionDrivers {
+  const recent = history.filter((s) => now - s.ts <= DRIVER_WINDOW_MS);
+  const samples = recent.length >= 2 ? recent : history.slice(-2);
+  const drivers: ConditionDriver[] = [];
+  const stabilisers: ConditionDriver[] = [];
+  if (samples.length < 2) return { drivers, stabilisers };
+
+  const baseline = samples[0].points;
+  const labels = new Set<string>([
+    ...Object.keys(baseline),
+    ...currentMechanisms.map((m) => m.label),
+  ]);
+
+  const ranked: { label: string; delta: number }[] = [];
+  for (const label of labels) {
+    const current = currentMechanisms.find((m) => m.label === label)?.points ?? 0;
+    const prior = baseline[label] ?? 0;
+    const delta = current - prior;
+    if (Math.abs(delta) < 1.5) continue; // ignore noise
+    ranked.push({ label, delta });
+  }
+
+  ranked.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
+  for (const r of ranked.slice(0, 4)) {
+    const direction = r.delta > 0 ? "up" : "down";
+    const reasonMap = direction === "up" ? MECHANISM_REASON_UP : MECHANISM_REASON_DOWN;
+    const entry: ConditionDriver = {
+      label: r.label,
+      direction,
+      contribution: contributionFor(r.delta),
+      reason: reasonMap[r.label] ?? "Mechanism weight shifting within the observation window.",
+    };
+    if (direction === "up") drivers.push(entry);
+    else stabilisers.push(entry);
+  }
+
+  return { drivers, stabilisers };
+}

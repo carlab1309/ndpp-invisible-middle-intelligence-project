@@ -7,10 +7,12 @@ import {
   type SignalFamily,
   type StructuralCondition,
   type ConditionStrengthSample,
+  type MechanismStrengthSample,
   generateSignal,
   interpret,
   familyCounts,
   computeTrajectory,
+  computeDrivers,
 } from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
@@ -82,17 +84,26 @@ function Console() {
   // Maintain a short rolling history of per-condition strength so we can
   // compute trajectory (NDPP: condition formation through time).
   const historyRef = useRef<Record<string, ConditionStrengthSample[]>>({});
+  // Per-condition history of mechanism point contributions, so we can
+  // compute which mechanisms are currently driving condition change.
+  const mechHistoryRef = useRef<Record<string, MechanismStrengthSample[]>>({});
   useEffect(() => {
     const store = historyRef.current;
+    const mechStore = mechHistoryRef.current;
     const active = new Set(rawConditions.map((c) => c.id));
     for (const c of rawConditions) {
       const arr = store[c.id] ?? [];
       arr.push({ ts: now, strength: c.strength });
-      // keep last ~90s of samples, cap at 60 entries
       const cutoff = now - 90_000;
       store[c.id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
+
+      const mArr = mechStore[c.id] ?? [];
+      const pointsMap: Record<string, number> = {};
+      for (const m of c.mechanisms) pointsMap[m.label] = m.points;
+      mArr.push({ ts: now, points: pointsMap });
+      mechStore[c.id] = mArr.filter((s) => s.ts >= cutoff).slice(-60);
     }
-    // Decay disappeared conditions toward zero so Recovering/Resolved can register
+    // Decay disappeared conditions so Recovering/Resolved can register
     for (const id of Object.keys(store)) {
       if (active.has(id as StructuralCondition["id"])) continue;
       const arr = store[id];
@@ -102,6 +113,12 @@ function Console() {
         const cutoff = now - 90_000;
         store[id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
       }
+      const mArr = mechStore[id];
+      if (mArr && mArr.length) {
+        mArr.push({ ts: now, points: {} });
+        const cutoff = now - 90_000;
+        mechStore[id] = mArr.filter((s) => s.ts >= cutoff).slice(-60);
+      }
     }
   }, [rawConditions, now]);
 
@@ -110,6 +127,7 @@ function Console() {
       rawConditions.map((c) => ({
         ...c,
         trajectory: computeTrajectory(historyRef.current[c.id] ?? [], c.strength, now),
+        drivers: computeDrivers(mechHistoryRef.current[c.id] ?? [], c.mechanisms, now),
       })),
     [rawConditions, now]
   );
@@ -605,6 +623,10 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         ))}
       </div>
 
+      {c.drivers && (c.drivers.drivers.length > 0 || c.drivers.stabilisers.length > 0) ? (
+        <DriversBlock drivers={c.drivers} tone={tone} />
+      ) : null}
+
       <details className="group mt-3">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
@@ -745,6 +767,95 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
 }
 
 
+
+function DriversBlock({
+  drivers,
+  tone,
+}: {
+  drivers: NonNullable<StructuralCondition["drivers"]>;
+  tone: string;
+}) {
+  return (
+    <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+      <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        Primary condition drivers
+      </p>
+      <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
+        Which mechanisms are currently increasing or reducing condition formation
+      </p>
+
+      <div className="mt-3">
+        <p
+          className="text-mono text-[10px] uppercase tracking-[0.14em]"
+          style={{ color: tone }}
+        >
+          Primary drivers
+        </p>
+        {drivers.drivers.length === 0 ? (
+          <p className="text-mono mt-1 text-[11px] text-muted-foreground">
+            None observed.
+          </p>
+        ) : (
+          <ul className="mt-1.5 space-y-2">
+            {drivers.drivers.map((d) => (
+              <DriverRow key={d.label} d={d} tone={tone} />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="mt-3 border-t border-border/60 pt-2.5">
+        <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          Stabilising factors
+        </p>
+        {drivers.stabilisers.length === 0 ? (
+          <p className="text-mono mt-1 text-[11px] text-muted-foreground">
+            None observed.
+          </p>
+        ) : (
+          <ul className="mt-1.5 space-y-2">
+            {drivers.stabilisers.map((d) => (
+              <DriverRow key={d.label} d={d} tone="var(--signal-low)" />
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+        Conditions don't worsen independently — mechanisms drive them. Drivers show
+        which compensation patterns are pushing this condition's formation right now.
+      </p>
+    </div>
+  );
+}
+
+function DriverRow({
+  d,
+  tone,
+}: {
+  d: NonNullable<StructuralCondition["drivers"]>["drivers"][number];
+  tone: string;
+}) {
+  const arrow = d.direction === "up" ? "↑" : "↓";
+  return (
+    <li>
+      <div className="flex items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+          <span aria-hidden style={{ color: tone }}>
+            {arrow}
+          </span>
+          {d.label}
+        </span>
+        <span className="text-mono shrink-0 text-[10px] uppercase tracking-[0.12em]" style={{ color: tone }}>
+          {d.contribution}
+        </span>
+      </div>
+      <p className="mt-1 pl-4 text-[11px] leading-snug text-muted-foreground">
+        {d.reason}
+      </p>
+    </li>
+  );
+}
 
 function severityTone(s: StructuralCondition["severity"]) {
   switch (s) {
