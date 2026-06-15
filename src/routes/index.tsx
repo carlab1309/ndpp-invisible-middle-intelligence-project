@@ -7,10 +7,12 @@ import {
   type SignalFamily,
   type StructuralCondition,
   type ConditionStrengthSample,
+  type MechanismStrengthSample,
   generateSignal,
   interpret,
   familyCounts,
   computeTrajectory,
+  computeDrivers,
 } from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
