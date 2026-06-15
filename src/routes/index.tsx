@@ -747,6 +747,37 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         </details>
       ) : null}
 
+      <details className="group mt-2">
+        <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
+          <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+          Likely organisational impact
+        </summary>
+        <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+          <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            If this condition continues, the organisation is likely to experience
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {c.organisationalImpact.map((i) => (
+              <li
+                key={i}
+                className="relative pl-4 text-xs leading-snug text-foreground"
+              >
+                <span
+                  className="absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: tone }}
+                  aria-hidden
+                />
+                {i}
+              </li>
+            ))}
+          </ul>
+          <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+            Architecture conditions don't stay structural — they surface as operational
+            consequences. This is the bridge from architecture intelligence to business impact.
+          </p>
+        </div>
+      </details>
+
 
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">

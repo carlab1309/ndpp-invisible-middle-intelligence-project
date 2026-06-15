@@ -120,6 +120,7 @@ export interface StructuralCondition {
   responseGuidance: string[];
   trajectory?: ConditionTrajectory;
   drivers?: ConditionDrivers;
+  organisationalImpact: string[];
 }
 
 
@@ -237,10 +238,20 @@ export const SIGNAL_CATALOGUE: SignalDef[] = [
   },
 ];
 
-const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "description" | "responseGuidance">> = {
+const CONDITION_META: Record<
+  ConditionId,
+  Pick<StructuralCondition, "label" | "description" | "responseGuidance" | "organisationalImpact">
+> = {
   trust_instability: {
     label: "Trust Instability",
     description: "Users are compensating for perceived unreliability — verification, reassurance, rechecking.",
+    organisationalImpact: [
+      "Increased verification activity",
+      "Slower decision making",
+      "Escalation dependency",
+      "Reduced workflow confidence",
+      "Increased management oversight demand",
+    ],
     responseGuidance: [
       "Strengthen closure confirmation surfaces",
       "Audit confidence signals returned to operators",
@@ -250,6 +261,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   closure_failure: {
     label: "Closure Failure",
     description: "The system isn't creating durable, trustable completion. Loops stay cognitively open.",
+    organisationalImpact: [
+      "Cognitive load held open past completion",
+      "Repeated re-checking of closed work",
+      "Inflated case volumes through reopens",
+      "Reduced operator throughput",
+      "Erosion of confidence in system state",
+    ],
     responseGuidance: [
       "Add explicit completion confirmation",
       "Suppress notifications after confirmed close",
@@ -259,6 +277,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   threshold_ambiguity: {
     label: "Threshold Ambiguity",
     description: "When observation should become intervention is interpreted inconsistently across teams.",
+    organisationalImpact: [
+      "Inconsistent treatment of comparable cases",
+      "Escalation inflation",
+      "Reduced predictability of intervention",
+      "Audit and assurance exposure",
+      "Erosion of severity model credibility",
+    ],
     responseGuidance: [
       "Codify intervention thresholds explicitly",
       "Align severity bands across reviewers",
@@ -268,6 +293,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   ownership_drift: {
     label: "Ownership Drift",
     description: "Responsibility is being informally redistributed. Handoffs are unclear or duplicated.",
+    organisationalImpact: [
+      "Delayed decisions",
+      "Duplication of effort",
+      "Responsibility avoidance",
+      "Escalation accumulation",
+      "Reduced accountability clarity",
+    ],
     responseGuidance: [
       "Make ownership transitions explicit",
       "Surface owner at every interaction surface",
@@ -277,6 +309,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   context_fragmentation: {
     label: "Context Fragmentation",
     description: "Meaning is not surviving handoffs. Humans repeatedly reconstruct case context.",
+    organisationalImpact: [
+      "Re-explanation overhead at every handoff",
+      "Loss of decision rationale across teams",
+      "Slower resolution times",
+      "Increased risk of inconsistent action",
+      "Hidden continuity labour",
+    ],
     responseGuidance: [
       "Carry case context across handoffs",
       "Preserve decision rationale on transitions",
@@ -286,6 +325,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   ai_burden_transfer: {
     label: "AI Burden Transfer",
     description: "AI is silently redistributing verification, interpretation and oversight back to humans.",
+    organisationalImpact: [
+      "Reduced AI efficiency gains",
+      "Increased human verification effort",
+      "Lower trust in AI outputs",
+      "Hidden operational labour",
+      "Reduced return on AI investment",
+    ],
     responseGuidance: [
       "Make AI confidence operationally interpretable",
       "Define explicit oversight thresholds",
@@ -295,6 +341,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   interpretive_overload: {
     label: "Interpretive Overload",
     description: "Humans are repeatedly inferring meaning, urgency or next step that the system should contain.",
+    organisationalImpact: [
+      "Slower first-action timings",
+      "Inconsistent prioritisation across operators",
+      "Cognitive fatigue concentrated in frontline roles",
+      "Increased risk of misjudged urgency",
+      "Reduced operational predictability",
+    ],
     responseGuidance: [
       "Reduce ambiguous signal surfaces",
       "Translate raw signals into action clarity",
@@ -304,6 +357,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   escalation_instability: {
     label: "Escalation Instability",
     description: "Escalation is reactive, delayed, or inflated — containment architecture is weak.",
+    organisationalImpact: [
+      "Senior capacity consumed by avoidable escalations",
+      "First-line containment confidence erodes",
+      "Inconsistent protocol adherence",
+      "Audit exposure on escalation decisions",
+      "Reduced organisational resilience",
+    ],
     responseGuidance: [
       "Define proportionate escalation criteria",
       "Audit recent escalations against protocol",
@@ -313,6 +373,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   workflow_incoherence: {
     label: "Workflow Incoherence",
     description: "Comparable situations are being handled inconsistently. Local workarounds proliferating.",
+    organisationalImpact: [
+      "Divergent outcomes for comparable cases",
+      "Workaround dependence becomes structural",
+      "Process design drifts from operational reality",
+      "Training and onboarding overhead increases",
+      "Reduced workflow auditability",
+    ],
     responseGuidance: [
       "Reconcile divergent local workarounds",
       "Stabilise workflow logic across teams",
@@ -322,6 +389,13 @@ const CONDITION_META: Record<ConditionId, Pick<StructuralCondition, "label" | "d
   predictability_failure: {
     label: "Predictability Failure",
     description: "Users cannot reliably form expectations about system behaviour. Trust budget erodes.",
+    organisationalImpact: [
+      "Hedging behaviours replace decisive action",
+      "Trust budget across the system erodes",
+      "Increased reliance on informal knowledge",
+      "Reduced adoption of system-recommended actions",
+      "Hidden cost of monitoring without intervention",
+    ],
     responseGuidance: [
       "Make state changes deterministic",
       "Communicate behavioural changes ahead of time",
@@ -884,6 +958,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       mechanisms,
       breakdown,
       architecturalCauses: architecturalCausesFor(mechanisms.map((m) => m.label)),
+      organisationalImpact: meta.organisationalImpact,
       responseGuidance: meta.responseGuidance,
     });
   }
