@@ -84,17 +84,26 @@ function Console() {
   // Maintain a short rolling history of per-condition strength so we can
   // compute trajectory (NDPP: condition formation through time).
   const historyRef = useRef<Record<string, ConditionStrengthSample[]>>({});
+  // Per-condition history of mechanism point contributions, so we can
+  // compute which mechanisms are currently driving condition change.
+  const mechHistoryRef = useRef<Record<string, MechanismStrengthSample[]>>({});
   useEffect(() => {
     const store = historyRef.current;
+    const mechStore = mechHistoryRef.current;
     const active = new Set(rawConditions.map((c) => c.id));
     for (const c of rawConditions) {
       const arr = store[c.id] ?? [];
       arr.push({ ts: now, strength: c.strength });
-      // keep last ~90s of samples, cap at 60 entries
       const cutoff = now - 90_000;
       store[c.id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
+
+      const mArr = mechStore[c.id] ?? [];
+      const pointsMap: Record<string, number> = {};
+      for (const m of c.mechanisms) pointsMap[m.label] = m.points;
+      mArr.push({ ts: now, points: pointsMap });
+      mechStore[c.id] = mArr.filter((s) => s.ts >= cutoff).slice(-60);
     }
-    // Decay disappeared conditions toward zero so Recovering/Resolved can register
+    // Decay disappeared conditions so Recovering/Resolved can register
     for (const id of Object.keys(store)) {
       if (active.has(id as StructuralCondition["id"])) continue;
       const arr = store[id];
@@ -104,6 +113,12 @@ function Console() {
         const cutoff = now - 90_000;
         store[id] = arr.filter((s) => s.ts >= cutoff).slice(-60);
       }
+      const mArr = mechStore[id];
+      if (mArr && mArr.length) {
+        mArr.push({ ts: now, points: {} });
+        const cutoff = now - 90_000;
+        mechStore[id] = mArr.filter((s) => s.ts >= cutoff).slice(-60);
+      }
     }
   }, [rawConditions, now]);
 
@@ -112,6 +127,7 @@ function Console() {
       rawConditions.map((c) => ({
         ...c,
         trajectory: computeTrajectory(historyRef.current[c.id] ?? [], c.strength, now),
+        drivers: computeDrivers(mechHistoryRef.current[c.id] ?? [], c.mechanisms, now),
       })),
     [rawConditions, now]
   );
