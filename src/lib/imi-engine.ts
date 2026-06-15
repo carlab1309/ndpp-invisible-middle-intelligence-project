@@ -120,6 +120,7 @@ export interface StructuralCondition {
   responseGuidance: string[];
   trajectory?: ConditionTrajectory;
   drivers?: ConditionDrivers;
+  organisationalImpact: string[];
 }
 
 
