@@ -606,6 +606,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           {c.drivers && (c.drivers.drivers.length > 0 || c.drivers.stabilisers.length > 0) && (
             <DriversBlock drivers={c.drivers} tone={tone} />
           )}
+        </div>
       </div>
 
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2">
