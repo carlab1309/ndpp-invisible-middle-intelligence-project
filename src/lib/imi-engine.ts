@@ -958,6 +958,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       mechanisms,
       breakdown,
       architecturalCauses: architecturalCausesFor(mechanisms.map((m) => m.label)),
+      organisationalImpact: meta.organisationalImpact,
       responseGuidance: meta.responseGuidance,
     });
   }
