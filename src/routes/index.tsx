@@ -778,6 +778,10 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         </div>
       </details>
 
+      <LeverageBlock c={c} tone={tone} />
+
+
+
 
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
@@ -887,6 +891,147 @@ function DriverRow({
     </li>
   );
 }
+
+function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
+  const impactTone = (impact: string) =>
+    impact === "Very High"
+      ? "var(--signal-critical)"
+      : impact === "High"
+        ? "var(--signal-elevated)"
+        : impact === "Moderate"
+          ? "var(--signal-moderate)"
+          : "var(--signal-low)";
+  const effortTone = (effort: string) =>
+    effort === "Low"
+      ? "var(--signal-low)"
+      : effort === "Medium"
+        ? "var(--signal-moderate)"
+        : "var(--signal-elevated)";
+
+  return (
+    <details className="group mt-2">
+      <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
+        <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+        Architectural leverage & intervention priority
+      </summary>
+      <div className="mt-2 space-y-3">
+        {/* Highest leverage point */}
+        <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+          <p className="text-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: tone }}>
+            Highest leverage point
+          </p>
+          <p className="mt-1.5 text-sm font-medium text-foreground">
+            {c.leverage.statement}
+          </p>
+          <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            Expected effect
+          </p>
+          <ul className="mt-1 space-y-0.5">
+            {c.leverage.expectedEffect.map((m) => (
+              <li
+                key={m}
+                className="text-mono inline-flex items-center gap-1.5 pr-2 text-[11px] text-muted-foreground"
+              >
+                <span aria-hidden style={{ color: tone }}>↓</span>
+                {m}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                Estimated influence
+              </p>
+              <p className="text-mono text-xs text-muted-foreground">
+                Share of current condition formation addressed
+              </p>
+            </div>
+            <p className="text-mono text-lg leading-none" style={{ color: tone }}>
+              {c.leverage.estimatedInfluence}%
+            </p>
+          </div>
+          <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+            {c.leverage.reason}
+          </p>
+        </div>
+
+        {/* Intervention priority */}
+        <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+          <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Intervention priority
+          </p>
+          <ol className="mt-2 space-y-2.5">
+            {c.interventionPriorities.map((p, i) => (
+              <li key={p.title}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-foreground">
+                      <span
+                        className="text-mono mr-1.5 text-[10px] uppercase tracking-[0.12em]"
+                        style={{ color: tone }}
+                      >
+                        Priority {i + 1}
+                      </span>
+                      {p.title}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                      {p.reason}
+                    </p>
+                  </div>
+                  <div className="shrink-0 space-y-0.5 text-right">
+                    <p
+                      className="text-mono text-[10px] uppercase tracking-[0.12em]"
+                      style={{ color: impactTone(p.impact) }}
+                    >
+                      {p.impact}
+                    </p>
+                    <p
+                      className="text-mono text-[10px] uppercase tracking-[0.12em]"
+                      style={{ color: effortTone(p.effort) }}
+                    >
+                      effort: {p.effort.toLowerCase()}
+                    </p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+            Priority orders interventions by likely reduction in compensation per unit of effort.
+          </p>
+        </div>
+
+        {/* Expected organisational improvement */}
+        <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+          <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Expected organisational improvement
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {c.expectedImprovement.map((i) => (
+              <li
+                key={i}
+                className="relative pl-4 text-xs leading-snug text-foreground"
+              >
+                <span
+                  className="absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: tone }}
+                  aria-hidden
+                />
+                {i}
+              </li>
+            ))}
+          </ul>
+          <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+            Architecture intelligence translates into business outcomes. Executives buy outcomes,
+            not architecture terminology.
+          </p>
+        </div>
+      </div>
+    </details>
+  );
+}
+
+
 
 function severityTone(s: StructuralCondition["severity"]) {
   switch (s) {
