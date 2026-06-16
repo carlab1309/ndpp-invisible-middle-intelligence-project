@@ -1217,7 +1217,14 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       architecturalCauses: architecturalCausesFor(mechanisms.map((m) => m.label)),
       organisationalImpact: meta.organisationalImpact,
       responseGuidance: meta.responseGuidance,
-      ...leverageFor(cid as ConditionId, mechanisms, strength * 100),
+      ...((): Pick<StructuralCondition, "leverage" | "interventionPriorities" | "expectedImprovement"> => {
+        const lf = leverageFor(cid as ConditionId, mechanisms, strength * 100);
+        return {
+          leverage: lf.leverage,
+          interventionPriorities: lf.priorities,
+          expectedImprovement: lf.expectedImprovement,
+        };
+      })(),
     });
   }
 
