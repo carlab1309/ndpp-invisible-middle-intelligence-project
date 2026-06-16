@@ -796,6 +796,243 @@ function evidenceMaturityFor(
   };
 }
 
+// --- Architectural leverage & intervention priority ----------------
+// For each condition: the architecture adjustment most likely to reduce
+// the largest amount of compensation, an ordered intervention plan, and
+// the expected organisational improvement if the leverage is acted on.
+
+interface LeverageDef {
+  statement: string;
+  targetMechanisms: string[]; // mechanism labels expected to reduce
+  reason: string;
+  priorities: InterventionPriority[];
+  expectedImprovement: string[];
+}
+
+const LEVERAGE_LIBRARY: Record<ConditionId, LeverageDef> = {
+  trust_instability: {
+    statement: "Clarify closure confirmation criteria.",
+    targetMechanisms: ["Reassurance Dependency", "Verification Burden", "Closure Uncertainty"],
+    reason:
+      "Multiple compensation mechanisms trace back to unresolved closure confirmation pathways.",
+    priorities: [
+      { title: "Strengthen closure confirmation surfaces", impact: "Very High", effort: "Low",
+        reason: "Reassurance and verification activity collapse when completion is durably signalled." },
+      { title: "Audit confidence signals returned to operators", impact: "High", effort: "Medium",
+        reason: "Operator trust forms around legible system feedback, not silent state changes." },
+      { title: "Suppress silent state changes", impact: "Moderate", effort: "Medium",
+        reason: "Hidden transitions sustain re-checking behaviour even after closure." },
+    ],
+    expectedImprovement: [
+      "reduced verification activity",
+      "lower management oversight demand",
+      "improved workflow confidence",
+      "increased operational predictability",
+    ],
+  },
+  closure_failure: {
+    statement: "Make completion durable and legible.",
+    targetMechanisms: ["Closure Uncertainty", "Completion Ambiguity"],
+    reason:
+      "Compensation mechanisms here converge on completion that the system does not durably hold.",
+    priorities: [
+      { title: "Add explicit completion confirmation", impact: "Very High", effort: "Low",
+        reason: "Most post-closure attention reduces when finality is unambiguously signalled." },
+      { title: "Suppress notifications after confirmed close", impact: "High", effort: "Low",
+        reason: "Residual notifications reopen cognitive loops the system has already closed." },
+      { title: "Codify reopen criteria", impact: "Moderate", effort: "Medium",
+        reason: "Without criteria, reopens are interpreted as system unreliability." },
+    ],
+    expectedImprovement: [
+      "reduced re-checking of closed work",
+      "lower case volume from reopens",
+      "improved operator throughput",
+      "increased confidence in system state",
+    ],
+  },
+  threshold_ambiguity: {
+    statement: "Codify intervention thresholds explicitly.",
+    targetMechanisms: ["Threshold Reinterpretation", "Severity Inconsistency", "Recognition Latency"],
+    reason: "Compensation forms wherever severity is interpreted locally rather than structurally.",
+    priorities: [
+      { title: "Codify severity bands across teams", impact: "Very High", effort: "Medium",
+        reason: "Reclassification activity collapses when bands are anchored to protocol." },
+      { title: "Surface threshold criteria in-context", impact: "High", effort: "Medium",
+        reason: "Operators stop inferring intervention boundaries when the system shows them." },
+      { title: "Align first-action ownership to severity bands", impact: "Moderate", effort: "Low",
+        reason: "Recognition latency shortens when ownership tracks the severity model." },
+    ],
+    expectedImprovement: [
+      "consistent treatment of comparable cases",
+      "reduced escalation inflation",
+      "increased predictability of intervention",
+      "stronger severity model credibility",
+    ],
+  },
+  ownership_drift: {
+    statement: "Standardise handoff ownership criteria.",
+    targetMechanisms: ["Ownership Ambiguity", "Duplicated Responsibility", "Handoff Gap"],
+    reason:
+      "Multiple architecture conditions share the same ownership pathway weakness.",
+    priorities: [
+      { title: "Clarify escalation ownership", impact: "Very High", effort: "Low",
+        reason: "Multiple compensation pathways converge on unresolved ownership allocation." },
+      { title: "Make ownership transitions explicit on every surface", impact: "High", effort: "Medium",
+        reason: "Reduces duplicate intervention and reassurance traffic around responsibility." },
+      { title: "Review notification architecture", impact: "Moderate", effort: "High",
+        reason: "Improves visibility but does not directly address ownership allocation." },
+    ],
+    expectedImprovement: [
+      "reduced duplicate review activity",
+      "faster decision making",
+      "reduced escalation dependency",
+      "improved accountability clarity",
+    ],
+  },
+  context_fragmentation: {
+    statement: "Carry case context across handoffs.",
+    targetMechanisms: ["Context Reconstruction", "Context Loss"],
+    reason: "Compensation here forms wherever meaning fails to survive a transition.",
+    priorities: [
+      { title: "Preserve decision rationale on transitions", impact: "Very High", effort: "Medium",
+        reason: "Re-explanation effort drops sharply when rationale travels with the case." },
+      { title: "Standardise handoff payloads", impact: "High", effort: "Medium",
+        reason: "Reduces transition ambiguity that produces continuity strain." },
+      { title: "Audit boundary points between systems", impact: "Moderate", effort: "High",
+        reason: "Surfaces structural discontinuities producing context loss." },
+    ],
+    expectedImprovement: [
+      "reduced re-explanation overhead",
+      "faster resolution times",
+      "reduced hidden coordination",
+      "improved continuity across teams",
+    ],
+  },
+  ai_burden_transfer: {
+    statement: "Make AI confidence operationally interpretable.",
+    targetMechanisms: ["Oversight Compensation", "Interpretive Reliance", "Verification Burden"],
+    reason: "Hidden oversight load forms wherever AI outputs lack operational meaning at point of use.",
+    priorities: [
+      { title: "Define explicit oversight thresholds", impact: "Very High", effort: "Medium",
+        reason: "Removes the implicit verification load operators currently absorb." },
+      { title: "Translate confidence into action guidance", impact: "High", effort: "Medium",
+        reason: "Interpretive queries fall when AI output carries operational meaning." },
+      { title: "Audit override frequency by surface", impact: "Moderate", effort: "Low",
+        reason: "Identifies surfaces silently transferring oversight back to humans." },
+    ],
+    expectedImprovement: [
+      "improved return on AI investment",
+      "reduced verification activity",
+      "lower management oversight demand",
+      "increased trust in AI outputs",
+    ],
+  },
+  interpretive_overload: {
+    statement: "Translate raw signals into action clarity.",
+    targetMechanisms: ["Meaning Reconstruction", "Urgency Inference"],
+    reason: "Compensation forms where the system requires meaning the architecture should contain.",
+    priorities: [
+      { title: "Tighten next-step prompts at decision points", impact: "Very High", effort: "Medium",
+        reason: "Operator-side meaning inference falls when next steps are explicit." },
+      { title: "Surface SLA and urgency context at the alert", impact: "High", effort: "Low",
+        reason: "Urgency inference collapses when time-criticality is shown directly." },
+      { title: "Reduce ambiguous signal surfaces", impact: "Moderate", effort: "High",
+        reason: "Removes interpretive load at the source rather than the operator." },
+    ],
+    expectedImprovement: [
+      "faster first-action timing",
+      "consistent prioritisation across operators",
+      "reduced cognitive fatigue on frontline roles",
+      "improved operational predictability",
+    ],
+  },
+  escalation_instability: {
+    statement: "Define proportionate escalation criteria.",
+    targetMechanisms: ["Escalation Inflation", "Threshold-Driven Escalation"],
+    reason: "Escalation defaults upward wherever first-line containment criteria are absent.",
+    priorities: [
+      { title: "Strengthen first-line containment", impact: "Very High", effort: "Medium",
+        reason: "Escalation inflation falls when first-line carry capacity is restored." },
+      { title: "Anchor escalation criteria to protocol", impact: "High", effort: "Low",
+        reason: "Reduces reclassification-driven escalations." },
+      { title: "Add holding state for reclassified cases", impact: "Moderate", effort: "Medium",
+        reason: "Prevents automatic escalation when severity is ambiguous." },
+    ],
+    expectedImprovement: [
+      "reduced escalation dependency",
+      "lower management oversight demand",
+      "improved first-line containment confidence",
+      "stronger organisational resilience",
+    ],
+  },
+  workflow_incoherence: {
+    statement: "Reconcile divergent workflow paths.",
+    targetMechanisms: ["Workaround Proliferation", "Duplicated Workflow"],
+    reason: "Local workarounds form wherever workflow logic diverges from operational reality.",
+    priorities: [
+      { title: "Identify root cause of detours", impact: "Very High", effort: "Medium",
+        reason: "Without addressing root causes, workarounds re-emerge after each fix." },
+      { title: "Converge comparable cases onto one route", impact: "High", effort: "Medium",
+        reason: "Reduces divergent outcomes for comparable situations." },
+      { title: "Add a retirement loop for legacy workarounds", impact: "Moderate", effort: "Low",
+        reason: "Prevents workaround persistence outliving originating conditions." },
+    ],
+    expectedImprovement: [
+      "convergent outcomes across teams",
+      "reduced training and onboarding overhead",
+      "improved workflow auditability",
+      "reduced hidden coordination",
+    ],
+  },
+  predictability_failure: {
+    statement: "Make state changes deterministic and announced.",
+    targetMechanisms: ["Behavioural Hedging", "Workaround Persistence"],
+    reason: "Hedging behaviour forms wherever system behaviour is non-deterministic from the user perspective.",
+    priorities: [
+      { title: "Announce state changes ahead of time", impact: "Very High", effort: "Low",
+        reason: "Hedging behaviour collapses when behavioural changes are predictable." },
+      { title: "Reduce unexplained variance", impact: "High", effort: "Medium",
+        reason: "Rebuilds the trust budget across the system." },
+      { title: "Increase adoption of system-recommended actions", impact: "Moderate", effort: "Medium",
+        reason: "Adoption follows predictability, not the other way around." },
+    ],
+    expectedImprovement: [
+      "improved adoption of system-recommended actions",
+      "reduced reliance on informal knowledge",
+      "increased operational predictability",
+      "reduced hidden coordination",
+    ],
+  },
+};
+
+function leverageFor(
+  cid: ConditionId,
+  mechanisms: ConditionMechanism[],
+  strengthPct: number
+): { leverage: ArchitecturalLeverage; priorities: InterventionPriority[]; expectedImprovement: string[] } {
+  const def = LEVERAGE_LIBRARY[cid];
+  // Estimated influence: share of current condition formation carried by the
+  // mechanisms that the leverage point is expected to reduce. Falls back to
+  // top-mechanism share if no target mechanisms are currently active.
+  let addressed = 0;
+  for (const m of mechanisms) {
+    if (def.targetMechanisms.includes(m.label)) addressed += m.points;
+  }
+  if (addressed === 0 && mechanisms.length) addressed = mechanisms[0].points;
+  const influence = strengthPct > 0 ? Math.round((addressed / strengthPct) * 100) : 0;
+
+  return {
+    leverage: {
+      statement: def.statement,
+      expectedEffect: def.targetMechanisms,
+      reason: def.reason,
+      estimatedInfluence: Math.min(100, Math.max(0, influence)),
+    },
+    priorities: def.priorities,
+    expectedImprovement: def.expectedImprovement,
+  };
+}
+
 // --- Scenarios -----------------------------------------------------
 
 export type ScenarioId = "baseline" | "trust_collapse" | "ai_burden" | "handoff_breakdown" | "flourishing";
