@@ -261,9 +261,6 @@ export const SIGNAL_CATALOGUE: SignalDef[] = [
 const CONDITION_META: Record<
   ConditionId,
   Pick<StructuralCondition, "label" | "description" | "responseGuidance" | "organisationalImpact">
-const CONDITION_META: Record<
-  ConditionId,
-  Pick<StructuralCondition, "label" | "description" | "responseGuidance" | "organisationalImpact">
 > = {
   trust_instability: {
     label: "Trust Instability",
