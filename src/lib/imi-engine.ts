@@ -104,6 +104,23 @@ export interface ConditionDrivers {
   stabilisers: ConditionDriver[]; // mechanisms currently reducing condition formation
 }
 
+export interface ArchitecturalLeverage {
+  statement: string; // the architecture adjustment
+  expectedEffect: string[]; // mechanisms expected to reduce
+  reason: string;
+  estimatedInfluence: number; // 0..100 — share of current formation addressed
+}
+
+export type InterventionImpact = "Very High" | "High" | "Moderate" | "Low";
+export type InterventionEffort = "Low" | "Medium" | "High";
+
+export interface InterventionPriority {
+  title: string;
+  impact: InterventionImpact;
+  effort: InterventionEffort;
+  reason: string;
+}
+
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
@@ -121,6 +138,9 @@ export interface StructuralCondition {
   trajectory?: ConditionTrajectory;
   drivers?: ConditionDrivers;
   organisationalImpact: string[];
+  leverage: ArchitecturalLeverage;
+  interventionPriorities: InterventionPriority[];
+  expectedImprovement: string[];
 }
 
 
