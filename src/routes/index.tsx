@@ -778,6 +778,10 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         </div>
       </details>
 
+      <LeverageBlock c={c} tone={tone} />
+
+
+
 
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
