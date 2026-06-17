@@ -1119,7 +1119,224 @@ function Panel({
   );
 }
 
-function EmptyState({ text }: { text: string }) {
+function InteractionPanel({ interactions }: { interactions: ConditionInteractionMap }) {
+  const { edges, primary, downstream, multiplier } = interactions;
+  const influenceTone = (s: "High" | "Medium" | "Low") =>
+    s === "High"
+      ? "var(--signal-critical)"
+      : s === "Medium"
+        ? "var(--signal-elevated)"
+        : "var(--signal-moderate)";
+
+  return (
+    <Panel
+      label="Condition interaction map"
+      caption="Upstream → downstream · multiplier intervention"
+    >
+      {edges.length === 0 ? (
+        <EmptyState text="No condition interactions detected yet." />
+      ) : (
+        <div className="space-y-5 px-5 py-5">
+          {/* INTERACTION MAP */}
+          <div>
+            <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              Condition interaction map
+            </p>
+            <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
+              How conditions are currently contributing to one another
+            </p>
+            <ul className="mt-3 space-y-3">
+              {edges.map((e) => {
+                const tone = influenceTone(e.influence);
+                return (
+                  <li
+                    key={e.from}
+                    className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold text-foreground">
+                        {e.fromLabel}
+                      </span>
+                      <span
+                        className="text-mono shrink-0 text-[10px] uppercase tracking-[0.12em]"
+                        style={{ color: tone }}
+                      >
+                        Influence · {e.influence}
+                      </span>
+                    </div>
+                    <p className="text-mono mt-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                      Contributing to
+                    </p>
+                    <ul className="mt-1 space-y-0.5">
+                      {e.toLabels.map((t) => (
+                        <li
+                          key={t}
+                          className="relative pl-4 text-[11px] text-foreground"
+                        >
+                          <span
+                            className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                            style={{ backgroundColor: tone }}
+                            aria-hidden
+                          />
+                          {t}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* PRIMARY UPSTREAM */}
+          {primary ? (
+            <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+              <p
+                className="text-mono text-[10px] uppercase tracking-[0.16em]"
+                style={{ color: "var(--signal-critical)" }}
+              >
+                Primary upstream condition
+              </p>
+              <p className="mt-1.5 text-sm font-semibold text-foreground">
+                {primary.label}
+              </p>
+              <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                Currently contributing to
+              </p>
+              <ul className="mt-1 space-y-0.5">
+                {primary.contributingTo.map((t) => (
+                  <li
+                    key={t}
+                    className="relative pl-4 text-[11px] text-foreground before:absolute before:left-0 before:top-2 before:h-1.5 before:w-1.5 before:rounded-full"
+                    style={{}}
+                  >
+                    <span
+                      className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: "var(--signal-critical)" }}
+                      aria-hidden
+                    />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
+                <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Estimated system influence
+                </span>
+                <span
+                  className="text-mono text-base font-semibold"
+                  style={{ color: "var(--signal-critical)" }}
+                >
+                  {primary.estimatedInfluence}%
+                </span>
+              </div>
+              <p className="text-mono mt-2 text-[10px] leading-relaxed text-muted-foreground">
+                {primary.reason}
+              </p>
+            </div>
+          ) : null}
+
+          {/* DOWNSTREAM CONSEQUENCES */}
+          {downstream && downstream.items.length > 0 ? (
+            <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+              <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                Downstream consequences
+              </p>
+              <p className="mt-1 text-[11px] leading-snug text-foreground">
+                {downstream.fromLabel} may contribute to:
+              </p>
+              <ul className="mt-2 space-y-1">
+                {downstream.items.map((i) => (
+                  <li
+                    key={i}
+                    className="relative pl-4 text-xs leading-snug text-foreground"
+                  >
+                    <span
+                      className="absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full bg-primary"
+                      aria-hidden
+                    />
+                    {i}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+                If this upstream condition continues forming, these are the
+                operational consequences most likely to emerge across downstream
+                conditions.
+              </p>
+            </div>
+          ) : null}
+
+          {/* MULTIPLIER EFFECT */}
+          {multiplier ? (
+            <div
+              className="rounded-md border px-3 py-3"
+              style={{
+                borderColor: "color-mix(in oklch, var(--primary) 40%, transparent)",
+                background: "color-mix(in oklch, var(--primary) 8%, transparent)",
+              }}
+            >
+              <p
+                className="text-mono text-[10px] uppercase tracking-[0.16em]"
+                style={{ color: "var(--primary)" }}
+              >
+                Architectural multiplier effect
+              </p>
+              <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                Highest leverage intervention
+              </p>
+              <p className="mt-1 text-sm font-semibold text-foreground">
+                {multiplier.intervention}
+              </p>
+              <p className="text-mono mt-3 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                Potential impact
+              </p>
+              <ul className="mt-1 space-y-0.5">
+                {multiplier.reductions.map((r) => (
+                  <li
+                    key={r}
+                    className="text-[11px] leading-snug text-foreground"
+                  >
+                    <span
+                      className="text-mono mr-1.5"
+                      style={{ color: "var(--signal-low)" }}
+                      aria-hidden
+                    >
+                      ↓
+                    </span>
+                    {r}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
+                <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Estimated cross-condition reduction
+                </span>
+                <span
+                  className="text-mono text-base font-semibold"
+                  style={{ color: "var(--primary)" }}
+                >
+                  {multiplier.estimatedReduction}%
+                </span>
+              </div>
+              <p className="text-mono mt-2 text-[10px] leading-relaxed text-muted-foreground">
+                {multiplier.reason}
+              </p>
+            </div>
+          ) : null}
+
+          <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+            Signals → mechanisms → conditions → interactions → upstream →
+            downstream → multiplier → response. Conditions are connected
+            architecture phenomena; a single structural change in the right
+            place reduces multiple forms of hidden compensation simultaneously.
+          </p>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
   return (
     <div className="text-mono px-5 py-10 text-center text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
       {text}
