@@ -176,6 +176,7 @@ function Console() {
               conditionsCount={conditions.length}
             />
             <ConditionsPanel conditions={conditions} />
+            <InteractionPanel interactions={interactions} />
           </section>
         </div>
 
