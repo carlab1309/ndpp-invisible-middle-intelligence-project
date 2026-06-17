@@ -139,6 +139,7 @@ function Console() {
     () => conditions.reduce((a, c) => a + c.strength, 0),
     [conditions]
   );
+  const interactions = useMemo(() => computeInteractions(conditions), [conditions]);
 
   const containmentScore = Math.max(
     0,
