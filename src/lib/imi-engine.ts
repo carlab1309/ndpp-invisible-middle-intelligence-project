@@ -143,6 +143,156 @@ export interface StructuralCondition {
   expectedImprovement: string[];
 }
 
+// --- Condition interaction map -------------------------------------
+// Conditions are not isolated. Some conditions form *through* other
+// conditions: their mechanisms and architectural causes overlap, so
+// movement in an upstream condition propagates into downstream ones.
+// This layer identifies the upstream condition exerting the greatest
+// influence across the currently-present set, the downstream conditions
+// it is contributing to, and the architecture intervention that would
+// reduce the most conditions simultaneously.
+
+export type InfluenceStrength = "High" | "Medium" | "Low";
+
+export interface ConditionInteractionEdge {
+  from: ConditionId;
+  fromLabel: string;
+  toLabels: string[];
+  toIds: ConditionId[];
+  influence: InfluenceStrength;
+  influencePct: number; // 0..100 share of current system formation routed through this condition
+}
+
+export interface PrimaryUpstream {
+  id: ConditionId;
+  label: string;
+  contributingTo: string[];
+  estimatedInfluence: number; // 0..100
+  reason: string;
+}
+
+export interface DownstreamConsequences {
+  fromLabel: string;
+  items: string[]; // organisational consequences likely to follow
+}
+
+export interface MultiplierEffect {
+  intervention: string; // architectural adjustment
+  reductions: string[]; // "↓ Condition Label"
+  estimatedReduction: number; // 0..100
+  reason: string;
+}
+
+export interface ConditionInteractionMap {
+  edges: ConditionInteractionEdge[];
+  primary: PrimaryUpstream | null;
+  downstream: DownstreamConsequences | null;
+  multiplier: MultiplierEffect | null;
+}
+
+// Directed graph: from → conditions it tends to contribute to forming.
+// Built from shared mechanisms, shared architectural causes, and the
+// causal chains the engine already models.
+const CONDITION_UPSTREAM_MAP: Record<ConditionId, ConditionId[]> = {
+  threshold_ambiguity: [
+    "ownership_drift",
+    "escalation_instability",
+    "trust_instability",
+    "predictability_failure",
+  ],
+  ownership_drift: ["workflow_incoherence", "trust_instability", "escalation_instability"],
+  closure_failure: ["trust_instability", "predictability_failure"],
+  ai_burden_transfer: ["trust_instability", "interpretive_overload"],
+  context_fragmentation: ["workflow_incoherence", "ownership_drift"],
+  interpretive_overload: ["escalation_instability", "predictability_failure"],
+  escalation_instability: ["trust_instability"],
+  workflow_incoherence: ["predictability_failure", "escalation_instability"],
+  trust_instability: ["predictability_failure"],
+  predictability_failure: [],
+};
+
+function influenceFor(pct: number): InfluenceStrength {
+  if (pct >= 45) return "High";
+  if (pct >= 20) return "Medium";
+  return "Low";
+}
+
+export function computeInteractions(conditions: StructuralCondition[]): ConditionInteractionMap {
+  if (conditions.length === 0) {
+    return { edges: [], primary: null, downstream: null, multiplier: null };
+  }
+  const byId = new Map(conditions.map((c) => [c.id, c]));
+  const totalStrength = conditions.reduce((a, c) => a + c.strength, 0) || 1;
+
+  const edges: ConditionInteractionEdge[] = [];
+  for (const c of conditions) {
+    const downstreamIds = (CONDITION_UPSTREAM_MAP[c.id] ?? []).filter((d) => byId.has(d));
+    if (downstreamIds.length === 0) continue;
+    const downstreamStrength = downstreamIds.reduce(
+      (a, d) => a + (byId.get(d)?.strength ?? 0),
+      0
+    );
+    const influencePct = Math.round(((c.strength + downstreamStrength) / totalStrength) * 100);
+    edges.push({
+      from: c.id,
+      fromLabel: c.label,
+      toIds: downstreamIds,
+      toLabels: downstreamIds.map((d) => byId.get(d)!.label),
+      influence: influenceFor(influencePct),
+      influencePct,
+    });
+  }
+  edges.sort((a, b) => b.influencePct - a.influencePct);
+
+  const top = edges[0] ?? null;
+  let primary: PrimaryUpstream | null = null;
+  let downstream: DownstreamConsequences | null = null;
+  let multiplier: MultiplierEffect | null = null;
+
+  if (top) {
+    const src = byId.get(top.from)!;
+    primary = {
+      id: top.from,
+      label: top.fromLabel,
+      contributingTo: top.toLabels,
+      estimatedInfluence: top.influencePct,
+      reason:
+        "Multiple architecture conditions are forming through compensation pathways that originate in this condition.",
+    };
+
+    // Downstream consequences: aggregate organisational impact across the
+    // downstream conditions this primary upstream is currently feeding.
+    const seen = new Set<string>();
+    const items: string[] = [];
+    for (const did of top.toIds) {
+      for (const i of byId.get(did)?.organisationalImpact ?? []) {
+        if (seen.has(i)) continue;
+        seen.add(i);
+        items.push(i);
+        if (items.length >= 6) break;
+      }
+      if (items.length >= 6) break;
+    }
+    downstream = { fromLabel: top.fromLabel, items };
+
+    // Multiplier: use the primary upstream's leverage statement; the
+    // reductions span the upstream condition itself plus every downstream
+    // condition it currently influences.
+    const touchedIds: ConditionId[] = [top.from, ...top.toIds];
+    const touchedStrength = touchedIds.reduce((a, id) => a + (byId.get(id)?.strength ?? 0), 0);
+    const reductionPct = Math.round((touchedStrength / totalStrength) * 100);
+    multiplier = {
+      intervention: src.leverage.statement,
+      reductions: touchedIds.map((id) => byId.get(id)!.label),
+      estimatedReduction: reductionPct,
+      reason:
+        "Multiple conditions are currently forming through the same upstream architecture pathway, so a single structural change reduces strain across all of them.",
+    };
+  }
+
+  return { edges, primary, downstream, multiplier };
+}
+
 
 
 
