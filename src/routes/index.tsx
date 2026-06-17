@@ -1337,6 +1337,7 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
   );
 }
 
+function EmptyState({ text }: { text: string }) {
   return (
     <div className="text-mono px-5 py-10 text-center text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
       {text}
