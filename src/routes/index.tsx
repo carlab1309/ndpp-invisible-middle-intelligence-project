@@ -8,11 +8,13 @@ import {
   type StructuralCondition,
   type ConditionStrengthSample,
   type MechanismStrengthSample,
+  type ConditionInteractionMap,
   generateSignal,
   interpret,
   familyCounts,
   computeTrajectory,
   computeDrivers,
+  computeInteractions,
 } from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
