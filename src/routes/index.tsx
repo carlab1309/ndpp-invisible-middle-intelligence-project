@@ -144,6 +144,10 @@ function Console() {
     [conditions]
   );
   const interactions = useMemo(() => computeInteractions(conditions), [conditions]);
+  const executive = useMemo(
+    () => computeExecutiveAssessment(conditions, interactions),
+    [conditions, interactions]
+  );
 
   const containmentScore = Math.max(
     0,
