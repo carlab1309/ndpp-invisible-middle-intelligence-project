@@ -531,6 +531,8 @@ function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) 
 function ConditionRow({ c }: { c: StructuralCondition }) {
   const tone = severityTone(c.severity);
   const pct = Math.round(c.strength * 100);
+  const containment = useMemo(() => computeContainment(c), [c]);
+  const cTone = containmentTone(containment.status);
   return (
     <li className="px-5 py-4">
       <div className="flex items-start justify-between gap-4">
