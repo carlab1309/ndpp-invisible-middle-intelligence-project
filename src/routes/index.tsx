@@ -1392,3 +1392,295 @@ function Footer() {
     </footer>
   );
 }
+
+function containmentTone(status: ContainmentStatus) {
+  switch (status) {
+    case "Critical":
+      return "var(--signal-critical)";
+    case "Fragile":
+      return "var(--signal-elevated)";
+    case "Vulnerable":
+      return "var(--signal-moderate)";
+    case "Containable":
+    default:
+      return "var(--signal-low)";
+  }
+}
+
+function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessment }) {
+  const {
+    containment,
+    primaryPressure,
+    humansCarrying,
+    highestLeverage,
+    ifNothingChanges,
+    portfolio,
+    burdenIndex,
+  } = assessment;
+  const tone = containmentTone(containment.status);
+
+  return (
+    <Panel
+      label="Executive situation assessment"
+      caption="Current architecture state · primary pressure · highest-leverage point"
+    >
+      <div className="space-y-5 px-5 py-5">
+        {/* CURRENT ARCHITECTURE STATE */}
+        <div
+          className="rounded-md border px-4 py-4"
+          style={{
+            borderColor: `color-mix(in oklch, ${tone} 40%, transparent)`,
+            background: `color-mix(in oklch, ${tone} 7%, transparent)`,
+          }}
+        >
+          <p className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            Current architecture state
+          </p>
+          <div className="mt-1 flex items-baseline justify-between gap-3">
+            <p className="text-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Containment status
+            </p>
+            <p
+              className="text-mono text-xl font-semibold tracking-tight"
+              style={{ color: tone }}
+            >
+              {containment.status.toUpperCase()}
+            </p>
+          </div>
+          <p className="text-mono mt-3 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            Reason
+          </p>
+          <ul className="mt-1 space-y-0.5">
+            {containment.reasons.map((r) => (
+              <li
+                key={r}
+                className="relative pl-4 text-xs leading-snug text-foreground"
+              >
+                <span
+                  className="absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: tone }}
+                  aria-hidden
+                />
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* PRIMARY SYSTEM PRESSURE */}
+        {primaryPressure ? (
+          <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+            <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              Primary system pressure
+            </p>
+            <p className="mt-1.5 text-base font-semibold text-foreground">
+              {primaryPressure.label}
+            </p>
+            <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              Currently contributing to
+            </p>
+            <ul className="mt-1 space-y-0.5">
+              {primaryPressure.contributingTo.map((t) => (
+                <li
+                  key={t}
+                  className="relative pl-4 text-[11px] text-foreground"
+                >
+                  <span
+                    className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: "var(--signal-critical)" }}
+                    aria-hidden
+                  />
+                  {t}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
+              <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Estimated system influence
+              </span>
+              <span
+                className="text-mono text-base font-semibold"
+                style={{ color: "var(--signal-critical)" }}
+              >
+                {primaryPressure.estimatedInfluence}%
+              </span>
+            </div>
+          </div>
+        ) : null}
+
+        {/* WHAT HUMANS ARE CURRENTLY CARRYING */}
+        {humansCarrying.length > 0 ? (
+          <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+            <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              What humans are currently carrying
+            </p>
+            <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
+              Aggregated across all active conditions — system-wide
+            </p>
+            <ol className="mt-2 space-y-1">
+              {humansCarrying.map((m, i) => (
+                <li
+                  key={m}
+                  className="text-xs text-foreground"
+                >
+                  <span className="text-mono mr-1.5 text-[10px] text-muted-foreground">
+                    {i + 1}.
+                  </span>
+                  {m}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
+
+        {/* HIGHEST LEVERAGE INTERVENTION */}
+        {highestLeverage ? (
+          <div
+            className="rounded-md border px-3 py-3"
+            style={{
+              borderColor: "color-mix(in oklch, var(--primary) 40%, transparent)",
+              background: "color-mix(in oklch, var(--primary) 8%, transparent)",
+            }}
+          >
+            <p
+              className="text-mono text-[10px] uppercase tracking-[0.16em]"
+              style={{ color: "var(--primary)" }}
+            >
+              Highest leverage architectural point
+            </p>
+            <p className="mt-1.5 text-sm font-semibold text-foreground">
+              {highestLeverage.statement}
+            </p>
+            <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              Expected reduction
+            </p>
+            <ul className="mt-1 space-y-0.5">
+              {highestLeverage.reductions.map((r) => (
+                <li key={r} className="text-[11px] leading-snug text-foreground">
+                  <span
+                    className="text-mono mr-1.5"
+                    style={{ color: "var(--signal-low)" }}
+                    aria-hidden
+                  >
+                    ↓
+                  </span>
+                  {r}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
+              <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Estimated system reduction
+              </span>
+              <span
+                className="text-mono text-base font-semibold"
+                style={{ color: "var(--primary)" }}
+              >
+                {highestLeverage.estimatedReduction}%
+              </span>
+            </div>
+            <p className="text-mono mt-2 text-[10px] leading-relaxed text-muted-foreground">
+              NDPP changes architecture, not people. This is an architectural leverage point,
+              not a recommendation or instruction to operators.
+            </p>
+          </div>
+        ) : null}
+
+        {/* IF NOTHING CHANGES */}
+        {ifNothingChanges.length > 0 ? (
+          <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+            <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              If nothing changes
+            </p>
+            <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
+              Likely emerging consequences
+            </p>
+            <ul className="mt-2 space-y-1">
+              {ifNothingChanges.map((i) => (
+                <li
+                  key={i}
+                  className="relative pl-4 text-xs leading-snug text-foreground"
+                >
+                  <span
+                    className="absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: "var(--signal-elevated)" }}
+                    aria-hidden
+                  />
+                  {i}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {/* ACTIVE CONDITION PORTFOLIO */}
+        <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+          <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+            Active condition portfolio
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <PortfolioStat label="Critical" value={portfolio.critical} tone="var(--signal-critical)" />
+            <PortfolioStat label="Elevated" value={portfolio.elevated} tone="var(--signal-elevated)" />
+            <PortfolioStat label="Moderate" value={portfolio.moderate} tone="var(--signal-moderate)" />
+            <PortfolioStat label="Emerging" value={portfolio.emerging} tone="var(--signal-low)" />
+            <PortfolioStat label="Escalating" value={portfolio.escalating} tone="var(--signal-critical)" />
+            <PortfolioStat label="Entrenching" value={portfolio.entrenching} tone="var(--signal-elevated)" />
+            <PortfolioStat label="Stabilising" value={portfolio.stabilising} tone="var(--signal-moderate)" />
+            <PortfolioStat label="Recovering" value={portfolio.recovering} tone="var(--signal-low)" />
+          </div>
+        </div>
+
+        {/* SYSTEM BURDEN INDEX */}
+        {burdenIndex.length > 0 ? (
+          <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+            <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              System burden index
+            </p>
+            <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
+              What the system is asking people to carry right now — aggregated across the whole architecture
+            </p>
+            <ul className="mt-3 space-y-2">
+              {burdenIndex.map((b) => (
+                <li key={b.mechanism}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-foreground">{b.mechanism}</span>
+                    <span className="text-mono shrink-0 text-[11px] text-muted-foreground">
+                      {b.pct}%
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${b.pct}%`,
+                        backgroundColor: "var(--primary)",
+                        opacity: 0.7,
+                      }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+          Where is the system asking people to carry complexity, and where should intervention occur first?
+        </p>
+      </div>
+    </Panel>
+  );
+}
+
+function PortfolioStat({ label, value, tone }: { label: string; value: number; tone: string }) {
+  return (
+    <div className="rounded border border-border/60 bg-surface px-2 py-2">
+      <p className="text-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="text-mono mt-0.5 text-lg leading-none" style={{ color: tone }}>
+        {value}
+      </p>
+    </div>
+  );
+}
