@@ -587,6 +587,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                 ))}
               </ul>
             </details>
+          </div>
           <div>
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
               Evidence formation
