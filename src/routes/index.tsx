@@ -564,6 +564,29 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               {pct}%
             </p>
           </div>
+          <div className="mt-1">
+            <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Containment status
+            </p>
+            <p className="text-mono mt-0.5 text-sm" style={{ color: cTone }}>
+              {containment.status}
+            </p>
+            <details className="group/ct mt-0.5">
+              <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
+                <span className="inline-block transition-transform group-open/ct:rotate-90">▸</span>{" "}
+                Reason
+              </summary>
+              <ul className="mt-1.5 space-y-0.5 pl-3 text-right">
+                {containment.reasons.map((r) => (
+                  <li
+                    key={r}
+                    className="text-[11px] text-muted-foreground"
+                  >
+                    • {r}
+                  </li>
+                ))}
+              </ul>
+            </details>
           <div>
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
               Evidence formation
