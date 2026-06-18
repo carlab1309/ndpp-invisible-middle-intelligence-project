@@ -169,6 +169,10 @@ function Console() {
           onReset={() => setSignals([])}
         />
 
+        <div className="mt-6">
+          <ExecutiveAssessmentPanel assessment={executive} />
+        </div>
+
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* Left: signal stream + families */}
           <section className="lg:col-span-5 flex flex-col gap-6">
