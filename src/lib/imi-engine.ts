@@ -143,6 +143,194 @@ export interface StructuralCondition {
   expectedImprovement: string[];
 }
 
+// --- Containment status (per condition + system-wide) --------------
+export type ContainmentStatus = "Containable" | "Vulnerable" | "Fragile" | "Critical";
+
+export interface ConditionContainment {
+  status: ContainmentStatus;
+  reasons: string[];
+}
+
+export function computeContainment(c: StructuralCondition): ConditionContainment {
+  const reasons: string[] = [];
+  const trajectory = c.trajectory?.state;
+  const driverCount = c.drivers?.drivers.length ?? 0;
+  const stabiliserCount = c.drivers?.stabilisers.length ?? 0;
+  const upstreamPresent = c.architecturalCauses.length >= 2;
+
+  let status: ContainmentStatus = "Containable";
+
+  if (c.severity === "critical" || (c.severity === "elevated" && trajectory === "Escalating")) {
+    status = "Critical";
+  } else if (
+    c.severity === "elevated" ||
+    trajectory === "Escalating" ||
+    trajectory === "Entrenching"
+  ) {
+    status = "Fragile";
+  } else if (c.severity === "moderate" || driverCount > stabiliserCount) {
+    status = "Vulnerable";
+  }
+
+  if (driverCount >= 2) reasons.push("Multiple active drivers");
+  if (stabiliserCount === 0 && (status === "Fragile" || status === "Critical"))
+    reasons.push("No stabilising mechanisms observed");
+  if (trajectory === "Escalating") reasons.push("Upstream contributors escalating");
+  if (trajectory === "Entrenching") reasons.push("Pattern persistently elevated across windows");
+  if (trajectory === "Recovering" && stabiliserCount > 0)
+    reasons.push("Stabilising mechanisms currently active");
+  if (upstreamPresent && (status === "Fragile" || status === "Critical"))
+    reasons.push("Architectural causes spanning multiple categories");
+  if (reasons.length === 0)
+    reasons.push("Severity within manageable band; no escalating drivers detected");
+
+  return { status, reasons };
+}
+
+// --- Executive situation assessment --------------------------------
+export interface SystemBurdenSlice {
+  mechanism: string;
+  pct: number;
+}
+
+export interface ConditionPortfolio {
+  critical: number;
+  elevated: number;
+  moderate: number;
+  emerging: number;
+  escalating: number;
+  stabilising: number;
+  entrenching: number;
+  recovering: number;
+}
+
+export interface ExecutivePrimaryPressure {
+  label: string;
+  contributingTo: string[];
+  estimatedInfluence: number;
+}
+
+export interface ExecutiveHighestLeverage {
+  statement: string;
+  reductions: string[];
+  estimatedReduction: number;
+}
+
+export interface ExecutiveAssessment {
+  containment: { status: ContainmentStatus; reasons: string[] };
+  primaryPressure: ExecutivePrimaryPressure | null;
+  humansCarrying: string[];
+  highestLeverage: ExecutiveHighestLeverage | null;
+  ifNothingChanges: string[];
+  portfolio: ConditionPortfolio;
+  burdenIndex: SystemBurdenSlice[];
+}
+
+export function computeExecutiveAssessment(
+  conditions: StructuralCondition[],
+  interactions: ConditionInteractionMap
+): ExecutiveAssessment {
+  // Portfolio counts
+  const portfolio: ConditionPortfolio = {
+    critical: 0, elevated: 0, moderate: 0, emerging: 0,
+    escalating: 0, stabilising: 0, entrenching: 0, recovering: 0,
+  };
+  for (const c of conditions) {
+    if (c.severity === "critical") portfolio.critical++;
+    else if (c.severity === "elevated") portfolio.elevated++;
+    else if (c.severity === "moderate") portfolio.moderate++;
+    else portfolio.emerging++;
+    const t = c.trajectory?.state;
+    if (t === "Escalating") portfolio.escalating++;
+    else if (t === "Stabilising") portfolio.stabilising++;
+    else if (t === "Entrenching") portfolio.entrenching++;
+    else if (t === "Recovering") portfolio.recovering++;
+  }
+
+  // System-wide containment
+  const containmentReasons: string[] = [];
+  let status: ContainmentStatus = "Containable";
+  if (portfolio.critical >= 2 || (portfolio.critical >= 1 && portfolio.escalating >= 3)) {
+    status = "Critical";
+    containmentReasons.push("Multiple critical conditions active");
+  } else if (portfolio.critical >= 1 || portfolio.elevated >= 2 || portfolio.escalating >= 3) {
+    status = "Fragile";
+    if (portfolio.critical >= 1) containmentReasons.push("Critical condition present");
+    if (portfolio.elevated >= 2) containmentReasons.push("Multiple elevated conditions active");
+  } else if (portfolio.elevated >= 1 || portfolio.escalating >= 1) {
+    status = "Vulnerable";
+    containmentReasons.push("Elevated or escalating conditions present");
+  } else if (conditions.length === 0) {
+    containmentReasons.push("No architecture conditions currently exceed formation thresholds");
+  } else {
+    containmentReasons.push("Conditions within manageable band");
+  }
+  if (interactions.primary && interactions.primary.estimatedInfluence >= 40)
+    containmentReasons.push("Shared upstream architecture drivers detected");
+  if (portfolio.escalating >= 2)
+    containmentReasons.push("Compensation mechanisms increasing across observation windows");
+
+  // Primary pressure (reuse interaction primary upstream)
+  const primaryPressure: ExecutivePrimaryPressure | null = interactions.primary
+    ? {
+        label: interactions.primary.label,
+        contributingTo: interactions.primary.contributingTo,
+        estimatedInfluence: interactions.primary.estimatedInfluence,
+      }
+    : null;
+
+  // System Burden Index: aggregate mechanism points across all conditions
+  const burdenAcc = new Map<string, number>();
+  let totalPts = 0;
+  for (const c of conditions) {
+    for (const m of c.mechanisms) {
+      burdenAcc.set(m.label, (burdenAcc.get(m.label) ?? 0) + m.points);
+      totalPts += m.points;
+    }
+  }
+  const burdenIndex: SystemBurdenSlice[] = Array.from(burdenAcc.entries())
+    .map(([mechanism, pts]) => ({
+      mechanism,
+      pct: totalPts > 0 ? Math.round((pts / totalPts) * 100) : 0,
+    }))
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 6);
+
+  const humansCarrying = burdenIndex.slice(0, 5).map((b) => b.mechanism);
+
+  // Highest leverage (reuse multiplier effect)
+  const highestLeverage: ExecutiveHighestLeverage | null = interactions.multiplier
+    ? {
+        statement: interactions.multiplier.intervention,
+        reductions: interactions.multiplier.reductions,
+        estimatedReduction: interactions.multiplier.estimatedReduction,
+      }
+    : null;
+
+  // If nothing changes — aggregate organisational impact across active conditions
+  const seen = new Set<string>();
+  const ifNothingChanges: string[] = [];
+  for (const c of conditions) {
+    for (const i of c.organisationalImpact) {
+      if (seen.has(i)) continue;
+      seen.add(i);
+      ifNothingChanges.push(i);
+      if (ifNothingChanges.length >= 6) break;
+    }
+    if (ifNothingChanges.length >= 6) break;
+  }
+
+  return {
+    containment: { status, reasons: containmentReasons },
+    primaryPressure,
+    humansCarrying,
+    highestLeverage,
+    ifNothingChanges,
+    portfolio,
+    burdenIndex,
+  };
+}
+
 // --- Condition interaction map -------------------------------------
 // Conditions are not isolated. Some conditions form *through* other
 // conditions: their mechanisms and architectural causes overlap, so
