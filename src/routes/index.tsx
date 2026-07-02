@@ -1436,12 +1436,12 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
           <p className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             Current architecture state
           </p>
-          <div className="mt-1 flex items-baseline justify-between gap-3">
-            <p className="text-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              Containment status
+          <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p className="text-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Architecture state:
             </p>
             <p
-              className="text-mono text-xl font-semibold tracking-tight"
+              className="text-mono text-2xl font-semibold tracking-tight"
               style={{ color: tone }}
             >
               {containment.status.toUpperCase()}
