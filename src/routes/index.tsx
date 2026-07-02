@@ -1411,7 +1411,6 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
   const {
     containment,
     primaryPressure,
-    humansCarrying,
     highestLeverage,
     ifNothingChanges,
     portfolio,
