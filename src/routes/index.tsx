@@ -247,7 +247,7 @@ function Intro() {
           <span className="text-primary">→</span>
           <span>Architectural attribution</span>
           <span className="text-primary">→</span>
-          <span>Response guidance</span>
+          <span className="text-foreground">Executive situation assessment</span>
         </div>
 
       </div>
