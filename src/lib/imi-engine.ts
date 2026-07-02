@@ -1738,6 +1738,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       id: cid as ConditionId,
       label: meta.label,
       description: meta.description,
+      plain: CONDITION_PLAIN[cid as ConditionId],
       strength,
       severity: sev,
       evidenceMaturity: maturity,
