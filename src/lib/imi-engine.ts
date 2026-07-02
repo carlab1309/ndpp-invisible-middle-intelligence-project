@@ -1719,6 +1719,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     const mechanisms: ConditionMechanism[] = Array.from(mechAcc.entries())
       .map(([label, v]) => ({
         label,
+        plain: plainForMechanism(label),
         points: v.points,
         signalNames: Array.from(v.signals),
         evidence: evidenceFor(label, v.signals.size),
