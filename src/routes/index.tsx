@@ -707,6 +707,14 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                       }}
                     />
                   </div>
+                  {m.plain ? (
+                    <p className="mt-2 text-[11px] leading-relaxed text-foreground/75">
+                      <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                        In plain language
+                      </span>
+                      {m.plain}
+                    </p>
+                  ) : null}
                   <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
                     Derived from
                   </p>
