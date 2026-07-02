@@ -128,6 +128,7 @@ export interface StructuralCondition {
   id: ConditionId;
   label: string;
   description: string;
+  plain?: string; // plain-language interpretation of the condition
   strength: number; // 0..1 — severity of this architecture condition
   severity: SignalSeverity;
   evidenceMaturity: "Emerging" | "Developing" | "Established" | "Entrenched";
