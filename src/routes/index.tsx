@@ -1644,39 +1644,6 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
           </div>
         </div>
 
-        {/* SYSTEM BURDEN INDEX */}
-        {burdenIndex.length > 0 ? (
-          <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
-            <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              System burden index
-            </p>
-            <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              What the system is asking people to carry right now — aggregated across the whole architecture
-            </p>
-            <ul className="mt-3 space-y-2">
-              {burdenIndex.map((b) => (
-                <li key={b.mechanism}>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-foreground">{b.mechanism}</span>
-                    <span className="text-mono shrink-0 text-[11px] text-muted-foreground">
-                      {b.pct}%
-                    </span>
-                  </div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${b.pct}%`,
-                        backgroundColor: "var(--primary)",
-                        opacity: 0.7,
-                      }}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
 
         <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
           Where is the system asking people to carry complexity, and where should intervention occur first?
