@@ -1040,6 +1040,14 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
                       </span>
                       {p.title}
                     </p>
+                    {p.plain ? (
+                      <p className="mt-1.5 text-[11px] leading-relaxed text-foreground/80">
+                        <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                          In plain language
+                        </span>
+                        {p.plain}
+                      </p>
+                    ) : null}
                     <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
                       {p.reason}
                     </p>
