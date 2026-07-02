@@ -554,6 +554,14 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
             {c.description}
           </p>
+          {c.plain ? (
+            <p className="mt-2 rounded border-l-2 border-primary/40 bg-primary/[0.04] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/85">
+              <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-primary/80">
+                In plain language
+              </span>
+              {c.plain}
+            </p>
+          ) : null}
         </div>
         <div className="shrink-0 space-y-1.5 text-right">
           <div>
