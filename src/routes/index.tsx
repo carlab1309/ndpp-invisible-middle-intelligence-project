@@ -247,7 +247,7 @@ function Intro() {
           <span className="text-primary">→</span>
           <span>Architectural attribution</span>
           <span className="text-primary">→</span>
-          <span>Response guidance</span>
+          <span className="text-foreground">Executive situation assessment</span>
         </div>
 
       </div>
@@ -1411,7 +1411,6 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
   const {
     containment,
     primaryPressure,
-    humansCarrying,
     highestLeverage,
     ifNothingChanges,
     portfolio,
@@ -1436,12 +1435,12 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
           <p className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             Current architecture state
           </p>
-          <div className="mt-1 flex items-baseline justify-between gap-3">
-            <p className="text-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              Containment status
+          <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p className="text-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+              Architecture state:
             </p>
             <p
-              className="text-mono text-xl font-semibold tracking-tight"
+              className="text-mono text-2xl font-semibold tracking-tight"
               style={{ color: tone }}
             >
               {containment.status.toUpperCase()}
@@ -1509,27 +1508,42 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         ) : null}
 
         {/* WHAT HUMANS ARE CURRENTLY CARRYING */}
-        {humansCarrying.length > 0 ? (
+        {burdenIndex.length > 0 ? (
           <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
               What humans are currently carrying
             </p>
             <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              Aggregated across all active conditions — system-wide
+              Aggregated across the entire architecture — system-wide, not condition-by-condition
             </p>
-            <ol className="mt-2 space-y-1">
-              {humansCarrying.map((m, i) => (
-                <li
-                  key={m}
-                  className="text-xs text-foreground"
-                >
-                  <span className="text-mono mr-1.5 text-[10px] text-muted-foreground">
-                    {i + 1}.
-                  </span>
-                  {m}
+            <ul className="mt-3 space-y-2">
+              {burdenIndex.slice(0, 5).map((b) => (
+                <li key={b.mechanism}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-foreground">{b.mechanism}</span>
+                    <span
+                      className="text-mono shrink-0 text-[11px] font-semibold"
+                      style={{ color: "var(--primary)" }}
+                    >
+                      {b.pct}%
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${b.pct}%`,
+                        backgroundColor: "var(--primary)",
+                        opacity: 0.75,
+                      }}
+                    />
+                  </div>
                 </li>
               ))}
-            </ol>
+            </ul>
+            <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+              What is the system asking people to carry right now?
+            </p>
           </div>
         ) : null}
 
@@ -1630,39 +1644,6 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
           </div>
         </div>
 
-        {/* SYSTEM BURDEN INDEX */}
-        {burdenIndex.length > 0 ? (
-          <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
-            <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              System burden index
-            </p>
-            <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              What the system is asking people to carry right now — aggregated across the whole architecture
-            </p>
-            <ul className="mt-3 space-y-2">
-              {burdenIndex.map((b) => (
-                <li key={b.mechanism}>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-foreground">{b.mechanism}</span>
-                    <span className="text-mono shrink-0 text-[11px] text-muted-foreground">
-                      {b.pct}%
-                    </span>
-                  </div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${b.pct}%`,
-                        backgroundColor: "var(--primary)",
-                        opacity: 0.7,
-                      }}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
 
         <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
           Where is the system asking people to carry complexity, and where should intervention occur first?
