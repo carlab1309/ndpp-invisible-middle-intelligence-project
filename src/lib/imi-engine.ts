@@ -61,6 +61,7 @@ export interface ArchitecturalAttributionGroup {
 
 export interface ConditionMechanism {
   label: string;
+  plain?: string; // plain-language interpretation of the mechanism
   points: number; // percentage points contributed to severity
   signalNames: string[]; // distinct signals that activated this mechanism
   evidence: string[]; // why this signal was interpreted as this mechanism
@@ -106,6 +107,7 @@ export interface ConditionDrivers {
 
 export interface ArchitecturalLeverage {
   statement: string; // the architecture adjustment
+  plain?: string; // plain-language interpretation of the leverage statement
   expectedEffect: string[]; // mechanisms expected to reduce
   reason: string;
   estimatedInfluence: number; // 0..100 — share of current formation addressed
@@ -116,6 +118,7 @@ export type InterventionEffort = "Low" | "Medium" | "High";
 
 export interface InterventionPriority {
   title: string;
+  plain?: string; // plain-language interpretation of the intervention
   impact: InterventionImpact;
   effort: InterventionEffort;
   reason: string;
@@ -125,6 +128,7 @@ export interface StructuralCondition {
   id: ConditionId;
   label: string;
   description: string;
+  plain?: string; // plain-language interpretation of the condition
   strength: number; // 0..1 — severity of this architecture condition
   severity: SignalSeverity;
   evidenceMaturity: "Emerging" | "Developing" | "Established" | "Entrenched";
@@ -1343,6 +1347,194 @@ const LEVERAGE_LIBRARY: Record<ConditionId, LeverageDef> = {
   },
 };
 
+// --- Plain-language interpretations --------------------------------
+// NDPP terminology is intellectually precise but can carry interpretation
+// burden for first-time users. The engine preserves NDPP language and
+// pairs every condition, mechanism and intervention with a plain-language
+// interpretation, so the platform itself embodies Cognitive Diversity Design.
+
+const CONDITION_PLAIN: Record<ConditionId, string> = {
+  trust_instability:
+    "People are increasingly relying on verification, reassurance and checking because confidence in system signals is weakening.",
+  closure_failure:
+    "People are unsure whether work has actually been completed, so they keep re-checking closed activity.",
+  threshold_ambiguity:
+    "The system is not making it clear when people should act, escalate, intervene or seek approval.",
+  ownership_drift:
+    "People are becoming increasingly unclear about who owns decisions, actions or outcomes.",
+  context_fragmentation:
+    "Meaning is being lost between teams and systems, so people have to rebuild context every time work moves.",
+  ai_burden_transfer:
+    "Work expected to be carried by the AI-supported system is being redistributed back to humans through verification, interpretation and oversight activity.",
+  interpretive_overload:
+    "People are repeatedly working out what a signal means, how urgent it is and what to do next, instead of the system telling them.",
+  escalation_instability:
+    "Escalation is happening too early, too late or inconsistently, because first-line containment is not holding.",
+  workflow_incoherence:
+    "Comparable situations are being handled in different ways, and local workarounds are quietly becoming the real process.",
+  predictability_failure:
+    "People cannot reliably predict how the system will behave, so they hedge, double-check and rely on informal knowledge.",
+};
+
+const MECHANISM_PLAIN: Record<string, string> = {
+  "Verification Burden":
+    "People are carrying increasing effort to confirm that actions, information or decisions can be trusted.",
+  "Reassurance Dependency":
+    "People require repeated confirmation before feeling confident enough to proceed.",
+  "Closure Uncertainty":
+    "People are unsure whether activities have been completed successfully or whether further action is required.",
+  "Completion Ambiguity":
+    "People cannot tell from the system whether work is truly finished, so they keep it cognitively open.",
+  "Oversight Compensation":
+    "People are absorbing supervision and checking work that the system was expected to hold.",
+  "Threshold Reinterpretation":
+    "People are re-deciding locally what counts as serious enough to act on, because the system does not say clearly.",
+  "Severity Inconsistency":
+    "Comparable situations are being classified differently by different people, weakening the severity model.",
+  "Recognition Latency":
+    "People are noticing that something needs action later than they should, because the system does not flag it clearly.",
+  "Duplicated Responsibility":
+    "Multiple people are carrying responsibility for the same activity because ownership is unclear.",
+  "Ownership Ambiguity":
+    "People are unsure who owns the next decision or action, so responsibility informally spreads.",
+  "Handoff Gap":
+    "Work is quietly falling into the space between people or teams during transitions.",
+  "Context Reconstruction":
+    "People are rebuilding case background at every handoff because context does not travel with the work.",
+  "Context Loss":
+    "Meaning and rationale are being lost when work moves between teams or systems.",
+  "Interpretive Reliance":
+    "People are having to work out what AI outputs mean before they can act on them.",
+  "Meaning Reconstruction":
+    "People are inferring what a signal actually means, instead of the system saying it directly.",
+  "Urgency Inference":
+    "People are working out how urgent something is, because time-criticality is not shown at the alert.",
+  "Escalation Inflation":
+    "Cases are being escalated further up than they should be, because first-line containment is not holding.",
+  "Threshold-Driven Escalation":
+    "People are escalating simply because they are unsure whether a case meets the threshold themselves.",
+  "Workaround Proliferation":
+    "Local workarounds are spreading because the standard workflow does not fit operational reality.",
+  "Duplicated Workflow":
+    "The same work is being done twice, in parallel, because the workflow does not converge cleanly.",
+  "Behavioural Hedging":
+    "People are acting cautiously and adding safety margins because they cannot predict how the system will behave.",
+  "Workaround Persistence":
+    "Old workarounds are outlasting the conditions that produced them, and are quietly becoming the real process.",
+  "Residual Compensation":
+    "People are absorbing effort the system did not clearly account for.",
+};
+
+const INTERVENTION_PLAIN: Record<string, string> = {
+  // trust_instability
+  "Clarify closure confirmation criteria.":
+    "Make it explicit when a piece of work is genuinely complete, so people can stop re-checking.",
+  "Strengthen closure confirmation surfaces":
+    "Show clearly, in the system, that work is closed and does not need further attention.",
+  "Audit confidence signals returned to operators":
+    "Check that the signals the system shows people actually help them trust the state of the work.",
+  "Suppress silent state changes":
+    "Stop the system from changing state in the background without telling the people who rely on it.",
+
+  // closure_failure
+  "Make completion durable and legible.":
+    "Make it obvious and lasting that work has been finished, so people are not left uncertain.",
+  "Add explicit completion confirmation":
+    "Confirm to the person that the case is closed, rather than leaving them to infer it.",
+  "Suppress notifications after confirmed close":
+    "Stop sending alerts about work that has already been closed.",
+  "Codify reopen criteria":
+    "Define clearly when a closed case can be reopened, so reopens don't look like system unreliability.",
+
+  // threshold_ambiguity
+  "Codify intervention thresholds explicitly.":
+    "Set out clearly what levels of severity should trigger action, escalation or intervention.",
+  "Codify severity bands across teams":
+    "Agree the same severity definitions across teams, so comparable cases are treated the same way.",
+  "Surface threshold criteria in-context":
+    "Show the threshold rules at the point people are making the decision, not in a separate document.",
+  "Align first-action ownership to severity bands":
+    "Match who owns the first action to how serious the case is, so response is proportionate.",
+
+  // ownership_drift
+  "Standardise handoff ownership criteria.":
+    "Define clearly who owns the work at each stage and when ownership transfers.",
+  "Clarify escalation ownership":
+    "Make it explicit who should act, who should decide and when escalation should occur.",
+  "Make ownership transitions explicit on every surface":
+    "Show who currently owns the work in every place people interact with it.",
+  "Review notification architecture":
+    "Check who is being notified about what, so ownership isn't spread by default.",
+
+  // context_fragmentation
+  "Carry case context across handoffs.":
+    "Make sure background, reasoning and history travel with the work when it moves between people or teams.",
+  "Preserve decision rationale on transitions":
+    "Keep the reasoning behind decisions attached to the case, not just the outcome.",
+  "Standardise handoff payloads":
+    "Define a consistent set of information that must move with the work at every handoff.",
+  "Audit boundary points between systems":
+    "Look at the points where information moves between systems and check what is being lost there.",
+
+  // ai_burden_transfer
+  "Make AI confidence operationally interpretable.":
+    "Translate AI confidence numbers into clear guidance people can actually act on.",
+  "Define explicit oversight thresholds":
+    "Set out clearly when a human needs to check or override the AI, and when they do not.",
+  "Translate confidence into action guidance":
+    "Turn AI confidence into a recommended action, not a number the operator has to interpret.",
+  "Audit override frequency by surface":
+    "Look at where people are overriding the AI most often — those are the surfaces silently transferring work back to humans.",
+
+  // interpretive_overload
+  "Translate raw signals into action clarity.":
+    "Turn raw alerts and data into a clear next step, so people don't have to work out what to do.",
+  "Tighten next-step prompts at decision points":
+    "Show a clear next action at the moment a decision has to be made.",
+  "Surface SLA and urgency context at the alert":
+    "Show how urgent something is at the point of the alert, not in a separate view.",
+  "Reduce ambiguous signal surfaces":
+    "Remove or clarify the alerts and screens where people have to guess what a signal means.",
+
+  // escalation_instability
+  "Define proportionate escalation criteria.":
+    "Set out clearly what should escalate, what should not, and at what level.",
+  "Strengthen first-line containment":
+    "Give first-line teams the clarity and support they need to hold cases without escalating.",
+  "Anchor escalation criteria to protocol":
+    "Tie escalation decisions to explicit protocol, so they don't drift with individual judgement.",
+  "Add holding state for reclassified cases":
+    "Create an intermediate state so cases with unclear severity don't automatically escalate.",
+
+  // workflow_incoherence
+  "Reconcile divergent workflow paths.":
+    "Bring divergent ways of handling comparable work back into one coherent process.",
+  "Identify root cause of detours":
+    "Find out why people are working around the standard process, before trying to remove the workaround.",
+  "Converge comparable cases onto one route":
+    "Make sure similar cases follow the same path through the system.",
+  "Add a retirement loop for legacy workarounds":
+    "Regularly review and retire old workarounds so they don't quietly become permanent.",
+
+  // predictability_failure
+  "Make state changes deterministic and announced.":
+    "Make the system's behaviour predictable, and tell people ahead of time when it will change.",
+  "Announce state changes ahead of time":
+    "Let people know before the system's behaviour changes, not after they've noticed.",
+  "Reduce unexplained variance":
+    "Cut down on situations where the system behaves differently for reasons people cannot see.",
+  "Increase adoption of system-recommended actions":
+    "Build the trust that lets people follow the system's recommendation rather than hedge around it.",
+};
+
+function plainForMechanism(label: string): string | undefined {
+  return MECHANISM_PLAIN[label];
+}
+
+function plainForIntervention(title: string): string | undefined {
+  return INTERVENTION_PLAIN[title];
+}
+
 function leverageFor(
   cid: ConditionId,
   mechanisms: ConditionMechanism[],
@@ -1362,11 +1554,12 @@ function leverageFor(
   return {
     leverage: {
       statement: def.statement,
+      plain: plainForIntervention(def.statement),
       expectedEffect: def.targetMechanisms,
       reason: def.reason,
       estimatedInfluence: Math.min(100, Math.max(0, influence)),
     },
-    priorities: def.priorities,
+    priorities: def.priorities.map((p) => ({ ...p, plain: plainForIntervention(p.title) })),
     expectedImprovement: def.expectedImprovement,
   };
 }
@@ -1526,6 +1719,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     const mechanisms: ConditionMechanism[] = Array.from(mechAcc.entries())
       .map(([label, v]) => ({
         label,
+        plain: plainForMechanism(label),
         points: v.points,
         signalNames: Array.from(v.signals),
         evidence: evidenceFor(label, v.signals.size),
@@ -1544,6 +1738,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
       id: cid as ConditionId,
       label: meta.label,
       description: meta.description,
+      plain: CONDITION_PLAIN[cid as ConditionId],
       strength,
       severity: sev,
       evidenceMaturity: maturity,

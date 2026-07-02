@@ -554,6 +554,14 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
             {c.description}
           </p>
+          {c.plain ? (
+            <p className="mt-2 rounded border-l-2 border-primary/40 bg-primary/[0.04] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/85">
+              <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-primary/80">
+                In plain language
+              </span>
+              {c.plain}
+            </p>
+          ) : null}
         </div>
         <div className="shrink-0 space-y-1.5 text-right">
           <div>
@@ -699,6 +707,14 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                       }}
                     />
                   </div>
+                  {m.plain ? (
+                    <p className="mt-2 text-[11px] leading-relaxed text-foreground/75">
+                      <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                        In plain language
+                      </span>
+                      {m.plain}
+                    </p>
+                  ) : null}
                   <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
                     Derived from
                   </p>
@@ -965,6 +981,14 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
           <p className="mt-1.5 text-sm font-medium text-foreground">
             {c.leverage.statement}
           </p>
+          {c.leverage.plain ? (
+            <p className="mt-2 rounded border-l-2 border-primary/40 bg-primary/[0.04] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/85">
+              <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-primary/80">
+                In plain language
+              </span>
+              {c.leverage.plain}
+            </p>
+          ) : null}
           <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
             Expected effect
           </p>
@@ -1016,6 +1040,14 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
                       </span>
                       {p.title}
                     </p>
+                    {p.plain ? (
+                      <p className="mt-1.5 text-[11px] leading-relaxed text-foreground/80">
+                        <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+                          In plain language
+                        </span>
+                        {p.plain}
+                      </p>
+                    ) : null}
                     <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
                       {p.reason}
                     </p>
