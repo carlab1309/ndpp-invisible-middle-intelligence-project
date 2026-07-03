@@ -678,11 +678,11 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-3">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Formed by · structural mechanisms
+          What people are doing to keep things working
         </summary>
         <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60">
           <p className="text-mono px-3 pt-3 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            What humans are being asked to carry
+            The extra work people are quietly carrying right now
           </p>
           <ul className="divide-y divide-border/40">
             {c.mechanisms.map((m) => {
@@ -690,7 +690,9 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               return (
                 <li key={m.label} className="px-3 py-2.5">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-foreground">{m.label}</span>
+                    <span className="text-xs font-medium text-foreground">
+                      {m.displayLabel ?? m.label}
+                    </span>
                     <span className="text-mono shrink-0 text-[11px]" style={{ color: tone }}>
                       {share}%
                     </span>
@@ -705,16 +707,8 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                       }}
                     />
                   </div>
-                  {m.plain ? (
-                    <p className="mt-2 text-[11px] leading-relaxed text-foreground/75">
-                      <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-                        In plain language
-                      </span>
-                      {m.plain}
-                    </p>
-                  ) : null}
                   <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                    Derived from
+                    What we're seeing
                   </p>
                   <ul className="mt-1 space-y-0.5">
                     {m.signalNames.map((n) => (
@@ -729,7 +723,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                   <details className="group/why mt-2">
                     <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
                       <span className="inline-block transition-transform group-open/why:rotate-90">▸</span>{" "}
-                      Why this mechanism?
+                      Why we're calling it this
                     </summary>
                     <ul className="mt-1.5 space-y-0.5 pl-3">
                       {m.evidence.map((e) => (
@@ -748,18 +742,19 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </ul>
           <div className="flex items-center justify-between border-t border-border/60 px-3 py-2">
             <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Condition formation
+              Overall severity of this problem
             </span>
             <span className="text-mono text-xs" style={{ color: tone }}>
               {pct}%
             </span>
           </div>
           <p className="text-mono px-3 pb-3 pt-1 text-[10px] leading-relaxed text-muted-foreground">
-            Signals → mechanisms → architecture condition. Mechanism share = portion of
-            condition formation attributable to each form of human compensation.
+            Each percentage shows how much of this problem is being held together by
+            that particular form of extra human effort.
           </p>
         </div>
       </details>
+
 
       {c.architecturalCauses.length > 0 ? (
         <details className="group mt-2">
