@@ -239,15 +239,15 @@ function Intro() {
           and how those conditions trace back to underlying system design.
         </p>
         <div className="text-mono mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-          <span>Operational signals</span>
+          <span>What we're seeing</span>
           <span className="text-primary">→</span>
-          <span>Compensation mechanisms</span>
+          <span>What people are doing to keep things working</span>
           <span className="text-primary">→</span>
-          <span>Architecture conditions</span>
+          <span>What's actually going wrong</span>
           <span className="text-primary">→</span>
-          <span>Architectural attribution</span>
+          <span>Why it's happening</span>
           <span className="text-primary">→</span>
-          <span className="text-foreground">Executive situation assessment</span>
+          <span className="text-foreground">What leaders should do next</span>
         </div>
 
       </div>
