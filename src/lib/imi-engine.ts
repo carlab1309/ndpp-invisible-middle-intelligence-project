@@ -1540,6 +1540,94 @@ function plainForIntervention(title: string): string | undefined {
   return INTERVENTION_PLAIN[title];
 }
 
+// --- Human display labels ------------------------------------------
+// Framework-native terms remain the engine's internal keys (for causes,
+// evidence, driver reasons, leverage targeting). Display labels are the
+// executive-facing rewrites: short, natural sentences a first-time reader
+// can understand without any NDPP background.
+
+const CONDITION_HUMAN_LABEL: Record<ConditionId, string> = {
+  trust_instability: "People are losing confidence in the system",
+  closure_failure: "People aren't sure when work is actually finished",
+  threshold_ambiguity: "People aren't sure when they should act",
+  ownership_drift: "People are becoming unclear about who owns what",
+  context_fragmentation: "Meaning is being lost between teams",
+  ai_burden_transfer: "The AI is creating extra work instead of removing it",
+  interpretive_overload: "People keep having to work out what things mean",
+  escalation_instability: "Escalation is drifting off protocol",
+  workflow_incoherence: "Comparable work is being handled inconsistently",
+  predictability_failure: "People can't predict how the system will behave",
+};
+
+const MECHANISM_HUMAN_LABEL: Record<string, string> = {
+  "Verification Burden": "People keep having to double-check things",
+  "Reassurance Dependency": "People need repeated confirmation before acting",
+  "Closure Uncertainty": "People aren't sure work is truly finished",
+  "Completion Ambiguity": "Finished work still feels open",
+  "Oversight Compensation": "People are supervising work the system should hold",
+  "Interpretive Reliance": "People are decoding AI output before they can act",
+  "Threshold Reinterpretation": "People are re-deciding what counts as serious",
+  "Severity Inconsistency": "Similar cases are being treated differently",
+  "Recognition Latency": "People are noticing things need action too late",
+  "Duplicated Responsibility": "More than one person carrying the same responsibility",
+  "Ownership Ambiguity": "People aren't sure who owns this",
+  "Handoff Gap": "Work is falling between people at handoffs",
+  "Context Reconstruction": "People rebuild the background at every handoff",
+  "Context Loss": "Meaning is being lost between teams and systems",
+  "Meaning Reconstruction": "People are inferring what signals actually mean",
+  "Urgency Inference": "People are guessing how urgent things are",
+  "Escalation Inflation": "Cases are escalating higher than they should",
+  "Threshold-Driven Escalation": "People are escalating because severity is unclear",
+  "Workaround Proliferation": "Local workarounds are spreading",
+  "Duplicated Workflow": "The same work is being done twice in parallel",
+  "Behavioural Hedging": "People are acting cautiously to be safe",
+  "Workaround Persistence": "Old workarounds are quietly becoming permanent",
+  "Residual Compensation": "Extra effort the system didn't plan for",
+};
+
+function humanMechanism(label: string): string {
+  return MECHANISM_HUMAN_LABEL[label] ?? label;
+}
+
+function humanIntervention(title: string): string {
+  return INTERVENTION_PLAIN[title] ?? title;
+}
+
+function leverageFor(
+  cid: ConditionId,
+  mechanisms: ConditionMechanism[],
+  strengthPct: number
+): { leverage: ArchitecturalLeverage; priorities: InterventionPriority[]; expectedImprovement: string[] } {
+  const def = LEVERAGE_LIBRARY[cid];
+  // Estimated influence: share of current condition formation carried by the
+  // mechanisms that the leverage point is expected to reduce. Falls back to
+  // top-mechanism share if no target mechanisms are currently active.
+  let addressed = 0;
+  for (const m of mechanisms) {
+    if (def.targetMechanisms.includes(m.label)) addressed += m.points;
+  }
+  if (addressed === 0 && mechanisms.length) addressed = mechanisms[0].points;
+  const influence = strengthPct > 0 ? Math.round((addressed / strengthPct) * 100) : 0;
+
+  return {
+    leverage: {
+      statement: def.statement,
+      displayStatement: humanIntervention(def.statement),
+      plain: plainForIntervention(def.statement),
+      expectedEffect: def.targetMechanisms,
+      expectedEffectDisplay: def.targetMechanisms.map(humanMechanism),
+      reason: def.reason,
+      estimatedInfluence: Math.min(100, Math.max(0, influence)),
+    },
+    priorities: def.priorities.map((p) => ({
+      ...p,
+      displayTitle: humanIntervention(p.title),
+      plain: plainForIntervention(p.title),
+    })),
+    expectedImprovement: def.expectedImprovement,
+  };
+}
+
 function leverageFor(
   cid: ConditionId,
   mechanisms: ConditionMechanism[],
