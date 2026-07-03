@@ -479,11 +479,11 @@ export function computeInteractions(conditions: StructuralCondition[]): Conditio
     const touchedStrength = touchedIds.reduce((a, id) => a + (byId.get(id)?.strength ?? 0), 0);
     const reductionPct = Math.round((touchedStrength / totalStrength) * 100);
     multiplier = {
-      intervention: src.leverage.statement,
-      reductions: touchedIds.map((id) => byId.get(id)!.label),
+      intervention: src.leverage.displayStatement ?? src.leverage.statement,
+      reductions: touchedIds.map((id) => byId.get(id)!.displayLabel ?? byId.get(id)!.label),
       estimatedReduction: reductionPct,
       reason:
-        "Multiple conditions are currently forming through the same upstream architecture pathway, so a single structural change reduces strain across all of them.",
+        "Multiple problems are currently flowing from the same underlying cause, so a single change reduces strain across all of them.",
     };
   }
 
