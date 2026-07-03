@@ -513,11 +513,11 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) {
   return (
     <Panel
-      label="Architecture conditions"
-      caption="Signals → mechanisms → condition → attribution → guidance"
+      label="What's happening in the organisation"
+      caption="Each issue, why it's forming, and what to change"
     >
       {conditions.length === 0 ? (
-        <EmptyState text="No architecture conditions present yet." />
+        <EmptyState text="Nothing significant to report yet." />
       ) : (
         <ul className="divide-y divide-border/60">
           {conditions.map((c) => (
