@@ -453,15 +453,15 @@ function ContainmentGauge({
 }) {
   const status =
     score >= 75
-      ? { label: "Stable architecture", tone: "var(--flourish)" }
+      ? { label: "Holding together well", tone: "var(--flourish)" }
       : score >= 50
-        ? { label: "Weakening architecture", tone: "var(--signal-moderate)" }
+        ? { label: "Beginning to strain", tone: "var(--signal-moderate)" }
         : score >= 25
-          ? { label: "Unstable architecture", tone: "var(--signal-elevated)" }
-          : { label: "Architecture failing", tone: "var(--signal-critical)" };
+          ? { label: "Struggling to hold", tone: "var(--signal-elevated)" }
+          : { label: "Coming apart", tone: "var(--signal-critical)" };
 
   return (
-    <Panel label="System containment" caption="Anchor metric · structural stability across all observed conditions">
+    <Panel label="Can the system still hold together?" caption="Overall stability across everything we're seeing right now">
       <div className="px-6 py-6">
         <div className="flex items-end justify-between gap-6">
           <div>
@@ -471,15 +471,15 @@ function ContainmentGauge({
             >
               {status.label}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Structural stability</p>
+            <p className="mt-1 text-xs text-muted-foreground">Overall stability</p>
             <p className="mt-2 text-5xl font-semibold tracking-tight text-foreground">
               {score}
               <span className="text-2xl text-muted-foreground">/100</span>
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 text-right">
-            <Metric label="Conditions" value={conditionsCount} />
-            <Metric label="Structural load" value={burden.toFixed(2)} />
+            <Metric label="Active problems" value={conditionsCount} />
+            <Metric label="Total strain" value={burden.toFixed(2)} />
           </div>
         </div>
         <div className="relative mt-6 h-3 overflow-hidden rounded-full bg-surface-2">
