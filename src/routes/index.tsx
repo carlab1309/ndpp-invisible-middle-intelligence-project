@@ -1547,7 +1547,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
               ))}
             </ul>
             <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-              What is the system asking people to carry right now?
+              These are the invisible tasks the system is asking people to hold onto.
             </p>
           </div>
         ) : null}
@@ -1565,13 +1565,13 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
               className="text-mono text-[10px] uppercase tracking-[0.16em]"
               style={{ color: "var(--primary)" }}
             >
-              Highest leverage architectural point
+              The one change most likely to help
             </p>
             <p className="mt-1.5 text-sm font-semibold text-foreground">
               {highestLeverage.statement}
             </p>
             <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              Expected reduction
+              Problems this would reduce
             </p>
             <ul className="mt-1 space-y-0.5">
               {highestLeverage.reductions.map((r) => (
@@ -1589,7 +1589,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
             </ul>
             <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
               <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                Estimated system reduction
+                How much this could reduce overall strain
               </span>
               <span
                 className="text-mono text-base font-semibold"
@@ -1599,8 +1599,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
               </span>
             </div>
             <p className="text-mono mt-2 text-[10px] leading-relaxed text-muted-foreground">
-              NDPP changes architecture, not people. This is an architectural leverage point,
-              not a recommendation or instruction to operators.
+              This is a change to how the organisation is set up — not a request for people to work harder.
             </p>
           </div>
         ) : null}
@@ -1609,10 +1608,10 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {ifNothingChanges.length > 0 ? (
           <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              If nothing changes
+              What happens if nothing changes
             </p>
             <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              Likely emerging consequences
+              The knock-on effects most likely to appear next
             </p>
             <ul className="mt-2 space-y-1">
               {ifNothingChanges.map((i) => (
@@ -1635,23 +1634,23 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {/* ACTIVE CONDITION PORTFOLIO */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-            Active condition portfolio
+            Overview of active problems
           </p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <PortfolioStat label="Critical" value={portfolio.critical} tone="var(--signal-critical)" />
             <PortfolioStat label="Elevated" value={portfolio.elevated} tone="var(--signal-elevated)" />
             <PortfolioStat label="Moderate" value={portfolio.moderate} tone="var(--signal-moderate)" />
             <PortfolioStat label="Emerging" value={portfolio.emerging} tone="var(--signal-low)" />
-            <PortfolioStat label="Escalating" value={portfolio.escalating} tone="var(--signal-critical)" />
-            <PortfolioStat label="Entrenching" value={portfolio.entrenching} tone="var(--signal-elevated)" />
-            <PortfolioStat label="Stabilising" value={portfolio.stabilising} tone="var(--signal-moderate)" />
-            <PortfolioStat label="Recovering" value={portfolio.recovering} tone="var(--signal-low)" />
+            <PortfolioStat label="Getting worse" value={portfolio.escalating} tone="var(--signal-critical)" />
+            <PortfolioStat label="Settling in" value={portfolio.entrenching} tone="var(--signal-elevated)" />
+            <PortfolioStat label="Levelling off" value={portfolio.stabilising} tone="var(--signal-moderate)" />
+            <PortfolioStat label="Improving" value={portfolio.recovering} tone="var(--signal-low)" />
           </div>
         </div>
 
 
         <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
-          Where is the system asking people to carry complexity, and where should intervention occur first?
+          Where is the organisation asking people to carry too much, and where should we change things first?
         </p>
       </div>
     </Panel>
