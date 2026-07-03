@@ -1287,10 +1287,10 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
           {downstream && downstream.items.length > 0 ? (
             <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
               <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                Downstream consequences
+                What tends to follow if this continues
               </p>
               <p className="mt-1 text-[11px] leading-snug text-foreground">
-                {downstream.fromLabel} may contribute to:
+                If "{downstream.fromLabel}" keeps forming, expect:
               </p>
               <ul className="mt-2 space-y-1">
                 {downstream.items.map((i) => (
@@ -1307,9 +1307,7 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                 ))}
               </ul>
               <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-                If this upstream condition continues forming, these are the
-                operational consequences most likely to emerge across downstream
-                conditions.
+                These are the everyday knock-on effects most likely to show up next.
               </p>
             </div>
           ) : null}
@@ -1327,16 +1325,16 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                 className="text-mono text-[10px] uppercase tracking-[0.16em]"
                 style={{ color: "var(--primary)" }}
               >
-                Architectural multiplier effect
+                The single change that helps most
               </p>
               <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Highest leverage intervention
+                The one change most likely to help
               </p>
               <p className="mt-1 text-sm font-semibold text-foreground">
                 {multiplier.intervention}
               </p>
               <p className="text-mono mt-3 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Potential impact
+                Problems this would reduce
               </p>
               <ul className="mt-1 space-y-0.5">
                 {multiplier.reductions.map((r) => (
