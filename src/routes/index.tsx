@@ -19,6 +19,7 @@ import {
   computeInteractions,
   computeContainment,
   computeExecutiveAssessment,
+  humanMechanismLabel,
 } from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
