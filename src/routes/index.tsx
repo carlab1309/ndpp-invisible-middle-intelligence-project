@@ -931,7 +931,7 @@ function DriverRow({
           <span aria-hidden style={{ color: tone }}>
             {arrow}
           </span>
-          {d.label}
+          {humanMechanismLabel(d.label)}
         </span>
         <span className="text-mono shrink-0 text-[10px] uppercase tracking-[0.12em]" style={{ color: tone }}>
           {d.contribution}
