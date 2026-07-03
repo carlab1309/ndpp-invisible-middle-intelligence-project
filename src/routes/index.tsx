@@ -408,7 +408,7 @@ function FamilyTag({ family }: { family: SignalFamily }) {
 function FamilyPanel({ counts }: { counts: Record<SignalFamily, number> }) {
   const max = Math.max(1, ...FAMILIES.map((f) => counts[f] ?? 0));
   return (
-    <Panel label="Signal families" caption="Cross-family correlation strengthens inference">
+    <Panel label="Where the signals are coming from" caption="Signals across many areas strengthen what we can conclude">
       <div className="space-y-2 px-4 py-4">
         {FAMILIES.map((f) => {
           const n = counts[f] ?? 0;
