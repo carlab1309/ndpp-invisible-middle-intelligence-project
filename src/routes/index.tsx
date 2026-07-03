@@ -964,33 +964,25 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
     <details className="group mt-2">
       <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
         <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-        Architectural leverage & intervention priority
+        What to change first
       </summary>
       <div className="mt-2 space-y-3">
         {/* Highest leverage point */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: tone }}>
-            Highest leverage point
+            The one change most likely to help
           </p>
           <p className="mt-1.5 text-sm font-medium text-foreground">
-            {c.leverage.statement}
+            {c.leverage.displayStatement ?? c.leverage.statement}
           </p>
-          {c.leverage.plain ? (
-            <p className="mt-2 rounded border-l-2 border-primary/40 bg-primary/[0.04] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/85">
-              <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-primary/80">
-                In plain language
-              </span>
-              {c.leverage.plain}
-            </p>
-          ) : null}
           <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            Expected effect
+            Extra effort this would reduce
           </p>
           <ul className="mt-1 space-y-0.5">
-            {c.leverage.expectedEffect.map((m) => (
+            {(c.leverage.expectedEffectDisplay ?? c.leverage.expectedEffect).map((m) => (
               <li
                 key={m}
-                className="text-mono inline-flex items-center gap-1.5 pr-2 text-[11px] text-muted-foreground"
+                className="inline-flex items-center gap-1.5 pr-2 text-[11px] text-foreground/85"
               >
                 <span aria-hidden style={{ color: tone }}>↓</span>
                 {m}
@@ -1000,10 +992,10 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
               <p className="text-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Estimated influence
+                How much of the problem this addresses
               </p>
               <p className="text-mono text-xs text-muted-foreground">
-                Share of current condition formation addressed
+                Estimated share of the problem this would reduce
               </p>
             </div>
             <p className="text-mono text-lg leading-none" style={{ color: tone }}>
@@ -1018,7 +1010,7 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
         {/* Intervention priority */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Intervention priority
+            Order of things to do
           </p>
           <ol className="mt-2 space-y-2.5">
             {c.interventionPriorities.map((p, i) => (
@@ -1030,18 +1022,10 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
                         className="text-mono mr-1.5 text-[10px] uppercase tracking-[0.12em]"
                         style={{ color: tone }}
                       >
-                        Priority {i + 1}
+                        Step {i + 1}
                       </span>
-                      {p.title}
+                      {p.displayTitle ?? p.title}
                     </p>
-                    {p.plain ? (
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-foreground/80">
-                        <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-                          In plain language
-                        </span>
-                        {p.plain}
-                      </p>
-                    ) : null}
                     <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
                       {p.reason}
                     </p>
@@ -1065,14 +1049,14 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
             ))}
           </ol>
           <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-            Priority orders interventions by likely reduction in compensation per unit of effort.
+            Ordered by how much they'll help versus how much effort they take.
           </p>
         </div>
 
         {/* Expected organisational improvement */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Expected organisational improvement
+            What should improve as a result
           </p>
           <ul className="mt-2 space-y-1.5">
             {c.expectedImprovement.map((i) => (
@@ -1090,8 +1074,7 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
             ))}
           </ul>
           <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-            Architecture intelligence translates into business outcomes. Executives buy outcomes,
-            not architecture terminology.
+            The everyday improvements a leader should expect to see if this change is made.
           </p>
         </div>
       </div>
