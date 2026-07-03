@@ -760,11 +760,11 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         <details className="group mt-2">
           <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
             <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-            Most likely architectural causes
+            What's creating this problem?
           </summary>
           <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              What structural conditions are most likely creating this pattern
+              The parts of how the organisation is set up that are producing this pattern
             </p>
             <div className="mt-3 space-y-3">
               {c.architecturalCauses.map((group) => (
@@ -791,8 +791,8 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               ))}
             </div>
             <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-              Architecture conditions don't produce the pattern directly — they shape the
-              compensation mechanisms above, which in turn form this condition.
+              These structural gaps are producing the extra human effort above, which is
+              what turns into the problem we're seeing.
             </p>
           </div>
         </details>
@@ -801,11 +801,11 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Likely organisational impact
+          What happens if nothing changes
         </summary>
         <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            If this condition continues, the organisation is likely to experience
+            If this continues, the organisation is likely to experience
           </p>
           <ul className="mt-2 space-y-1.5">
             {c.organisationalImpact.map((i) => (
@@ -823,8 +823,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             ))}
           </ul>
           <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-            Architecture conditions don't stay structural — they surface as operational
-            consequences. This is the bridge from architecture intelligence to business impact.
+            Left unchecked, this quietly turns into everyday business consequences leaders will feel.
           </p>
         </div>
       </details>
@@ -837,7 +836,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Response guidance
+          Suggested next steps
         </summary>
         <ul className="mt-2 space-y-1 pl-4 text-xs text-foreground">
           {c.responseGuidance.map((g) => (
@@ -847,6 +846,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           ))}
         </ul>
       </details>
+
 
     </li>
   );
