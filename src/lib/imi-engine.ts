@@ -1590,6 +1590,10 @@ function humanMechanism(label: string): string {
   return MECHANISM_HUMAN_LABEL[label] ?? label;
 }
 
+export function humanMechanismLabel(label: string): string {
+  return MECHANISM_HUMAN_LABEL[label] ?? label;
+}
+
 function humanIntervention(title: string): string {
   return INTERVENTION_PLAIN[title] ?? title;
 }
