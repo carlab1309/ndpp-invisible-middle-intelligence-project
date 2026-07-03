@@ -1177,20 +1177,20 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
 
   return (
     <Panel
-      label="Condition interaction map"
-      caption="Upstream → downstream · multiplier intervention"
+      label="How the problems connect"
+      caption="Which problem is driving the others — and the single change that helps most"
     >
       {edges.length === 0 ? (
-        <EmptyState text="No condition interactions detected yet." />
+        <EmptyState text="No connections between problems yet." />
       ) : (
         <div className="space-y-5 px-5 py-5">
           {/* INTERACTION MAP */}
           <div>
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              Condition interaction map
+              How the problems connect
             </p>
             <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              How conditions are currently contributing to one another
+              Which problems are currently making other problems worse
             </p>
             <ul className="mt-3 space-y-3">
               {edges.map((e) => {
