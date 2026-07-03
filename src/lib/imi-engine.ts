@@ -293,7 +293,8 @@ export function computeExecutiveAssessment(
   let totalPts = 0;
   for (const c of conditions) {
     for (const m of c.mechanisms) {
-      burdenAcc.set(m.label, (burdenAcc.get(m.label) ?? 0) + m.points);
+      const key = m.displayLabel ?? m.label;
+      burdenAcc.set(key, (burdenAcc.get(key) ?? 0) + m.points);
       totalPts += m.points;
     }
   }
