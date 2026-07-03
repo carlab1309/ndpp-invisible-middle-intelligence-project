@@ -1268,7 +1268,7 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
               </ul>
               <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
                 <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Estimated system influence
+                  How much of the overall strain this represents
                 </span>
                 <span
                   className="text-mono text-base font-semibold"
