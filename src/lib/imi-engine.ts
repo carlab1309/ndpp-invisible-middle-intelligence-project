@@ -61,7 +61,8 @@ export interface ArchitecturalAttributionGroup {
 
 export interface ConditionMechanism {
   label: string;
-  plain?: string; // plain-language interpretation of the mechanism
+  displayLabel?: string; // human-language rewrite of the mechanism label
+  plain?: string; // longer plain-language interpretation of the mechanism
   points: number; // percentage points contributed to severity
   signalNames: string[]; // distinct signals that activated this mechanism
   evidence: string[]; // why this signal was interpreted as this mechanism
