@@ -61,7 +61,8 @@ export interface ArchitecturalAttributionGroup {
 
 export interface ConditionMechanism {
   label: string;
-  plain?: string; // plain-language interpretation of the mechanism
+  displayLabel?: string; // human-language rewrite of the mechanism label
+  plain?: string; // longer plain-language interpretation of the mechanism
   points: number; // percentage points contributed to severity
   signalNames: string[]; // distinct signals that activated this mechanism
   evidence: string[]; // why this signal was interpreted as this mechanism
@@ -107,8 +108,10 @@ export interface ConditionDrivers {
 
 export interface ArchitecturalLeverage {
   statement: string; // the architecture adjustment
-  plain?: string; // plain-language interpretation of the leverage statement
+  displayStatement?: string; // human-language rewrite of the leverage statement
+  plain?: string; // longer plain-language interpretation of the leverage statement
   expectedEffect: string[]; // mechanisms expected to reduce
+  expectedEffectDisplay?: string[]; // human-language rewrite of expected-effect mechanism labels
   reason: string;
   estimatedInfluence: number; // 0..100 — share of current formation addressed
 }
@@ -118,7 +121,8 @@ export type InterventionEffort = "Low" | "Medium" | "High";
 
 export interface InterventionPriority {
   title: string;
-  plain?: string; // plain-language interpretation of the intervention
+  displayTitle?: string; // human-language rewrite of the intervention title
+  plain?: string; // longer plain-language interpretation of the intervention
   impact: InterventionImpact;
   effort: InterventionEffort;
   reason: string;
@@ -127,8 +131,9 @@ export interface InterventionPriority {
 export interface StructuralCondition {
   id: ConditionId;
   label: string;
+  displayLabel?: string; // human-language rewrite of the condition label
   description: string;
-  plain?: string; // plain-language interpretation of the condition
+  plain?: string; // longer plain-language interpretation of the condition
   strength: number; // 0..1 — severity of this architecture condition
   severity: SignalSeverity;
   evidenceMaturity: "Emerging" | "Developing" | "Established" | "Entrenched";
@@ -288,7 +293,8 @@ export function computeExecutiveAssessment(
   let totalPts = 0;
   for (const c of conditions) {
     for (const m of c.mechanisms) {
-      burdenAcc.set(m.label, (burdenAcc.get(m.label) ?? 0) + m.points);
+      const key = m.displayLabel ?? m.label;
+      burdenAcc.set(key, (burdenAcc.get(key) ?? 0) + m.points);
       totalPts += m.points;
     }
   }
@@ -427,9 +433,9 @@ export function computeInteractions(conditions: StructuralCondition[]): Conditio
     const influencePct = Math.round(((c.strength + downstreamStrength) / totalStrength) * 100);
     edges.push({
       from: c.id,
-      fromLabel: c.label,
+      fromLabel: c.displayLabel ?? c.label,
       toIds: downstreamIds,
-      toLabels: downstreamIds.map((d) => byId.get(d)!.label),
+      toLabels: downstreamIds.map((d) => byId.get(d)!.displayLabel ?? byId.get(d)!.label),
       influence: influenceFor(influencePct),
       influencePct,
     });
@@ -474,11 +480,11 @@ export function computeInteractions(conditions: StructuralCondition[]): Conditio
     const touchedStrength = touchedIds.reduce((a, id) => a + (byId.get(id)?.strength ?? 0), 0);
     const reductionPct = Math.round((touchedStrength / totalStrength) * 100);
     multiplier = {
-      intervention: src.leverage.statement,
-      reductions: touchedIds.map((id) => byId.get(id)!.label),
+      intervention: src.leverage.displayStatement ?? src.leverage.statement,
+      reductions: touchedIds.map((id) => byId.get(id)!.displayLabel ?? byId.get(id)!.label),
       estimatedReduction: reductionPct,
       reason:
-        "Multiple conditions are currently forming through the same upstream architecture pathway, so a single structural change reduces strain across all of them.",
+        "Multiple problems are currently flowing from the same underlying cause, so a single change reduces strain across all of them.",
     };
   }
 
@@ -1535,6 +1541,63 @@ function plainForIntervention(title: string): string | undefined {
   return INTERVENTION_PLAIN[title];
 }
 
+// --- Human display labels ------------------------------------------
+// Framework-native terms remain the engine's internal keys (for causes,
+// evidence, driver reasons, leverage targeting). Display labels are the
+// executive-facing rewrites: short, natural sentences a first-time reader
+// can understand without any NDPP background.
+
+const CONDITION_HUMAN_LABEL: Record<ConditionId, string> = {
+  trust_instability: "People are losing confidence in the system",
+  closure_failure: "People aren't sure when work is actually finished",
+  threshold_ambiguity: "People aren't sure when they should act",
+  ownership_drift: "People are becoming unclear about who owns what",
+  context_fragmentation: "Meaning is being lost between teams",
+  ai_burden_transfer: "The AI is creating extra work instead of removing it",
+  interpretive_overload: "People keep having to work out what things mean",
+  escalation_instability: "Escalation is drifting off protocol",
+  workflow_incoherence: "Comparable work is being handled inconsistently",
+  predictability_failure: "People can't predict how the system will behave",
+};
+
+const MECHANISM_HUMAN_LABEL: Record<string, string> = {
+  "Verification Burden": "People keep having to double-check things",
+  "Reassurance Dependency": "People need repeated confirmation before acting",
+  "Closure Uncertainty": "People aren't sure work is truly finished",
+  "Completion Ambiguity": "Finished work still feels open",
+  "Oversight Compensation": "People are supervising work the system should hold",
+  "Interpretive Reliance": "People are decoding AI output before they can act",
+  "Threshold Reinterpretation": "People are re-deciding what counts as serious",
+  "Severity Inconsistency": "Similar cases are being treated differently",
+  "Recognition Latency": "People are noticing things need action too late",
+  "Duplicated Responsibility": "More than one person carrying the same responsibility",
+  "Ownership Ambiguity": "People aren't sure who owns this",
+  "Handoff Gap": "Work is falling between people at handoffs",
+  "Context Reconstruction": "People rebuild the background at every handoff",
+  "Context Loss": "Meaning is being lost between teams and systems",
+  "Meaning Reconstruction": "People are inferring what signals actually mean",
+  "Urgency Inference": "People are guessing how urgent things are",
+  "Escalation Inflation": "Cases are escalating higher than they should",
+  "Threshold-Driven Escalation": "People are escalating because severity is unclear",
+  "Workaround Proliferation": "Local workarounds are spreading",
+  "Duplicated Workflow": "The same work is being done twice in parallel",
+  "Behavioural Hedging": "People are acting cautiously to be safe",
+  "Workaround Persistence": "Old workarounds are quietly becoming permanent",
+  "Residual Compensation": "Extra effort the system didn't plan for",
+};
+
+function humanMechanism(label: string): string {
+  return MECHANISM_HUMAN_LABEL[label] ?? label;
+}
+
+export function humanMechanismLabel(label: string): string {
+  return MECHANISM_HUMAN_LABEL[label] ?? label;
+}
+
+function humanIntervention(title: string): string {
+  return INTERVENTION_PLAIN[title] ?? title;
+}
+
 function leverageFor(
   cid: ConditionId,
   mechanisms: ConditionMechanism[],
@@ -1554,15 +1617,22 @@ function leverageFor(
   return {
     leverage: {
       statement: def.statement,
+      displayStatement: humanIntervention(def.statement),
       plain: plainForIntervention(def.statement),
       expectedEffect: def.targetMechanisms,
+      expectedEffectDisplay: def.targetMechanisms.map(humanMechanism),
       reason: def.reason,
       estimatedInfluence: Math.min(100, Math.max(0, influence)),
     },
-    priorities: def.priorities.map((p) => ({ ...p, plain: plainForIntervention(p.title) })),
+    priorities: def.priorities.map((p) => ({
+      ...p,
+      displayTitle: humanIntervention(p.title),
+      plain: plainForIntervention(p.title),
+    })),
     expectedImprovement: def.expectedImprovement,
   };
 }
+
 
 // --- Scenarios -----------------------------------------------------
 
@@ -1719,6 +1789,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     const mechanisms: ConditionMechanism[] = Array.from(mechAcc.entries())
       .map(([label, v]) => ({
         label,
+        displayLabel: humanMechanism(label),
         plain: plainForMechanism(label),
         points: v.points,
         signalNames: Array.from(v.signals),
@@ -1737,6 +1808,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     results.push({
       id: cid as ConditionId,
       label: meta.label,
+      displayLabel: CONDITION_HUMAN_LABEL[cid as ConditionId] ?? meta.label,
       description: meta.description,
       plain: CONDITION_PLAIN[cid as ConditionId],
       strength,

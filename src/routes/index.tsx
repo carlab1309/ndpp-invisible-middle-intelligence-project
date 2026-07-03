@@ -19,6 +19,7 @@ import {
   computeInteractions,
   computeContainment,
   computeExecutiveAssessment,
+  humanMechanismLabel,
 } from "@/lib/imi-engine";
 
 export const Route = createFileRoute("/")({
@@ -239,15 +240,15 @@ function Intro() {
           and how those conditions trace back to underlying system design.
         </p>
         <div className="text-mono mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-          <span>Operational signals</span>
+          <span>What we're seeing</span>
           <span className="text-primary">→</span>
-          <span>Compensation mechanisms</span>
+          <span>What people are doing to keep things working</span>
           <span className="text-primary">→</span>
-          <span>Architecture conditions</span>
+          <span>What's actually going wrong</span>
           <span className="text-primary">→</span>
-          <span>Architectural attribution</span>
+          <span>Why it's happening</span>
           <span className="text-primary">→</span>
-          <span className="text-foreground">Executive situation assessment</span>
+          <span className="text-foreground">What leaders should do next</span>
         </div>
 
       </div>
@@ -324,12 +325,13 @@ function ScenarioBar({
 function SignalStream({ signals }: { signals: Signal[] }) {
   return (
     <Panel
-      label="Signal intake"
-      caption="Raw operational signals · interpreted, not assumed"
+      label="What the system is picking up"
+      caption="Raw signals from the day — read as evidence, not assumptions"
     >
       <div className="max-h-[420px] overflow-y-auto">
         {signals.length === 0 ? (
-          <EmptyState text="Awaiting first signal…" />
+          <EmptyState text="Waiting for the first signal…" />
+
         ) : (
           <ul className="divide-y divide-border/60">
             {signals.map((s) => (
@@ -407,7 +409,7 @@ function FamilyTag({ family }: { family: SignalFamily }) {
 function FamilyPanel({ counts }: { counts: Record<SignalFamily, number> }) {
   const max = Math.max(1, ...FAMILIES.map((f) => counts[f] ?? 0));
   return (
-    <Panel label="Signal families" caption="Cross-family correlation strengthens inference">
+    <Panel label="Where the signals are coming from" caption="Signals across many areas strengthen what we can conclude">
       <div className="space-y-2 px-4 py-4">
         {FAMILIES.map((f) => {
           const n = counts[f] ?? 0;
@@ -452,15 +454,15 @@ function ContainmentGauge({
 }) {
   const status =
     score >= 75
-      ? { label: "Stable architecture", tone: "var(--flourish)" }
+      ? { label: "Holding together well", tone: "var(--flourish)" }
       : score >= 50
-        ? { label: "Weakening architecture", tone: "var(--signal-moderate)" }
+        ? { label: "Beginning to strain", tone: "var(--signal-moderate)" }
         : score >= 25
-          ? { label: "Unstable architecture", tone: "var(--signal-elevated)" }
-          : { label: "Architecture failing", tone: "var(--signal-critical)" };
+          ? { label: "Struggling to hold", tone: "var(--signal-elevated)" }
+          : { label: "Coming apart", tone: "var(--signal-critical)" };
 
   return (
-    <Panel label="System containment" caption="Anchor metric · structural stability across all observed conditions">
+    <Panel label="Can the system still hold together?" caption="Overall stability across everything we're seeing right now">
       <div className="px-6 py-6">
         <div className="flex items-end justify-between gap-6">
           <div>
@@ -470,15 +472,15 @@ function ContainmentGauge({
             >
               {status.label}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Structural stability</p>
+            <p className="mt-1 text-xs text-muted-foreground">Overall stability</p>
             <p className="mt-2 text-5xl font-semibold tracking-tight text-foreground">
               {score}
               <span className="text-2xl text-muted-foreground">/100</span>
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 text-right">
-            <Metric label="Conditions" value={conditionsCount} />
-            <Metric label="Structural load" value={burden.toFixed(2)} />
+            <Metric label="Active problems" value={conditionsCount} />
+            <Metric label="Total strain" value={burden.toFixed(2)} />
           </div>
         </div>
         <div className="relative mt-6 h-3 overflow-hidden rounded-full bg-surface-2">
@@ -512,11 +514,11 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 function ConditionsPanel({ conditions }: { conditions: StructuralCondition[] }) {
   return (
     <Panel
-      label="Architecture conditions"
-      caption="Signals → mechanisms → condition → attribution → guidance"
+      label="What's happening in the organisation"
+      caption="Each issue, why it's forming, and what to change"
     >
       {conditions.length === 0 ? (
-        <EmptyState text="No architecture conditions present yet." />
+        <EmptyState text="Nothing significant to report yet." />
       ) : (
         <ul className="divide-y divide-border/60">
           {conditions.map((c) => (
@@ -549,19 +551,16 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             >
               {c.severity}
             </span>
-            <h3 className="text-sm font-semibold text-foreground">{c.label}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{c.displayLabel ?? c.label}</h3>
           </div>
+          {c.displayLabel && c.displayLabel !== c.label ? (
+            <p className="text-mono mt-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
+              {c.label}
+            </p>
+          ) : null}
           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
             {c.description}
           </p>
-          {c.plain ? (
-            <p className="mt-2 rounded border-l-2 border-primary/40 bg-primary/[0.04] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/85">
-              <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-primary/80">
-                In plain language
-              </span>
-              {c.plain}
-            </p>
-          ) : null}
         </div>
         <div className="shrink-0 space-y-1.5 text-right">
           <div>
@@ -574,7 +573,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </div>
           <div className="mt-1">
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Containment status
+              Can this still be stabilised?
             </p>
             <p className="text-mono mt-0.5 text-sm" style={{ color: cTone }}>
               {containment.status}
@@ -582,7 +581,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             <details className="group/ct mt-0.5">
               <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
                 <span className="inline-block transition-transform group-open/ct:rotate-90">▸</span>{" "}
-                Reason
+                Why
               </summary>
               <ul className="mt-1.5 space-y-0.5 pl-3 text-right">
                 {containment.reasons.map((r) => (
@@ -598,7 +597,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </div>
           <div>
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Evidence formation
+              How much evidence supports this
             </p>
             <p className="text-mono mt-0.5 text-sm" style={{ color: tone }}>
               {c.evidenceMaturity}
@@ -607,7 +606,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           <details className="group/ev mt-1">
             <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
               <span className="inline-block transition-transform group-open/ev:rotate-90">▸</span>{" "}
-              Why this evidence formation?
+              Why we're confident
             </summary>
             <ul className="mt-1.5 space-y-0.5 pl-3">
               {c.evidenceRationale.map((r) => (
@@ -623,7 +622,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           {c.trajectory && (
             <div className="mt-2">
               <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                Trajectory
+                Direction of travel
               </p>
               <p
                 className="text-mono mt-0.5 inline-flex items-center gap-1 text-sm"
@@ -638,7 +637,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               <details className="group/tr mt-1">
                 <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
                   <span className="inline-block transition-transform group-open/tr:rotate-90">▸</span>{" "}
-                  Why this trajectory?
+                  Why this direction
                 </summary>
                 <ul className="mt-1.5 space-y-0.5 pl-3">
                   {c.trajectory.rationale.map((r) => (
@@ -680,11 +679,11 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-3">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Formed by · structural mechanisms
+          What people are doing to keep things working
         </summary>
         <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60">
           <p className="text-mono px-3 pt-3 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            What humans are being asked to carry
+            The extra work people are quietly carrying right now
           </p>
           <ul className="divide-y divide-border/40">
             {c.mechanisms.map((m) => {
@@ -692,7 +691,9 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               return (
                 <li key={m.label} className="px-3 py-2.5">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-foreground">{m.label}</span>
+                    <span className="text-xs font-medium text-foreground">
+                      {m.displayLabel ?? m.label}
+                    </span>
                     <span className="text-mono shrink-0 text-[11px]" style={{ color: tone }}>
                       {share}%
                     </span>
@@ -707,16 +708,8 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                       }}
                     />
                   </div>
-                  {m.plain ? (
-                    <p className="mt-2 text-[11px] leading-relaxed text-foreground/75">
-                      <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-                        In plain language
-                      </span>
-                      {m.plain}
-                    </p>
-                  ) : null}
                   <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                    Derived from
+                    What we're seeing
                   </p>
                   <ul className="mt-1 space-y-0.5">
                     {m.signalNames.map((n) => (
@@ -731,7 +724,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
                   <details className="group/why mt-2">
                     <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
                       <span className="inline-block transition-transform group-open/why:rotate-90">▸</span>{" "}
-                      Why this mechanism?
+                      Why we're calling it this
                     </summary>
                     <ul className="mt-1.5 space-y-0.5 pl-3">
                       {m.evidence.map((e) => (
@@ -750,28 +743,29 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </ul>
           <div className="flex items-center justify-between border-t border-border/60 px-3 py-2">
             <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Condition formation
+              Overall severity of this problem
             </span>
             <span className="text-mono text-xs" style={{ color: tone }}>
               {pct}%
             </span>
           </div>
           <p className="text-mono px-3 pb-3 pt-1 text-[10px] leading-relaxed text-muted-foreground">
-            Signals → mechanisms → architecture condition. Mechanism share = portion of
-            condition formation attributable to each form of human compensation.
+            Each percentage shows how much of this problem is being held together by
+            that particular form of extra human effort.
           </p>
         </div>
       </details>
+
 
       {c.architecturalCauses.length > 0 ? (
         <details className="group mt-2">
           <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
             <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-            Most likely architectural causes
+            What's creating this problem?
           </summary>
           <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              What structural conditions are most likely creating this pattern
+              The parts of how the organisation is set up that are producing this pattern
             </p>
             <div className="mt-3 space-y-3">
               {c.architecturalCauses.map((group) => (
@@ -798,8 +792,8 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               ))}
             </div>
             <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-              Architecture conditions don't produce the pattern directly — they shape the
-              compensation mechanisms above, which in turn form this condition.
+              These structural gaps are producing the extra human effort above, which is
+              what turns into the problem we're seeing.
             </p>
           </div>
         </details>
@@ -808,11 +802,11 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Likely organisational impact
+          What happens if nothing changes
         </summary>
         <div className="mt-2 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            If this condition continues, the organisation is likely to experience
+            If this continues, the organisation is likely to experience
           </p>
           <ul className="mt-2 space-y-1.5">
             {c.organisationalImpact.map((i) => (
@@ -830,8 +824,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             ))}
           </ul>
           <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-            Architecture conditions don't stay structural — they surface as operational
-            consequences. This is the bridge from architecture intelligence to business impact.
+            Left unchecked, this quietly turns into everyday business consequences leaders will feel.
           </p>
         </div>
       </details>
@@ -844,7 +837,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
       <details className="group mt-2">
         <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
           <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-          Response guidance
+          Suggested next steps
         </summary>
         <ul className="mt-2 space-y-1 pl-4 text-xs text-foreground">
           {c.responseGuidance.map((g) => (
@@ -854,6 +847,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           ))}
         </ul>
       </details>
+
 
     </li>
   );
@@ -871,10 +865,10 @@ function DriversBlock({
   return (
     <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
       <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-        Primary condition drivers
+        What's making this worse — and what's helping
       </p>
       <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-        Which mechanisms are currently increasing or reducing condition formation
+        What's currently pushing this problem in each direction
       </p>
 
       <div className="mt-3">
@@ -882,11 +876,11 @@ function DriversBlock({
           className="text-mono text-[10px] uppercase tracking-[0.14em]"
           style={{ color: tone }}
         >
-          Primary drivers
+          What's making it worse
         </p>
         {drivers.drivers.length === 0 ? (
           <p className="text-mono mt-1 text-[11px] text-muted-foreground">
-            None observed.
+            Nothing significant right now.
           </p>
         ) : (
           <ul className="mt-1.5 space-y-2">
@@ -899,11 +893,11 @@ function DriversBlock({
 
       <div className="mt-3 border-t border-border/60 pt-2.5">
         <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-          Stabilising factors
+          What's helping right now
         </p>
         {drivers.stabilisers.length === 0 ? (
           <p className="text-mono mt-1 text-[11px] text-muted-foreground">
-            None observed.
+            Nothing significant right now.
           </p>
         ) : (
           <ul className="mt-1.5 space-y-2">
@@ -915,8 +909,8 @@ function DriversBlock({
       </div>
 
       <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-        Conditions don't worsen independently — mechanisms drive them. Drivers show
-        which compensation patterns are pushing this condition's formation right now.
+        Problems don't get worse on their own — specific patterns of extra effort push them.
+        This shows which patterns are pushing this one right now.
       </p>
     </div>
   );
@@ -937,7 +931,7 @@ function DriverRow({
           <span aria-hidden style={{ color: tone }}>
             {arrow}
           </span>
-          {d.label}
+          {humanMechanismLabel(d.label)}
         </span>
         <span className="text-mono shrink-0 text-[10px] uppercase tracking-[0.12em]" style={{ color: tone }}>
           {d.contribution}
@@ -970,33 +964,25 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
     <details className="group mt-2">
       <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
         <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-        Architectural leverage & intervention priority
+        What to change first
       </summary>
       <div className="mt-2 space-y-3">
         {/* Highest leverage point */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: tone }}>
-            Highest leverage point
+            The one change most likely to help
           </p>
           <p className="mt-1.5 text-sm font-medium text-foreground">
-            {c.leverage.statement}
+            {c.leverage.displayStatement ?? c.leverage.statement}
           </p>
-          {c.leverage.plain ? (
-            <p className="mt-2 rounded border-l-2 border-primary/40 bg-primary/[0.04] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/85">
-              <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-primary/80">
-                In plain language
-              </span>
-              {c.leverage.plain}
-            </p>
-          ) : null}
           <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            Expected effect
+            Extra effort this would reduce
           </p>
           <ul className="mt-1 space-y-0.5">
-            {c.leverage.expectedEffect.map((m) => (
+            {(c.leverage.expectedEffectDisplay ?? c.leverage.expectedEffect).map((m) => (
               <li
                 key={m}
-                className="text-mono inline-flex items-center gap-1.5 pr-2 text-[11px] text-muted-foreground"
+                className="inline-flex items-center gap-1.5 pr-2 text-[11px] text-foreground/85"
               >
                 <span aria-hidden style={{ color: tone }}>↓</span>
                 {m}
@@ -1006,10 +992,10 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
           <div className="mt-3 flex items-end justify-between gap-3">
             <div>
               <p className="text-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Estimated influence
+                How much of the problem this addresses
               </p>
               <p className="text-mono text-xs text-muted-foreground">
-                Share of current condition formation addressed
+                Estimated share of the problem this would reduce
               </p>
             </div>
             <p className="text-mono text-lg leading-none" style={{ color: tone }}>
@@ -1024,7 +1010,7 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
         {/* Intervention priority */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Intervention priority
+            Order of things to do
           </p>
           <ol className="mt-2 space-y-2.5">
             {c.interventionPriorities.map((p, i) => (
@@ -1036,18 +1022,10 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
                         className="text-mono mr-1.5 text-[10px] uppercase tracking-[0.12em]"
                         style={{ color: tone }}
                       >
-                        Priority {i + 1}
+                        Step {i + 1}
                       </span>
-                      {p.title}
+                      {p.displayTitle ?? p.title}
                     </p>
-                    {p.plain ? (
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-foreground/80">
-                        <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-                          In plain language
-                        </span>
-                        {p.plain}
-                      </p>
-                    ) : null}
                     <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
                       {p.reason}
                     </p>
@@ -1071,14 +1049,14 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
             ))}
           </ol>
           <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-            Priority orders interventions by likely reduction in compensation per unit of effort.
+            Ordered by how much they'll help versus how much effort they take.
           </p>
         </div>
 
         {/* Expected organisational improvement */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Expected organisational improvement
+            What should improve as a result
           </p>
           <ul className="mt-2 space-y-1.5">
             {c.expectedImprovement.map((i) => (
@@ -1096,8 +1074,7 @@ function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
             ))}
           </ul>
           <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-            Architecture intelligence translates into business outcomes. Executives buy outcomes,
-            not architecture terminology.
+            The everyday improvements a leader should expect to see if this change is made.
           </p>
         </div>
       </div>
@@ -1200,20 +1177,20 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
 
   return (
     <Panel
-      label="Condition interaction map"
-      caption="Upstream → downstream · multiplier intervention"
+      label="How the problems connect"
+      caption="Which problem is driving the others — and the single change that helps most"
     >
       {edges.length === 0 ? (
-        <EmptyState text="No condition interactions detected yet." />
+        <EmptyState text="No connections between problems yet." />
       ) : (
         <div className="space-y-5 px-5 py-5">
           {/* INTERACTION MAP */}
           <div>
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              Condition interaction map
+              How the problems connect
             </p>
             <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              How conditions are currently contributing to one another
+              Which problems are currently making other problems worse
             </p>
             <ul className="mt-3 space-y-3">
               {edges.map((e) => {
@@ -1235,7 +1212,7 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                       </span>
                     </div>
                     <p className="text-mono mt-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                      Contributing to
+                      Making these worse
                     </p>
                     <ul className="mt-1 space-y-0.5">
                       {e.toLabels.map((t) => (
@@ -1265,13 +1242,13 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                 className="text-mono text-[10px] uppercase tracking-[0.16em]"
                 style={{ color: "var(--signal-critical)" }}
               >
-                Primary upstream condition
+                Biggest problem driving the others
               </p>
               <p className="mt-1.5 text-sm font-semibold text-foreground">
                 {primary.label}
               </p>
               <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Currently contributing to
+                Currently making these worse
               </p>
               <ul className="mt-1 space-y-0.5">
                 {primary.contributingTo.map((t) => (
@@ -1291,7 +1268,7 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
               </ul>
               <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
                 <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Estimated system influence
+                  How much of the overall strain this represents
                 </span>
                 <span
                   className="text-mono text-base font-semibold"
@@ -1310,10 +1287,10 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
           {downstream && downstream.items.length > 0 ? (
             <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
               <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                Downstream consequences
+                What tends to follow if this continues
               </p>
               <p className="mt-1 text-[11px] leading-snug text-foreground">
-                {downstream.fromLabel} may contribute to:
+                If "{downstream.fromLabel}" keeps forming, expect:
               </p>
               <ul className="mt-2 space-y-1">
                 {downstream.items.map((i) => (
@@ -1330,9 +1307,7 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                 ))}
               </ul>
               <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-                If this upstream condition continues forming, these are the
-                operational consequences most likely to emerge across downstream
-                conditions.
+                These are the everyday knock-on effects most likely to show up next.
               </p>
             </div>
           ) : null}
@@ -1350,16 +1325,16 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                 className="text-mono text-[10px] uppercase tracking-[0.16em]"
                 style={{ color: "var(--primary)" }}
               >
-                Architectural multiplier effect
+                The single change that helps most
               </p>
               <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Highest leverage intervention
+                The one change most likely to help
               </p>
               <p className="mt-1 text-sm font-semibold text-foreground">
                 {multiplier.intervention}
               </p>
               <p className="text-mono mt-3 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Potential impact
+                Problems this would reduce
               </p>
               <ul className="mt-1 space-y-0.5">
                 {multiplier.reductions.map((r) => (
@@ -1396,10 +1371,8 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
           ) : null}
 
           <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
-            Signals → mechanisms → conditions → interactions → upstream →
-            downstream → multiplier → response. Conditions are connected
-            architecture phenomena; a single structural change in the right
-            place reduces multiple forms of hidden compensation simultaneously.
+            When problems connect, one well-placed change can quietly reduce several
+            problems at once. This is that single change.
           </p>
         </div>
       )}
@@ -1452,8 +1425,8 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
 
   return (
     <Panel
-      label="Executive situation assessment"
-      caption="Current architecture state · primary pressure · highest-leverage point"
+      label="What leaders should know right now"
+      caption="What's happening · what's driving it · what to change first"
     >
       <div className="space-y-5 px-5 py-5">
         {/* CURRENT ARCHITECTURE STATE */}
@@ -1465,11 +1438,11 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
           }}
         >
           <p className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Current architecture state
+            How the organisation is holding up
           </p>
           <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <p className="text-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
-              Architecture state:
+              State:
             </p>
             <p
               className="text-mono text-2xl font-semibold tracking-tight"
@@ -1479,7 +1452,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
             </p>
           </div>
           <p className="text-mono mt-3 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            Reason
+            Why
           </p>
           <ul className="mt-1 space-y-0.5">
             {containment.reasons.map((r) => (
@@ -1502,13 +1475,13 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {primaryPressure ? (
           <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              Primary system pressure
+              Biggest issue affecting the organisation
             </p>
             <p className="mt-1.5 text-base font-semibold text-foreground">
               {primaryPressure.label}
             </p>
             <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              Currently contributing to
+              Currently making these worse
             </p>
             <ul className="mt-1 space-y-0.5">
               {primaryPressure.contributingTo.map((t) => (
@@ -1527,7 +1500,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
             </ul>
             <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
               <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                Estimated system influence
+                How much of the overall strain this represents
               </span>
               <span
                 className="text-mono text-base font-semibold"
@@ -1543,10 +1516,10 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {burdenIndex.length > 0 ? (
           <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              What humans are currently carrying
+              What people are currently carrying
             </p>
             <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              Aggregated across the entire architecture — system-wide, not condition-by-condition
+              The extra effort being absorbed across the whole organisation right now
             </p>
             <ul className="mt-3 space-y-2">
               {burdenIndex.slice(0, 5).map((b) => (
@@ -1574,7 +1547,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
               ))}
             </ul>
             <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-              What is the system asking people to carry right now?
+              These are the invisible tasks the system is asking people to hold onto.
             </p>
           </div>
         ) : null}
@@ -1592,13 +1565,13 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
               className="text-mono text-[10px] uppercase tracking-[0.16em]"
               style={{ color: "var(--primary)" }}
             >
-              Highest leverage architectural point
+              The one change most likely to help
             </p>
             <p className="mt-1.5 text-sm font-semibold text-foreground">
               {highestLeverage.statement}
             </p>
             <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              Expected reduction
+              Problems this would reduce
             </p>
             <ul className="mt-1 space-y-0.5">
               {highestLeverage.reductions.map((r) => (
@@ -1616,7 +1589,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
             </ul>
             <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
               <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                Estimated system reduction
+                How much this could reduce overall strain
               </span>
               <span
                 className="text-mono text-base font-semibold"
@@ -1626,8 +1599,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
               </span>
             </div>
             <p className="text-mono mt-2 text-[10px] leading-relaxed text-muted-foreground">
-              NDPP changes architecture, not people. This is an architectural leverage point,
-              not a recommendation or instruction to operators.
+              This is a change to how the organisation is set up — not a request for people to work harder.
             </p>
           </div>
         ) : null}
@@ -1636,10 +1608,10 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {ifNothingChanges.length > 0 ? (
           <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              If nothing changes
+              What happens if nothing changes
             </p>
             <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              Likely emerging consequences
+              The knock-on effects most likely to appear next
             </p>
             <ul className="mt-2 space-y-1">
               {ifNothingChanges.map((i) => (
@@ -1662,23 +1634,23 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {/* ACTIVE CONDITION PORTFOLIO */}
         <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
           <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-            Active condition portfolio
+            Overview of active problems
           </p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <PortfolioStat label="Critical" value={portfolio.critical} tone="var(--signal-critical)" />
             <PortfolioStat label="Elevated" value={portfolio.elevated} tone="var(--signal-elevated)" />
             <PortfolioStat label="Moderate" value={portfolio.moderate} tone="var(--signal-moderate)" />
             <PortfolioStat label="Emerging" value={portfolio.emerging} tone="var(--signal-low)" />
-            <PortfolioStat label="Escalating" value={portfolio.escalating} tone="var(--signal-critical)" />
-            <PortfolioStat label="Entrenching" value={portfolio.entrenching} tone="var(--signal-elevated)" />
-            <PortfolioStat label="Stabilising" value={portfolio.stabilising} tone="var(--signal-moderate)" />
-            <PortfolioStat label="Recovering" value={portfolio.recovering} tone="var(--signal-low)" />
+            <PortfolioStat label="Getting worse" value={portfolio.escalating} tone="var(--signal-critical)" />
+            <PortfolioStat label="Settling in" value={portfolio.entrenching} tone="var(--signal-elevated)" />
+            <PortfolioStat label="Levelling off" value={portfolio.stabilising} tone="var(--signal-moderate)" />
+            <PortfolioStat label="Improving" value={portfolio.recovering} tone="var(--signal-low)" />
           </div>
         </div>
 
 
         <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
-          Where is the system asking people to carry complexity, and where should intervention occur first?
+          Where is the organisation asking people to carry too much, and where should we change things first?
         </p>
       </div>
     </Panel>
