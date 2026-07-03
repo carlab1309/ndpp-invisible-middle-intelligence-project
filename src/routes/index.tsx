@@ -1213,9 +1213,6 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                     </div>
                     <p className="text-mono mt-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                       Making these worse
-                    </div>
-                    <p className="text-mono mt-1.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                      Contributing to
                     </p>
                     <ul className="mt-1 space-y-0.5">
                       {e.toLabels.map((t) => (
