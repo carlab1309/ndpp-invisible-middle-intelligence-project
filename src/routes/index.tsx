@@ -324,12 +324,13 @@ function ScenarioBar({
 function SignalStream({ signals }: { signals: Signal[] }) {
   return (
     <Panel
-      label="Signal intake"
-      caption="Raw operational signals · interpreted, not assumed"
+      label="What the system is picking up"
+      caption="Raw signals from the day — read as evidence, not assumptions"
     >
       <div className="max-h-[420px] overflow-y-auto">
         {signals.length === 0 ? (
-          <EmptyState text="Awaiting first signal…" />
+          <EmptyState text="Waiting for the first signal…" />
+
         ) : (
           <ul className="divide-y divide-border/60">
             {signals.map((s) => (
