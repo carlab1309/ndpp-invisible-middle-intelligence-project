@@ -108,8 +108,10 @@ export interface ConditionDrivers {
 
 export interface ArchitecturalLeverage {
   statement: string; // the architecture adjustment
-  plain?: string; // plain-language interpretation of the leverage statement
+  displayStatement?: string; // human-language rewrite of the leverage statement
+  plain?: string; // longer plain-language interpretation of the leverage statement
   expectedEffect: string[]; // mechanisms expected to reduce
+  expectedEffectDisplay?: string[]; // human-language rewrite of expected-effect mechanism labels
   reason: string;
   estimatedInfluence: number; // 0..100 — share of current formation addressed
 }
@@ -119,7 +121,8 @@ export type InterventionEffort = "Low" | "Medium" | "High";
 
 export interface InterventionPriority {
   title: string;
-  plain?: string; // plain-language interpretation of the intervention
+  displayTitle?: string; // human-language rewrite of the intervention title
+  plain?: string; // longer plain-language interpretation of the intervention
   impact: InterventionImpact;
   effort: InterventionEffort;
   reason: string;
