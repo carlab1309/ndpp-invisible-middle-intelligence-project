@@ -1371,10 +1371,8 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
           ) : null}
 
           <p className="text-mono border-t border-border/60 pt-3 text-[10px] leading-relaxed text-muted-foreground">
-            Signals → mechanisms → conditions → interactions → upstream →
-            downstream → multiplier → response. Conditions are connected
-            architecture phenomena; a single structural change in the right
-            place reduces multiple forms of hidden compensation simultaneously.
+            When problems connect, one well-placed change can quietly reduce several
+            problems at once. This is that single change.
           </p>
         </div>
       )}
