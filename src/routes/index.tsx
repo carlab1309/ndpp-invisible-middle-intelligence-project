@@ -1242,13 +1242,13 @@ function InteractionPanel({ interactions }: { interactions: ConditionInteraction
                 className="text-mono text-[10px] uppercase tracking-[0.16em]"
                 style={{ color: "var(--signal-critical)" }}
               >
-                Primary upstream condition
+                Biggest problem driving the others
               </p>
               <p className="mt-1.5 text-sm font-semibold text-foreground">
                 {primary.label}
               </p>
               <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                Currently contributing to
+                Currently making these worse
               </p>
               <ul className="mt-1 space-y-0.5">
                 {primary.contributingTo.map((t) => (
