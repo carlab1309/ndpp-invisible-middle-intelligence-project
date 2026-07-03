@@ -1628,34 +1628,6 @@ function leverageFor(
   };
 }
 
-function leverageFor(
-  cid: ConditionId,
-  mechanisms: ConditionMechanism[],
-  strengthPct: number
-): { leverage: ArchitecturalLeverage; priorities: InterventionPriority[]; expectedImprovement: string[] } {
-  const def = LEVERAGE_LIBRARY[cid];
-  // Estimated influence: share of current condition formation carried by the
-  // mechanisms that the leverage point is expected to reduce. Falls back to
-  // top-mechanism share if no target mechanisms are currently active.
-  let addressed = 0;
-  for (const m of mechanisms) {
-    if (def.targetMechanisms.includes(m.label)) addressed += m.points;
-  }
-  if (addressed === 0 && mechanisms.length) addressed = mechanisms[0].points;
-  const influence = strengthPct > 0 ? Math.round((addressed / strengthPct) * 100) : 0;
-
-  return {
-    leverage: {
-      statement: def.statement,
-      plain: plainForIntervention(def.statement),
-      expectedEffect: def.targetMechanisms,
-      reason: def.reason,
-      estimatedInfluence: Math.min(100, Math.max(0, influence)),
-    },
-    priorities: def.priorities.map((p) => ({ ...p, plain: plainForIntervention(p.title) })),
-    expectedImprovement: def.expectedImprovement,
-  };
-}
 
 // --- Scenarios -----------------------------------------------------
 
