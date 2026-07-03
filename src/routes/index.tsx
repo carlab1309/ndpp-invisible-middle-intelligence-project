@@ -864,10 +864,10 @@ function DriversBlock({
   return (
     <div className="mt-3 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
       <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-        Primary condition drivers
+        What's making this worse — and what's helping
       </p>
       <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-        Which mechanisms are currently increasing or reducing condition formation
+        What's currently pushing this problem in each direction
       </p>
 
       <div className="mt-3">
@@ -875,11 +875,11 @@ function DriversBlock({
           className="text-mono text-[10px] uppercase tracking-[0.14em]"
           style={{ color: tone }}
         >
-          Primary drivers
+          What's making it worse
         </p>
         {drivers.drivers.length === 0 ? (
           <p className="text-mono mt-1 text-[11px] text-muted-foreground">
-            None observed.
+            Nothing significant right now.
           </p>
         ) : (
           <ul className="mt-1.5 space-y-2">
@@ -892,11 +892,11 @@ function DriversBlock({
 
       <div className="mt-3 border-t border-border/60 pt-2.5">
         <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-          Stabilising factors
+          What's helping right now
         </p>
         {drivers.stabilisers.length === 0 ? (
           <p className="text-mono mt-1 text-[11px] text-muted-foreground">
-            None observed.
+            Nothing significant right now.
           </p>
         ) : (
           <ul className="mt-1.5 space-y-2">
@@ -908,8 +908,8 @@ function DriversBlock({
       </div>
 
       <p className="text-mono mt-3 border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
-        Conditions don't worsen independently — mechanisms drive them. Drivers show
-        which compensation patterns are pushing this condition's formation right now.
+        Problems don't get worse on their own — specific patterns of extra effort push them.
+        This shows which patterns are pushing this one right now.
       </p>
     </div>
   );
