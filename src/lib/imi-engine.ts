@@ -432,9 +432,9 @@ export function computeInteractions(conditions: StructuralCondition[]): Conditio
     const influencePct = Math.round(((c.strength + downstreamStrength) / totalStrength) * 100);
     edges.push({
       from: c.id,
-      fromLabel: c.label,
+      fromLabel: c.displayLabel ?? c.label,
       toIds: downstreamIds,
-      toLabels: downstreamIds.map((d) => byId.get(d)!.label),
+      toLabels: downstreamIds.map((d) => byId.get(d)!.displayLabel ?? byId.get(d)!.label),
       influence: influenceFor(influencePct),
       influencePct,
     });
