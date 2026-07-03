@@ -1425,8 +1425,8 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
 
   return (
     <Panel
-      label="Executive situation assessment"
-      caption="Current architecture state · primary pressure · highest-leverage point"
+      label="What leaders should know right now"
+      caption="What's happening · what's driving it · what to change first"
     >
       <div className="space-y-5 px-5 py-5">
         {/* CURRENT ARCHITECTURE STATE */}
@@ -1438,11 +1438,11 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
           }}
         >
           <p className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Current architecture state
+            How the organisation is holding up
           </p>
           <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <p className="text-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
-              Architecture state:
+              State:
             </p>
             <p
               className="text-mono text-2xl font-semibold tracking-tight"
@@ -1452,7 +1452,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
             </p>
           </div>
           <p className="text-mono mt-3 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            Reason
+            Why
           </p>
           <ul className="mt-1 space-y-0.5">
             {containment.reasons.map((r) => (
@@ -1475,13 +1475,13 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {primaryPressure ? (
           <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              Primary system pressure
+              Biggest issue affecting the organisation
             </p>
             <p className="mt-1.5 text-base font-semibold text-foreground">
               {primaryPressure.label}
             </p>
             <p className="text-mono mt-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              Currently contributing to
+              Currently making these worse
             </p>
             <ul className="mt-1 space-y-0.5">
               {primaryPressure.contributingTo.map((t) => (
