@@ -550,19 +550,16 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             >
               {c.severity}
             </span>
-            <h3 className="text-sm font-semibold text-foreground">{c.label}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{c.displayLabel ?? c.label}</h3>
           </div>
+          {c.displayLabel && c.displayLabel !== c.label ? (
+            <p className="text-mono mt-1 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
+              {c.label}
+            </p>
+          ) : null}
           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
             {c.description}
           </p>
-          {c.plain ? (
-            <p className="mt-2 rounded border-l-2 border-primary/40 bg-primary/[0.04] px-2 py-1.5 text-[11px] leading-relaxed text-foreground/85">
-              <span className="text-mono mr-1.5 text-[9px] uppercase tracking-[0.14em] text-primary/80">
-                In plain language
-              </span>
-              {c.plain}
-            </p>
-          ) : null}
         </div>
         <div className="shrink-0 space-y-1.5 text-right">
           <div>
@@ -575,7 +572,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </div>
           <div className="mt-1">
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Containment status
+              Can this still be stabilised?
             </p>
             <p className="text-mono mt-0.5 text-sm" style={{ color: cTone }}>
               {containment.status}
@@ -583,7 +580,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
             <details className="group/ct mt-0.5">
               <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
                 <span className="inline-block transition-transform group-open/ct:rotate-90">▸</span>{" "}
-                Reason
+                Why
               </summary>
               <ul className="mt-1.5 space-y-0.5 pl-3 text-right">
                 {containment.reasons.map((r) => (
@@ -599,7 +596,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           </div>
           <div>
             <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              Evidence formation
+              How much evidence supports this
             </p>
             <p className="text-mono mt-0.5 text-sm" style={{ color: tone }}>
               {c.evidenceMaturity}
@@ -608,7 +605,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           <details className="group/ev mt-1">
             <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
               <span className="inline-block transition-transform group-open/ev:rotate-90">▸</span>{" "}
-              Why this evidence formation?
+              Why we're confident
             </summary>
             <ul className="mt-1.5 space-y-0.5 pl-3">
               {c.evidenceRationale.map((r) => (
@@ -624,7 +621,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
           {c.trajectory && (
             <div className="mt-2">
               <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                Trajectory
+                Direction of travel
               </p>
               <p
                 className="text-mono mt-0.5 inline-flex items-center gap-1 text-sm"
@@ -639,7 +636,7 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
               <details className="group/tr mt-1">
                 <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
                   <span className="inline-block transition-transform group-open/tr:rotate-90">▸</span>{" "}
-                  Why this trajectory?
+                  Why this direction
                 </summary>
                 <ul className="mt-1.5 space-y-0.5 pl-3">
                   {c.trajectory.rationale.map((r) => (
