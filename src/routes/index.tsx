@@ -1500,7 +1500,7 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
             </ul>
             <div className="mt-3 flex items-baseline justify-between border-t border-border/60 pt-2">
               <span className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                Estimated system influence
+                How much of the overall strain this represents
               </span>
               <span
                 className="text-mono text-base font-semibold"
@@ -1516,10 +1516,10 @@ function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessm
         {burdenIndex.length > 0 ? (
           <div className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
             <p className="text-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              What humans are currently carrying
+              What people are currently carrying
             </p>
             <p className="text-mono mt-0.5 text-[10px] leading-relaxed text-muted-foreground/80">
-              Aggregated across the entire architecture — system-wide, not condition-by-condition
+              The extra effort being absorbed across the whole organisation right now
             </p>
             <ul className="mt-3 space-y-2">
               {burdenIndex.slice(0, 5).map((b) => (
