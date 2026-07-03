@@ -1784,6 +1784,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     const mechanisms: ConditionMechanism[] = Array.from(mechAcc.entries())
       .map(([label, v]) => ({
         label,
+        displayLabel: humanMechanism(label),
         plain: plainForMechanism(label),
         points: v.points,
         signalNames: Array.from(v.signals),
@@ -1802,6 +1803,7 @@ export function interpret(signals: Signal[], now = Date.now()): StructuralCondit
     results.push({
       id: cid as ConditionId,
       label: meta.label,
+      displayLabel: CONDITION_HUMAN_LABEL[cid as ConditionId] ?? meta.label,
       description: meta.description,
       plain: CONDITION_PLAIN[cid as ConditionId],
       strength,
