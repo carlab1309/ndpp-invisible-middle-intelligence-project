@@ -1611,7 +1611,7 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
     else if (primaryPressure.estimatedInfluence >= 20)
       pressureEvidence.push("It accounts for a meaningful share of the overall strain.");
     pressureEvidence.push("Signals pointing to it are coming from more than one area.");
-    if (primaryPressure.reason) pressureEvidence.push(primaryPressure.reason);
+    
   }
 
   const burdenEvidence: string[] = [];
@@ -1642,7 +1642,7 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
     leverageEvidence.push(
       "It targets an upstream cause, not a symptom — so knock-on effects are likely."
     );
-    if (highestLeverage.reason) leverageEvidence.push(highestLeverage.reason);
+    
   }
 
   return (
