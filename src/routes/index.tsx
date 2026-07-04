@@ -159,8 +159,8 @@ function Console() {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 lg:px-10">
-        <Intro />
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-6 lg:px-10">
+        <Masthead />
 
         <ScenarioBar
           scenario={scenario}
@@ -170,11 +170,13 @@ function Console() {
           onReset={() => setSignals([])}
         />
 
-        <div className="mt-6">
-          <ExecutiveAssessmentPanel assessment={executive} />
+        <div className="mt-8">
+          <ExecutiveHero assessment={executive} />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <SupportingDivider />
+
+        <div className="mt-6 grid grid-cols-1 gap-6 opacity-95 lg:grid-cols-12">
           {/* Left: signal stream + families */}
           <section className="lg:col-span-5 flex flex-col gap-6">
             <SignalStream signals={signals.slice().reverse()} />
@@ -193,8 +195,45 @@ function Console() {
           </section>
         </div>
 
+        <details className="mt-6 group">
+          <summary className="text-mono cursor-pointer list-none rounded-md border border-border/60 bg-surface/60 px-4 py-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary">
+            <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+            Full executive briefing (all detail)
+          </summary>
+          <div className="mt-4">
+            <ExecutiveAssessmentPanel assessment={executive} />
+          </div>
+        </details>
+
         <Footer />
       </main>
+    </div>
+  );
+}
+
+function SupportingDivider() {
+  return (
+    <div className="mt-14 mb-2 flex items-center gap-4">
+      <span className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+        Supporting evidence
+      </span>
+      <span className="h-px flex-1 bg-border/60" />
+      <span className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+        Signals · families · conditions · interactions
+      </span>
+    </div>
+  );
+}
+
+function Masthead() {
+  return (
+    <div className="border-b border-border/60 pb-4">
+      <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+        NDPP · Invisible Middle Intelligence
+      </p>
+      <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+        Executive situation, right now.
+      </h1>
     </div>
   );
 }
