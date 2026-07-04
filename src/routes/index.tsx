@@ -1636,8 +1636,9 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
   );
 }
 
-
+function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessment }) {
   const {
+
     containment,
     primaryPressure,
     highestLeverage,
