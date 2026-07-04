@@ -1451,7 +1451,192 @@ function containmentTone(status: ContainmentStatus) {
   }
 }
 
-function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessment }) {
+function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
+  const {
+    containment,
+    primaryPressure,
+    highestLeverage,
+    ifNothingChanges,
+    burdenIndex,
+  } = assessment;
+  const tone = containmentTone(containment.status);
+  const statusHeadline =
+    containment.status === "Critical"
+      ? "Critical"
+      : containment.status === "Fragile"
+        ? "Under strain"
+        : containment.status === "Vulnerable"
+          ? "Vulnerable"
+          : "Stable";
+
+  return (
+    <article className="overflow-hidden rounded-2xl border border-border/70 bg-surface">
+      {/* 1. WHAT IS HAPPENING — hero status */}
+      <header
+        className="relative px-6 py-10 lg:px-12 lg:py-14"
+        style={{
+          background: `radial-gradient(120% 100% at 0% 0%, color-mix(in oklch, ${tone} 18%, transparent), transparent 60%)`,
+        }}
+      >
+        <div className="absolute inset-0 grid-bg opacity-20" aria-hidden />
+        <div className="relative">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            Current system status
+          </p>
+          <div className="mt-3 flex items-center gap-4">
+            <span
+              className="inline-block h-3 w-3 rounded-full"
+              style={{ backgroundColor: tone, boxShadow: `0 0 20px ${tone}` }}
+              aria-hidden
+            />
+            <h2
+              className="text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-7xl"
+              style={{ color: tone }}
+            >
+              {statusHeadline}
+            </h2>
+          </div>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {containment.reasons[0] ??
+              "The system is being read continuously across signals, mechanisms and conditions."}
+          </p>
+        </div>
+      </header>
+
+      {/* 2. PRIMARY SYSTEM PRESSURE */}
+      {primaryPressure ? (
+        <section className="border-t border-border/60 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            Primary system pressure
+          </p>
+          <h3 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {primaryPressure.label}
+          </h3>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Driving roughly{" "}
+            <span className="font-semibold text-foreground">
+              {primaryPressure.estimatedInfluence}%
+            </span>{" "}
+            of what the organisation is currently feeling.
+          </p>
+        </section>
+      ) : null}
+
+      {/* 3. WHAT PEOPLE ARE CARRYING */}
+      {burdenIndex.length > 0 ? (
+        <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            People are currently spending more effort on
+          </p>
+          <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {burdenIndex.slice(0, 4).map((b) => (
+              <li
+                key={b.mechanism}
+                className="rounded-lg border border-border/60 bg-surface px-4 py-3"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-base font-medium text-foreground">
+                    {b.mechanism}
+                  </span>
+                  <span
+                    className="text-mono text-lg font-semibold"
+                    style={{ color: "var(--primary)" }}
+                  >
+                    {b.pct}%
+                  </span>
+                </div>
+                <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface-2">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${b.pct}%`,
+                      backgroundColor: "var(--primary)",
+                      opacity: 0.8,
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 4. HIGHEST IMPACT CHANGE */}
+      {highestLeverage ? (
+        <section
+          className="border-t px-6 py-8 lg:px-12"
+          style={{
+            borderColor: "color-mix(in oklch, var(--primary) 30%, transparent)",
+            background: "color-mix(in oklch, var(--primary) 6%, transparent)",
+          }}
+        >
+          <p
+            className="text-mono text-[10px] uppercase tracking-[0.24em]"
+            style={{ color: "var(--primary)" }}
+          >
+            Highest impact change
+          </p>
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            {highestLeverage.statement}
+          </h3>
+          {highestLeverage.reductions.length > 0 ? (
+            <>
+              <p className="text-mono mt-5 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                Expected result
+              </p>
+              <ul className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                {highestLeverage.reductions.map((r) => (
+                  <li
+                    key={r}
+                    className="flex items-start gap-2 text-sm leading-snug text-foreground"
+                  >
+                    <span
+                      className="text-mono mt-[3px] shrink-0"
+                      style={{ color: "var(--signal-low)" }}
+                      aria-hidden
+                    >
+                      ↓
+                    </span>
+                    {r}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+          <p className="text-mono mt-5 border-t border-border/40 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+            A change to how the organisation is set up — not a request for people to work harder.
+          </p>
+        </section>
+      ) : null}
+
+      {/* 5. IF NOTHING CHANGES */}
+      {ifNothingChanges.length > 0 ? (
+        <section className="border-t border-border/60 px-6 py-6 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            If nothing changes
+          </p>
+          <ul className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {ifNothingChanges.slice(0, 6).map((i) => (
+              <li
+                key={i}
+                className="relative pl-4 text-sm leading-snug text-muted-foreground"
+              >
+                <span
+                  className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--signal-elevated)" }}
+                  aria-hidden
+                />
+                {i}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </article>
+  );
+}
+
+
   const {
     containment,
     primaryPressure,
