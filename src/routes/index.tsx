@@ -1451,6 +1451,98 @@ function containmentTone(status: ContainmentStatus) {
   }
 }
 
+type ConfidenceLevel = "High" | "Moderate" | "Low";
+
+function confidenceFromScore(score: number): {
+  level: ConfidenceLevel;
+  blurb: string;
+} {
+  if (score >= 3) {
+    return {
+      level: "High",
+      blurb:
+        "We're seeing the same pattern repeatedly across different parts of the system.",
+    };
+  }
+  if (score >= 2) {
+    return {
+      level: "Moderate",
+      blurb:
+        "The pattern is emerging clearly, but we'd want to keep watching it before treating it as settled.",
+    };
+  }
+  return {
+    level: "Low",
+    blurb:
+      "Early indications only — worth noting, but more evidence is needed before drawing strong conclusions.",
+  };
+}
+
+function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
+  const tone =
+    level === "High"
+      ? "var(--flourish)"
+      : level === "Moderate"
+        ? "var(--signal-moderate)"
+        : "var(--muted-foreground)";
+  return (
+    <span
+      className="text-mono inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]"
+      style={{
+        color: tone,
+        borderColor: `color-mix(in oklch, ${tone} 40%, transparent)`,
+        backgroundColor: `color-mix(in oklch, ${tone} 10%, transparent)`,
+      }}
+    >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: tone }}
+        aria-hidden
+      />
+      Confidence · {level}
+    </span>
+  );
+}
+
+function EvidenceBlock({
+  title,
+  points,
+  confidence,
+}: {
+  title: string;
+  points: string[];
+  confidence: { level: ConfidenceLevel; blurb: string };
+}) {
+  if (points.length === 0) return null;
+  return (
+    <div className="mt-5 rounded-md border border-border/60 bg-surface-2/50 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          {title}
+        </p>
+        <ConfidenceBadge level={confidence.level} />
+      </div>
+      <ul className="mt-2 space-y-1">
+        {points.map((p) => (
+          <li
+            key={p}
+            className="relative pl-4 text-[12px] leading-snug text-foreground"
+          >
+            <span
+              className="absolute left-0 top-2 h-1 w-1 rounded-full bg-primary"
+              aria-hidden
+            />
+            {p}
+          </li>
+        ))}
+      </ul>
+      <p className="text-mono mt-2 border-t border-border/50 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+        {confidence.blurb}
+      </p>
+    </div>
+  );
+}
+
 function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
   const {
     containment,
@@ -1458,6 +1550,7 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
     highestLeverage,
     ifNothingChanges,
     burdenIndex,
+    portfolio,
   } = assessment;
   const tone = containmentTone(containment.status);
   const statusHeadline =
@@ -1468,6 +1561,89 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
         : containment.status === "Vulnerable"
           ? "Vulnerable"
           : "Stable";
+
+  // Confidence scoring (0-4)
+  const statusScore =
+    (containment.reasons.length >= 3 ? 2 : containment.reasons.length >= 2 ? 1 : 0) +
+    (portfolio.critical > 0 ? 2 : portfolio.elevated > 0 ? 1 : 0);
+  const statusConfidence = confidenceFromScore(statusScore);
+
+  const pressureScore = primaryPressure
+    ? (primaryPressure.estimatedInfluence >= 45 ? 2 : primaryPressure.estimatedInfluence >= 25 ? 1 : 0) +
+      (primaryPressure.contributingTo.length >= 3 ? 2 : primaryPressure.contributingTo.length >= 1 ? 1 : 0)
+    : 0;
+  const pressureConfidence = confidenceFromScore(pressureScore);
+
+  const topBurden = burdenIndex[0];
+  const burdenScore =
+    (burdenIndex.length >= 4 ? 2 : burdenIndex.length >= 2 ? 1 : 0) +
+    (topBurden && topBurden.pct >= 25 ? 2 : topBurden && topBurden.pct >= 15 ? 1 : 0);
+  const burdenConfidence = confidenceFromScore(burdenScore);
+
+  const leverageScore = highestLeverage
+    ? (highestLeverage.estimatedReduction >= 30 ? 2 : highestLeverage.estimatedReduction >= 15 ? 1 : 0) +
+      (highestLeverage.reductions.length >= 3 ? 2 : highestLeverage.reductions.length >= 1 ? 1 : 0)
+    : 0;
+  const leverageConfidence = confidenceFromScore(leverageScore);
+
+  // Evidence points (plain language)
+  const statusEvidence: string[] = [];
+  if (portfolio.critical + portfolio.elevated >= 2)
+    statusEvidence.push("Several serious issues are active at the same time.");
+  if (portfolio.escalating > 0)
+    statusEvidence.push("One or more of them is getting worse, not settling.");
+  if (portfolio.entrenching > 0)
+    statusEvidence.push("At least one issue is starting to feel like the new normal.");
+  if (topBurden && topBurden.pct >= 20)
+    statusEvidence.push("Hidden compensation is spreading across the organisation.");
+  containment.reasons.slice(1, 3).forEach((r) => statusEvidence.push(r));
+  if (statusEvidence.length === 0 && containment.reasons.length > 0)
+    statusEvidence.push(containment.reasons[0]);
+
+  const pressureEvidence: string[] = [];
+  if (primaryPressure) {
+    if (primaryPressure.contributingTo.length > 0)
+      pressureEvidence.push(
+        `It's currently making ${primaryPressure.contributingTo.length} other issue${primaryPressure.contributingTo.length === 1 ? "" : "s"} worse.`
+      );
+    if (primaryPressure.estimatedInfluence >= 40)
+      pressureEvidence.push("It accounts for a large share of the overall strain.");
+    else if (primaryPressure.estimatedInfluence >= 20)
+      pressureEvidence.push("It accounts for a meaningful share of the overall strain.");
+    pressureEvidence.push("Signals pointing to it are coming from more than one area.");
+    if (primaryPressure.reason) pressureEvidence.push(primaryPressure.reason);
+  }
+
+  const burdenEvidence: string[] = [];
+  if (topBurden) {
+    burdenEvidence.push(
+      `"${topBurden.mechanism}" is the single largest form of extra effort right now (${topBurden.pct}%).`
+    );
+  }
+  if (burdenIndex.length >= 3)
+    burdenEvidence.push(
+      "The same kinds of extra effort keep appearing across different parts of the system."
+    );
+  if (burdenIndex.length >= 2)
+    burdenEvidence.push(
+      "Multiple signals — repeated checking, re-confirming, chasing ownership — point in the same direction."
+    );
+
+  const leverageEvidence: string[] = [];
+  if (highestLeverage) {
+    if (highestLeverage.reductions.length >= 2)
+      leverageEvidence.push(
+        `Fixing this is expected to reduce ${highestLeverage.reductions.length} downstream problems at once.`
+      );
+    if (highestLeverage.estimatedReduction >= 25)
+      leverageEvidence.push(
+        `Modelled to remove roughly ${highestLeverage.estimatedReduction}% of the overall strain.`
+      );
+    leverageEvidence.push(
+      "It targets an upstream cause, not a symptom — so knock-on effects are likely."
+    );
+    if (highestLeverage.reason) leverageEvidence.push(highestLeverage.reason);
+  }
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border/70 bg-surface">
@@ -1500,6 +1676,11 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
             {containment.reasons[0] ??
               "The system is being read continuously across signals, mechanisms and conditions."}
           </p>
+          <EvidenceBlock
+            title="Why we're saying this"
+            points={statusEvidence}
+            confidence={statusConfidence}
+          />
         </div>
       </header>
 
@@ -1519,6 +1700,11 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
             </span>{" "}
             of what the organisation is currently feeling.
           </p>
+          <EvidenceBlock
+            title="Why this is the primary pressure"
+            points={pressureEvidence}
+            confidence={pressureConfidence}
+          />
         </section>
       ) : null}
 
@@ -1558,6 +1744,11 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
               </li>
             ))}
           </ul>
+          <EvidenceBlock
+            title="Why we're saying people are carrying this"
+            points={burdenEvidence}
+            confidence={burdenConfidence}
+          />
         </section>
       ) : null}
 
@@ -1603,6 +1794,11 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
               </ul>
             </>
           ) : null}
+          <EvidenceBlock
+            title="Why this is the highest leverage change"
+            points={leverageEvidence}
+            confidence={leverageConfidence}
+          />
           <p className="text-mono mt-5 border-t border-border/40 pt-3 text-[10px] leading-relaxed text-muted-foreground">
             A change to how the organisation is set up — not a request for people to work harder.
           </p>
@@ -1635,6 +1831,8 @@ function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
     </article>
   );
 }
+
+
 
 function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessment }) {
   const {
