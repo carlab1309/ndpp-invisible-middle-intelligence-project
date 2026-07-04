@@ -159,8 +159,8 @@ function Console() {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
-      <main className="mx-auto max-w-7xl px-6 pb-24 pt-8 lg:px-10">
-        <Intro />
+      <main className="mx-auto max-w-7xl px-6 pb-24 pt-6 lg:px-10">
+        <Masthead />
 
         <ScenarioBar
           scenario={scenario}
@@ -170,11 +170,13 @@ function Console() {
           onReset={() => setSignals([])}
         />
 
-        <div className="mt-6">
-          <ExecutiveAssessmentPanel assessment={executive} />
+        <div className="mt-8">
+          <ExecutiveHero assessment={executive} />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <SupportingDivider />
+
+        <div className="mt-6 grid grid-cols-1 gap-6 opacity-95 lg:grid-cols-12">
           {/* Left: signal stream + families */}
           <section className="lg:col-span-5 flex flex-col gap-6">
             <SignalStream signals={signals.slice().reverse()} />
@@ -193,8 +195,45 @@ function Console() {
           </section>
         </div>
 
+        <details className="mt-6 group">
+          <summary className="text-mono cursor-pointer list-none rounded-md border border-border/60 bg-surface/60 px-4 py-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary">
+            <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+            Full executive briefing (all detail)
+          </summary>
+          <div className="mt-4">
+            <ExecutiveAssessmentPanel assessment={executive} />
+          </div>
+        </details>
+
         <Footer />
       </main>
+    </div>
+  );
+}
+
+function SupportingDivider() {
+  return (
+    <div className="mt-14 mb-2 flex items-center gap-4">
+      <span className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+        Supporting evidence
+      </span>
+      <span className="h-px flex-1 bg-border/60" />
+      <span className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+        Signals · families · conditions · interactions
+      </span>
+    </div>
+  );
+}
+
+function Masthead() {
+  return (
+    <div className="border-b border-border/60 pb-4">
+      <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+        NDPP · Invisible Middle Intelligence
+      </p>
+      <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+        Executive situation, right now.
+      </h1>
     </div>
   );
 }
@@ -1412,8 +1451,194 @@ function containmentTone(status: ContainmentStatus) {
   }
 }
 
+function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
+  const {
+    containment,
+    primaryPressure,
+    highestLeverage,
+    ifNothingChanges,
+    burdenIndex,
+  } = assessment;
+  const tone = containmentTone(containment.status);
+  const statusHeadline =
+    containment.status === "Critical"
+      ? "Critical"
+      : containment.status === "Fragile"
+        ? "Under strain"
+        : containment.status === "Vulnerable"
+          ? "Vulnerable"
+          : "Stable";
+
+  return (
+    <article className="overflow-hidden rounded-2xl border border-border/70 bg-surface">
+      {/* 1. WHAT IS HAPPENING — hero status */}
+      <header
+        className="relative px-6 py-10 lg:px-12 lg:py-14"
+        style={{
+          background: `radial-gradient(120% 100% at 0% 0%, color-mix(in oklch, ${tone} 18%, transparent), transparent 60%)`,
+        }}
+      >
+        <div className="absolute inset-0 grid-bg opacity-20" aria-hidden />
+        <div className="relative">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            Current system status
+          </p>
+          <div className="mt-3 flex items-center gap-4">
+            <span
+              className="inline-block h-3 w-3 rounded-full"
+              style={{ backgroundColor: tone, boxShadow: `0 0 20px ${tone}` }}
+              aria-hidden
+            />
+            <h2
+              className="text-5xl font-semibold leading-none tracking-tight sm:text-6xl lg:text-7xl"
+              style={{ color: tone }}
+            >
+              {statusHeadline}
+            </h2>
+          </div>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            {containment.reasons[0] ??
+              "The system is being read continuously across signals, mechanisms and conditions."}
+          </p>
+        </div>
+      </header>
+
+      {/* 2. PRIMARY SYSTEM PRESSURE */}
+      {primaryPressure ? (
+        <section className="border-t border-border/60 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            Primary system pressure
+          </p>
+          <h3 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {primaryPressure.label}
+          </h3>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Driving roughly{" "}
+            <span className="font-semibold text-foreground">
+              {primaryPressure.estimatedInfluence}%
+            </span>{" "}
+            of what the organisation is currently feeling.
+          </p>
+        </section>
+      ) : null}
+
+      {/* 3. WHAT PEOPLE ARE CARRYING */}
+      {burdenIndex.length > 0 ? (
+        <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            People are currently spending more effort on
+          </p>
+          <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {burdenIndex.slice(0, 4).map((b) => (
+              <li
+                key={b.mechanism}
+                className="rounded-lg border border-border/60 bg-surface px-4 py-3"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-base font-medium text-foreground">
+                    {b.mechanism}
+                  </span>
+                  <span
+                    className="text-mono text-lg font-semibold"
+                    style={{ color: "var(--primary)" }}
+                  >
+                    {b.pct}%
+                  </span>
+                </div>
+                <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface-2">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${b.pct}%`,
+                      backgroundColor: "var(--primary)",
+                      opacity: 0.8,
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 4. HIGHEST IMPACT CHANGE */}
+      {highestLeverage ? (
+        <section
+          className="border-t px-6 py-8 lg:px-12"
+          style={{
+            borderColor: "color-mix(in oklch, var(--primary) 30%, transparent)",
+            background: "color-mix(in oklch, var(--primary) 6%, transparent)",
+          }}
+        >
+          <p
+            className="text-mono text-[10px] uppercase tracking-[0.24em]"
+            style={{ color: "var(--primary)" }}
+          >
+            Highest impact change
+          </p>
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            {highestLeverage.statement}
+          </h3>
+          {highestLeverage.reductions.length > 0 ? (
+            <>
+              <p className="text-mono mt-5 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                Expected result
+              </p>
+              <ul className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                {highestLeverage.reductions.map((r) => (
+                  <li
+                    key={r}
+                    className="flex items-start gap-2 text-sm leading-snug text-foreground"
+                  >
+                    <span
+                      className="text-mono mt-[3px] shrink-0"
+                      style={{ color: "var(--signal-low)" }}
+                      aria-hidden
+                    >
+                      ↓
+                    </span>
+                    {r}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+          <p className="text-mono mt-5 border-t border-border/40 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+            A change to how the organisation is set up — not a request for people to work harder.
+          </p>
+        </section>
+      ) : null}
+
+      {/* 5. IF NOTHING CHANGES */}
+      {ifNothingChanges.length > 0 ? (
+        <section className="border-t border-border/60 px-6 py-6 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            If nothing changes
+          </p>
+          <ul className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {ifNothingChanges.slice(0, 6).map((i) => (
+              <li
+                key={i}
+                className="relative pl-4 text-sm leading-snug text-muted-foreground"
+              >
+                <span
+                  className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--signal-elevated)" }}
+                  aria-hidden
+                />
+                {i}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </article>
+  );
+}
+
 function ExecutiveAssessmentPanel({ assessment }: { assessment: ExecutiveAssessment }) {
   const {
+
     containment,
     primaryPressure,
     highestLeverage,
