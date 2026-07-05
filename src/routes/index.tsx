@@ -11,6 +11,7 @@ import {
   type ConditionInteractionMap,
   type ExecutiveAssessment,
   type ContainmentStatus,
+  type CommercialIntelligence,
   generateSignal,
   interpret,
   familyCounts,
@@ -19,6 +20,8 @@ import {
   computeInteractions,
   computeContainment,
   computeExecutiveAssessment,
+  computeCommercialIntelligence,
+  commercialForCondition,
   humanMechanismLabel,
 } from "@/lib/imi-engine";
 
