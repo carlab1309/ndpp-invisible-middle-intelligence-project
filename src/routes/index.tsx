@@ -992,6 +992,89 @@ function DriverRow({
   );
 }
 
+function CommercialImpactBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
+  const impact = useMemo(() => commercialForCondition(c), [c]);
+  if (
+    impact.organisational.length === 0 &&
+    impact.leadership.length === 0 &&
+    impact.capacity.length === 0
+  ) {
+    return null;
+  }
+  return (
+    <details className="group mt-2">
+      <summary className="text-mono cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
+        <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
+        Why this matters commercially
+      </summary>
+      <div className="mt-2 space-y-3 rounded-md border border-border/60 bg-surface-2/60 px-3 py-3">
+        {impact.organisational.length > 0 ? (
+          <div>
+            <p className="text-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: tone }}>
+              Organisational impact
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {impact.organisational.map((i) => (
+                <li key={i} className="relative pl-4 text-xs leading-snug text-foreground">
+                  <span
+                    className="absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: tone }}
+                    aria-hidden
+                  />
+                  {i}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {impact.leadership.length > 0 ? (
+          <div>
+            <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Leadership impact
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {impact.leadership.map((i) => (
+                <li key={i} className="relative pl-4 text-xs leading-snug text-foreground">
+                  <span
+                    className="absolute left-0 top-1.5 h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: "var(--primary)" }}
+                    aria-hidden
+                  />
+                  {i}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {impact.capacity.length > 0 ? (
+          <div>
+            <p className="text-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Capacity being lost
+            </p>
+            <ul className="mt-1.5 space-y-1">
+              {impact.capacity.map((i) => (
+                <li key={i} className="relative pl-4 text-xs leading-snug text-foreground">
+                  <span
+                    className="text-mono absolute left-0 top-[2px]"
+                    style={{ color: "var(--signal-critical)" }}
+                    aria-hidden
+                  >
+                    −
+                  </span>
+                  {i}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        <p className="text-mono border-t border-border/60 pt-2 text-[10px] leading-relaxed text-muted-foreground">
+          Derived from the extra effort people are currently carrying for this condition.
+        </p>
+      </div>
+    </details>
+  );
+}
+
 function LeverageBlock({ c, tone }: { c: StructuralCondition; tone: string }) {
   const impactTone = (impact: string) =>
     impact === "Very High"
