@@ -178,7 +178,7 @@ function Console() {
         />
 
         <div className="mt-8">
-          <ExecutiveHero assessment={executive} />
+          <ExecutiveHero assessment={executive} commercial={commercial} />
         </div>
 
         <SupportingDivider />
