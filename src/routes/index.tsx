@@ -1841,6 +1841,149 @@ function ExecutiveHero({
           </ul>
         </section>
       ) : null}
+
+      {/* 6. ORGANISATIONAL IMPACT */}
+      {commercial.organisationalImpact.length > 0 ? (
+        <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            Organisational impact
+          </p>
+          <p className="mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+            The commercial consequences the organisation is likely to feel while this continues.
+          </p>
+          <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {commercial.organisationalImpact.map((i) => (
+              <li
+                key={i}
+                className="relative rounded-md border border-border/60 bg-surface px-3 py-2 pl-6 text-sm leading-snug text-foreground"
+              >
+                <span
+                  className="absolute left-3 top-3 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--signal-elevated)" }}
+                  aria-hidden
+                />
+                {i}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 7. CAPACITY BEING LOST */}
+      {commercial.capacityLoss.length > 0 ? (
+        <section
+          className="border-t px-6 py-8 lg:px-12"
+          style={{
+            borderColor: "color-mix(in oklch, var(--signal-critical) 25%, transparent)",
+            background: "color-mix(in oklch, var(--signal-critical) 5%, transparent)",
+          }}
+        >
+          <p
+            className="text-mono text-[10px] uppercase tracking-[0.24em]"
+            style={{ color: "var(--signal-critical)" }}
+          >
+            Capacity being lost
+          </p>
+          <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Where the organisation is quietly losing capacity.
+          </h3>
+          <ul className="mt-4 space-y-2">
+            {commercial.capacityLoss.map((i) => (
+              <li
+                key={i}
+                className="relative pl-5 text-sm leading-snug text-foreground"
+              >
+                <span
+                  className="text-mono absolute left-0 top-[2px]"
+                  style={{ color: "var(--signal-critical)" }}
+                  aria-hidden
+                >
+                  −
+                </span>
+                {i}
+              </li>
+            ))}
+          </ul>
+          <p className="text-mono mt-4 border-t border-border/40 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+            These are not calculated hours. They are the categories of organisational effort
+            currently being absorbed by people to keep the system functional.
+          </p>
+        </section>
+      ) : null}
+
+      {/* 8. LEADERSHIP IMPACT */}
+      {commercial.leadershipImpact.length > 0 ? (
+        <section className="border-t border-border/60 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            What leaders are likely to experience
+          </p>
+          <ul className="mt-4 space-y-2">
+            {commercial.leadershipImpact.map((i) => (
+              <li
+                key={i}
+                className="relative pl-4 text-sm leading-snug text-foreground"
+              >
+                <span
+                  className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--primary)" }}
+                  aria-hidden
+                />
+                {i}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 9. STRATEGIC CONSEQUENCES */}
+      {commercial.strategicConsequences.length > 0 ? (
+        <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            Strategic consequences
+          </p>
+          <p className="mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+            Broader organisational implications if these conditions persist.
+          </p>
+          <ul className="mt-4 space-y-2">
+            {commercial.strategicConsequences.map((i) => (
+              <li
+                key={i}
+                className="relative pl-4 text-sm leading-snug text-foreground"
+              >
+                <span
+                  className="absolute left-0 top-2 h-1.5 w-1.5 rotate-45"
+                  style={{ backgroundColor: "var(--signal-elevated)" }}
+                  aria-hidden
+                />
+                {i}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 10. WHY THIS MATTERS */}
+      <section
+        className="border-t px-6 py-8 lg:px-12"
+        style={{
+          borderColor: "color-mix(in oklch, var(--primary) 30%, transparent)",
+          background: "color-mix(in oklch, var(--primary) 8%, transparent)",
+        }}
+      >
+        <p
+          className="text-mono text-[10px] uppercase tracking-[0.24em]"
+          style={{ color: "var(--primary)" }}
+        >
+          Why this matters
+        </p>
+        <p className="mt-3 max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">
+          {commercial.whyThisMatters}
+        </p>
+        <p className="text-mono mt-4 border-t border-border/40 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+          Hidden work creates lost capacity. The change identified above is the change most
+          likely to recover it.
+        </p>
+      </section>
     </article>
   );
 }
