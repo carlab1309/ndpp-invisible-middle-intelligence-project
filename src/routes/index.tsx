@@ -1550,7 +1550,13 @@ function EvidenceBlock({
   );
 }
 
-function ExecutiveHero({ assessment }: { assessment: ExecutiveAssessment }) {
+function ExecutiveHero({
+  assessment,
+  commercial,
+}: {
+  assessment: ExecutiveAssessment;
+  commercial: CommercialIntelligence;
+}) {
   const {
     containment,
     primaryPressure,
