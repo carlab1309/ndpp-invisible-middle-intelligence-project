@@ -2069,3 +2069,237 @@ export function computeDrivers(
 
   return { drivers, stabilisers };
 }
+
+// =====================================================================
+// COMMERCIAL INTELLIGENCE LAYER
+// ---------------------------------------------------------------------
+// Translates operational intelligence into commercial meaning.
+// For each mechanism the engine has observed, we map to the most likely
+// organisational consequence, leadership experience, capacity loss and
+// (where applicable) broader strategic consequence. Everything below is
+// evidence-led: statements only appear when the underlying mechanism
+// or portfolio condition is actually present.
+// =====================================================================
+
+interface MechanismCommercialEntry {
+  organisational?: string;
+  leadership?: string;
+  capacity?: string;
+  strategic?: string;
+}
+
+const MECHANISM_COMMERCIAL: Record<string, MechanismCommercialEntry> = {
+  "Verification Burden": {
+    organisational: "Increased operational effort as work is re-checked before it can move forward.",
+    leadership: "Managers increasingly asked to confirm decisions that should be routine.",
+    capacity: "Capacity lost through repeated checking and re-confirmation of work already done.",
+  },
+  "Reassurance Dependency": {
+    organisational: "Slower decision-making as approvals are sought before routine action.",
+    leadership: "Leaders becoming decision bottlenecks for work that should not require them.",
+    capacity: "Capacity lost through avoidable escalation for confidence rather than judgement.",
+  },
+  "Closure Uncertainty": {
+    organisational: "Duplicated follow-up as it remains unclear whether work is complete.",
+    capacity: "Capacity lost through re-opening and re-checking work believed to be finished.",
+    strategic: "Operational resilience weakens as closure ambiguity accumulates across workstreams.",
+  },
+  "Completion Ambiguity": {
+    organisational: "Higher operational effort chasing whether outcomes have actually landed.",
+    capacity: "Capacity lost through repeated verification of completion.",
+  },
+  "Oversight Compensation": {
+    organisational: "Increased management oversight as the system relies on people to catch its gaps.",
+    leadership: "Leadership attention increasingly diverted into operational supervision.",
+    capacity: "Capacity lost through avoidable management oversight of routine work.",
+    strategic: "Leadership capacity for strategic work continues to reduce.",
+  },
+  "Interpretive Reliance": {
+    organisational: "Lower technology adoption as people distrust AI output without human decoding.",
+    capacity: "Capacity lost through humans re-interpreting AI output before acting on it.",
+    strategic: "AI investments deliver reduced value while people carry the interpretation load.",
+  },
+  "Threshold Reinterpretation": {
+    organisational: "Inconsistent operational response as thresholds are re-decided case by case.",
+    capacity: "Capacity lost through repeated re-interpretation of what should trigger action.",
+  },
+  "Severity Inconsistency": {
+    organisational: "Inconsistent customer experience as similar cases receive different responses.",
+    strategic: "Organisational trust and predictability weaken over time.",
+  },
+  "Recognition Latency": {
+    organisational: "Implementation delays as emerging issues are recognised too late.",
+    capacity: "Capacity lost through late recognition and reactive coordination.",
+  },
+  "Duplicated Responsibility": {
+    organisational: "Duplicated work as more than one person carries the same accountability.",
+    leadership: "Leaders spending time reconciling overlapping responsibilities.",
+    capacity: "Capacity lost through duplicated ownership and parallel effort.",
+  },
+  "Ownership Ambiguity": {
+    organisational: "Slower decision-making as ownership must be re-established before action.",
+    leadership: "Managers repeatedly asked to arbitrate who owns what.",
+    capacity: "Capacity lost through unnecessary coordination to locate ownership.",
+  },
+  "Handoff Gap": {
+    organisational: "Growing support demand as work falls between teams at handoffs.",
+    capacity: "Capacity lost through recovery work at handoff points.",
+  },
+  "Context Reconstruction": {
+    organisational: "Higher operational effort as background is rebuilt at every handoff.",
+    capacity: "Capacity lost through repeated context reconstruction across teams.",
+  },
+  "Context Loss": {
+    organisational: "Reduced organisational confidence as meaning is lost between teams and systems.",
+    strategic: "Transformation programmes become harder to sustain as shared context erodes.",
+  },
+  "Meaning Reconstruction": {
+    organisational: "Slower response as people work out what signals actually mean.",
+    capacity: "Capacity lost through repeated inference of what the system is saying.",
+  },
+  "Urgency Inference": {
+    organisational: "Inconsistent prioritisation as urgency is inferred rather than defined.",
+    capacity: "Capacity lost through avoidable escalation and re-prioritisation.",
+  },
+  "Escalation Inflation": {
+    organisational: "Increased management load as cases escalate higher than they should.",
+    leadership: "Strategic work displaced by reactive coordination of escalated cases.",
+    capacity: "Capacity lost through escalation of work that could be resolved earlier.",
+  },
+  "Threshold-Driven Escalation": {
+    organisational: "Increased operational cost as unclear thresholds drive precautionary escalation.",
+    capacity: "Capacity lost through escalation triggered by ambiguity, not risk.",
+  },
+  "Workaround Proliferation": {
+    organisational: "Inconsistent operations as local workarounds spread across teams.",
+    strategic: "Change programmes require greater effort as workarounds embed.",
+  },
+  "Duplicated Workflow": {
+    organisational: "Duplicated work as the same activity is performed in parallel.",
+    capacity: "Capacity lost through parallel execution of the same work.",
+  },
+  "Behavioural Hedging": {
+    organisational: "Slower delivery as people act cautiously to protect themselves.",
+    strategic: "Organisational adaptability decreases as risk-avoidance behaviours entrench.",
+  },
+  "Workaround Persistence": {
+    organisational: "Reduced organisational confidence as workarounds quietly become permanent.",
+    strategic: "Transformation programmes become harder to sustain.",
+  },
+  "Residual Compensation": {
+    organisational: "Higher operational cost absorbed by people to keep the system functional.",
+    capacity: "Capacity lost through hidden effort the system did not plan for.",
+  },
+};
+
+export interface CommercialIntelligence {
+  organisationalImpact: string[];
+  leadershipImpact: string[];
+  capacityLoss: string[];
+  strategicConsequences: string[];
+  whyThisMatters: string;
+}
+
+export function commercialForCondition(c: StructuralCondition): {
+  organisational: string[];
+  leadership: string[];
+  capacity: string[];
+} {
+  const org = new Set<string>();
+  const lead = new Set<string>();
+  const cap = new Set<string>();
+  // Prioritise mechanisms carrying the most points in this condition
+  const ordered = [...c.mechanisms].sort((a, b) => b.points - a.points);
+  for (const m of ordered) {
+    const e = MECHANISM_COMMERCIAL[m.label];
+    if (!e) continue;
+    if (e.organisational) org.add(e.organisational);
+    if (e.leadership) lead.add(e.leadership);
+    if (e.capacity) cap.add(e.capacity);
+  }
+  return {
+    organisational: Array.from(org).slice(0, 4),
+    leadership: Array.from(lead).slice(0, 3),
+    capacity: Array.from(cap).slice(0, 3),
+  };
+}
+
+export function computeCommercialIntelligence(
+  conditions: StructuralCondition[],
+  executive: ExecutiveAssessment
+): CommercialIntelligence {
+  const org = new Set<string>();
+  const lead = new Set<string>();
+  const cap = new Set<string>();
+  const strat = new Set<string>();
+
+  // Weight by mechanism points across all active conditions so the most
+  // structurally-loaded consequences surface first.
+  const scored = new Map<string, { entry: MechanismCommercialEntry; pts: number }>();
+  for (const c of conditions) {
+    for (const m of c.mechanisms) {
+      const entry = MECHANISM_COMMERCIAL[m.label];
+      if (!entry) continue;
+      const existing = scored.get(m.label);
+      if (existing) existing.pts += m.points;
+      else scored.set(m.label, { entry, pts: m.points });
+    }
+  }
+  const ordered = Array.from(scored.values()).sort((a, b) => b.pts - a.pts);
+  for (const { entry } of ordered) {
+    if (entry.organisational) org.add(entry.organisational);
+    if (entry.leadership) lead.add(entry.leadership);
+    if (entry.capacity) cap.add(entry.capacity);
+    if (entry.strategic) strat.add(entry.strategic);
+  }
+
+  // Portfolio-driven additions (evidence-led)
+  if (executive.portfolio.escalating >= 2) {
+    lead.add("Leadership attention increasingly diverted into operational issues.");
+  }
+  if (executive.portfolio.critical >= 1 && executive.portfolio.escalating >= 1) {
+    lead.add("Strategic work displaced by reactive coordination.");
+  }
+  if (executive.portfolio.critical >= 1 || executive.portfolio.elevated >= 2) {
+    strat.add("Operational resilience weakens as multiple conditions compound.");
+  }
+  if (executive.portfolio.entrenching >= 1) {
+    strat.add("Organisational adaptability decreases as patterns become the new normal.");
+  }
+  if ((executive.primaryPressure?.contributingTo.length ?? 0) >= 2) {
+    strat.add("A single upstream pressure is propagating into several downstream conditions.");
+  }
+  if (executive.portfolio.escalating + executive.portfolio.entrenching >= 2) {
+    strat.add("Reduced organisational capacity for improvement activity.");
+  }
+
+  // Why This Matters — concise commercial framing
+  let whyThisMatters: string;
+  if (conditions.length === 0) {
+    whyThisMatters =
+      "No material capacity loss is currently detectable. The system appears to be absorbing demand without transferring hidden work onto people.";
+  } else {
+    const topBurden = executive.burdenIndex[0];
+    const state = executive.containment.status;
+    const stateFragment =
+      state === "Critical" || state === "Fragile"
+        ? "The organisation is currently losing capacity through increasing hidden work."
+        : "The organisation is beginning to absorb hidden work that would otherwise be structural.";
+    const burdenFragment = topBurden
+      ? ` The largest source of lost capacity right now is "${topBurden.mechanism}" (${topBurden.pct}% of hidden effort).`
+      : "";
+    const trajFragment =
+      executive.portfolio.escalating > 0 || executive.portfolio.entrenching > 0
+        ? " Without addressing the underlying conditions, operational effort is likely to continue increasing while capacity for improvement continues to reduce."
+        : " If left unaddressed, this hidden effort quietly reduces the capacity available for improvement and change.";
+    whyThisMatters = stateFragment + burdenFragment + trajFragment;
+  }
+
+  return {
+    organisationalImpact: Array.from(org).slice(0, 6),
+    leadershipImpact: Array.from(lead).slice(0, 5),
+    capacityLoss: Array.from(cap).slice(0, 6),
+    strategicConsequences: Array.from(strat).slice(0, 5),
+    whyThisMatters,
+  };
+}
