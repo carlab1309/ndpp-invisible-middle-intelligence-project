@@ -152,6 +152,10 @@ function Console() {
     () => computeExecutiveAssessment(conditions, interactions),
     [conditions, interactions]
   );
+  const commercial = useMemo(
+    () => computeCommercialIntelligence(conditions, executive),
+    [conditions, executive]
+  );
 
   const containmentScore = Math.max(
     0,
