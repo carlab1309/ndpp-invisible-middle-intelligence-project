@@ -875,6 +875,8 @@ function ConditionRow({ c }: { c: StructuralCondition }) {
         </div>
       </details>
 
+      <CommercialImpactBlock c={c} tone={tone} />
+
       <LeverageBlock c={c} tone={tone} />
 
 
