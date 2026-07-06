@@ -278,7 +278,7 @@ function Masthead() {
 
 /* -------------------------------------------------------------------------- */
 
-function Header() {
+function Header({ onOpenOnboarding }: { onOpenOnboarding: () => void }) {
   return (
     <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
@@ -290,11 +290,134 @@ function Header() {
             NDPP / Invisible Middle Intelligence
           </span>
         </div>
-        <span className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-          v1 · live console
-        </span>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={onOpenOnboarding}
+            className="text-mono cursor-pointer text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary"
+          >
+            How this works
+          </button>
+          <span className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            v1 · live console
+          </span>
+        </div>
       </div>
     </header>
+  );
+}
+
+function Onboarding({ onBegin }: { onBegin: () => void }) {
+  const steps = [
+    "Operational Signals",
+    "Hidden Work",
+    "Lost Capacity",
+    "Understanding",
+    "Better Decisions",
+    "Recovered Capacity",
+  ];
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="imi-onboarding-title"
+    >
+      <div className="relative max-h-full w-full max-w-3xl overflow-y-auto rounded-2xl border border-border/70 bg-surface shadow-2xl">
+        <div
+          className="px-6 py-8 sm:px-10 sm:py-10"
+          style={{
+            background:
+              "radial-gradient(120% 100% at 0% 0%, color-mix(in oklch, var(--primary) 14%, transparent), transparent 60%)",
+          }}
+        >
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+            Executive briefing · introduction
+          </p>
+          <h2
+            id="imi-onboarding-title"
+            className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+          >
+            Welcome to the Invisible Middle Intelligence Engine
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            This platform helps leaders understand where hidden work is quietly reducing
+            organisational capacity. Rather than reporting isolated issues, it identifies
+            patterns that explain why unnecessary effort is building across the organisation.
+          </p>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            The goal is not simply to identify problems. The goal is to help leaders
+            understand where capacity is being lost, why it is happening and where
+            intervention is likely to have the greatest impact.
+          </p>
+        </div>
+
+        <div className="border-t border-border/60 px-6 py-6 sm:px-10">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            How the platform works
+          </p>
+          <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
+            {steps.map((s, i) => (
+              <li key={s} className="flex items-center gap-2">
+                <span className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-1.5 text-foreground">
+                  {s}
+                </span>
+                {i < steps.length - 1 ? (
+                  <span className="text-primary" aria-hidden>
+                    ↓
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+            The platform analyses patterns across the organisation to understand how hidden
+            work forms, how it affects capacity and where structural changes are most likely
+            to improve organisational performance.
+          </p>
+        </div>
+
+        <div className="border-t border-border/60 px-6 py-6 sm:px-10">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            What you will see
+          </p>
+          <ul className="mt-4 grid grid-cols-1 gap-2 text-sm text-foreground sm:grid-cols-2">
+            {[
+              "What is happening across the organisation.",
+              "Why it is happening.",
+              "What people are currently carrying.",
+              "Where organisational capacity is being consumed.",
+              "The highest-impact change available.",
+              "What is likely to happen if nothing changes.",
+            ].map((line) => (
+              <li key={line} className="relative pl-4 leading-snug">
+                <span
+                  className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--primary)" }}
+                  aria-hidden
+                />
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex flex-col-reverse items-stretch gap-3 border-t border-border/60 bg-surface-2/40 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+          <p className="text-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Most executive summaries can be understood in under three minutes. Additional
+            evidence is available throughout the report.
+          </p>
+          <button
+            type="button"
+            onClick={onBegin}
+            className="cursor-pointer rounded-md px-5 py-2.5 text-sm font-medium text-primary-foreground shadow transition-colors"
+            style={{ backgroundColor: "var(--primary)" }}
+          >
+            Begin Executive Briefing
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
