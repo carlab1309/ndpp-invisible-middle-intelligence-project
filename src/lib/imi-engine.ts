@@ -2501,7 +2501,7 @@ export function computeCapacityIntelligence(
   //    (evidence of forward risk).
   const atRiskAreas = new Set<string>();
   for (const c of conditions) {
-    const t = c.trajectory?.direction;
+    const t = c.trajectory?.state;
     if (t !== "Escalating" && t !== "Entrenching") continue;
     for (const m of c.mechanisms) {
       const entry = MECHANISM_CAPACITY[m.label];
