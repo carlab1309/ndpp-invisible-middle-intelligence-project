@@ -12,6 +12,7 @@ import {
   type ExecutiveAssessment,
   type ContainmentStatus,
   type CommercialIntelligence,
+  type CapacityIntelligence,
   generateSignal,
   interpret,
   familyCounts,
@@ -21,6 +22,7 @@ import {
   computeContainment,
   computeExecutiveAssessment,
   computeCommercialIntelligence,
+  computeCapacityIntelligence,
   commercialForCondition,
   humanMechanismLabel,
 } from "@/lib/imi-engine";
@@ -156,15 +158,39 @@ function Console() {
     () => computeCommercialIntelligence(conditions, executive),
     [conditions, executive]
   );
+  const capacity = useMemo(
+    () => computeCapacityIntelligence(conditions, executive),
+    [conditions, executive]
+  );
 
   const containmentScore = Math.max(
     0,
     Math.min(100, Math.round(100 - totalBurden * 18))
   );
 
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    try {
+      if (!window.localStorage.getItem("imi.onboarded.v44")) {
+        setShowOnboarding(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+  const dismissOnboarding = () => {
+    try {
+      window.localStorage.setItem("imi.onboarded.v44", "1");
+    } catch {
+      /* ignore */
+    }
+    setShowOnboarding(false);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header />
+      {showOnboarding ? <Onboarding onBegin={dismissOnboarding} /> : null}
+      <Header onOpenOnboarding={() => setShowOnboarding(true)} />
 
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-6 lg:px-10">
         <Masthead />
@@ -178,8 +204,13 @@ function Console() {
         />
 
         <div className="mt-8">
-          <ExecutiveHero assessment={executive} commercial={commercial} />
+          <ExecutiveHero
+            assessment={executive}
+            commercial={commercial}
+            capacity={capacity}
+          />
         </div>
+
 
         <SupportingDivider />
 
@@ -247,7 +278,7 @@ function Masthead() {
 
 /* -------------------------------------------------------------------------- */
 
-function Header() {
+function Header({ onOpenOnboarding }: { onOpenOnboarding: () => void }) {
   return (
     <header className="border-b border-border/60 bg-surface/60 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
@@ -259,11 +290,134 @@ function Header() {
             NDPP / Invisible Middle Intelligence
           </span>
         </div>
-        <span className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-          v1 · live console
-        </span>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={onOpenOnboarding}
+            className="text-mono cursor-pointer text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary"
+          >
+            How this works
+          </button>
+          <span className="text-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            v1 · live console
+          </span>
+        </div>
       </div>
     </header>
+  );
+}
+
+function Onboarding({ onBegin }: { onBegin: () => void }) {
+  const steps = [
+    "Operational Signals",
+    "Hidden Work",
+    "Lost Capacity",
+    "Understanding",
+    "Better Decisions",
+    "Recovered Capacity",
+  ];
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="imi-onboarding-title"
+    >
+      <div className="relative max-h-full w-full max-w-3xl overflow-y-auto rounded-2xl border border-border/70 bg-surface shadow-2xl">
+        <div
+          className="px-6 py-8 sm:px-10 sm:py-10"
+          style={{
+            background:
+              "radial-gradient(120% 100% at 0% 0%, color-mix(in oklch, var(--primary) 14%, transparent), transparent 60%)",
+          }}
+        >
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+            Executive briefing · introduction
+          </p>
+          <h2
+            id="imi-onboarding-title"
+            className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+          >
+            Welcome to the Invisible Middle Intelligence Engine
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            This platform helps leaders understand where hidden work is quietly reducing
+            organisational capacity. Rather than reporting isolated issues, it identifies
+            patterns that explain why unnecessary effort is building across the organisation.
+          </p>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            The goal is not simply to identify problems. The goal is to help leaders
+            understand where capacity is being lost, why it is happening and where
+            intervention is likely to have the greatest impact.
+          </p>
+        </div>
+
+        <div className="border-t border-border/60 px-6 py-6 sm:px-10">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            How the platform works
+          </p>
+          <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
+            {steps.map((s, i) => (
+              <li key={s} className="flex items-center gap-2">
+                <span className="rounded-md border border-border/60 bg-surface-2/60 px-3 py-1.5 text-foreground">
+                  {s}
+                </span>
+                {i < steps.length - 1 ? (
+                  <span className="text-primary" aria-hidden>
+                    ↓
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+            The platform analyses patterns across the organisation to understand how hidden
+            work forms, how it affects capacity and where structural changes are most likely
+            to improve organisational performance.
+          </p>
+        </div>
+
+        <div className="border-t border-border/60 px-6 py-6 sm:px-10">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            What you will see
+          </p>
+          <ul className="mt-4 grid grid-cols-1 gap-2 text-sm text-foreground sm:grid-cols-2">
+            {[
+              "What is happening across the organisation.",
+              "Why it is happening.",
+              "What people are currently carrying.",
+              "Where organisational capacity is being consumed.",
+              "The highest-impact change available.",
+              "What is likely to happen if nothing changes.",
+            ].map((line) => (
+              <li key={line} className="relative pl-4 leading-snug">
+                <span
+                  className="absolute left-0 top-2 h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: "var(--primary)" }}
+                  aria-hidden
+                />
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex flex-col-reverse items-stretch gap-3 border-t border-border/60 bg-surface-2/40 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+          <p className="text-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Most executive summaries can be understood in under three minutes. Additional
+            evidence is available throughout the report.
+          </p>
+          <button
+            type="button"
+            onClick={onBegin}
+            className="cursor-pointer rounded-md px-5 py-2.5 text-sm font-medium text-primary-foreground shadow transition-colors"
+            style={{ backgroundColor: "var(--primary)" }}
+          >
+            Begin Executive Briefing
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1638,9 +1792,11 @@ function EvidenceBlock({
 function ExecutiveHero({
   assessment,
   commercial,
+  capacity,
 }: {
   assessment: ExecutiveAssessment;
   commercial: CommercialIntelligence;
+  capacity: CapacityIntelligence;
 }) {
   const {
     containment,
@@ -2069,9 +2225,172 @@ function ExecutiveHero({
           likely to recover it.
         </p>
       </section>
+
+      {/* 11. ORGANISATIONAL CAPACITY */}
+      <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+        <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+          Organisational capacity
+        </p>
+        <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Where capacity is working, under pressure, or at risk.
+        </h3>
+        <p className="mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+          Hidden work quietly consumes organisational capacity. These are the areas
+          currently protected, under strain or likely to come under strain if nothing
+          changes.
+        </p>
+        <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
+          <CapacityColumn
+            label="Working well"
+            accent="var(--signal-low)"
+            items={capacity.workingWell}
+            emptyText="No capacity area is currently free of hidden work."
+          />
+          <CapacityColumn
+            label="Under pressure"
+            accent="var(--signal-elevated)"
+            items={capacity.underPressure}
+            emptyText="No capacity area is currently under material pressure."
+          />
+          <CapacityColumn
+            label="At risk"
+            accent="var(--signal-critical)"
+            items={capacity.atRisk}
+            emptyText="No capacity area is currently trending toward risk."
+          />
+        </div>
+      </section>
+
+      {/* 12. HOW HIDDEN WORK CONSUMES CAPACITY */}
+      {capacity.hiddenWork.length > 0 ? (
+        <section className="border-t border-border/60 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            How hidden work is consuming capacity
+          </p>
+          <ul className="mt-4 space-y-3">
+            {capacity.hiddenWork.map((h) => (
+              <li
+                key={h.mechanism}
+                className="rounded-lg border border-border/60 bg-surface px-4 py-3"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-base font-medium text-foreground">
+                    {h.plainName}
+                  </span>
+                  <span
+                    className="text-mono text-xs uppercase tracking-[0.16em]"
+                    style={{ color: "var(--primary)" }}
+                  >
+                    {h.capacityAffected}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-sm leading-snug text-muted-foreground">
+                  {h.explanation}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 13. CAPACITY FLOW */}
+      <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+        <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+          How capacity changes
+        </p>
+        <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
+          {[
+            "System Conditions",
+            "Hidden Work",
+            "Capacity Under Pressure",
+            "Better Understanding",
+            "Better Decisions",
+            "Capacity Recovered or Redirected",
+          ].map((step, i, arr) => (
+            <li key={step} className="flex items-center gap-2">
+              <span className="rounded-md border border-border/60 bg-surface px-3 py-1.5 text-foreground">
+                {step}
+              </span>
+              {i < arr.length - 1 ? (
+                <span className="text-primary" aria-hidden>
+                  →
+                </span>
+              ) : null}
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* 14. CAPACITY SUMMARY */}
+      <section
+        className="border-t px-6 py-8 lg:px-12"
+        style={{
+          borderColor: "color-mix(in oklch, var(--primary) 30%, transparent)",
+          background: "color-mix(in oklch, var(--primary) 6%, transparent)",
+        }}
+      >
+        <p
+          className="text-mono text-[10px] uppercase tracking-[0.24em]"
+          style={{ color: "var(--primary)" }}
+        >
+          Organisational capacity summary
+        </p>
+        <p className="mt-3 max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">
+          {capacity.summary}
+        </p>
+        <p className="text-mono mt-4 border-t border-border/40 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+          Organisations do not always need more capacity — often they need to recover or
+          redirect the capacity they already have.
+        </p>
+      </section>
     </article>
   );
 }
+
+function CapacityColumn({
+  label,
+  accent,
+  items,
+  emptyText,
+}: {
+  label: string;
+  accent: string;
+  items: { area: string; reason: string }[];
+  emptyText: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border/60 bg-surface p-4">
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-block h-2 w-2 rounded-full"
+          style={{ backgroundColor: accent, boxShadow: `0 0 10px ${accent}` }}
+          aria-hidden
+        />
+        <p
+          className="text-mono text-[10px] uppercase tracking-[0.2em]"
+          style={{ color: accent }}
+        >
+          {label}
+        </p>
+      </div>
+      {items.length === 0 ? (
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{emptyText}</p>
+      ) : (
+        <ul className="mt-3 space-y-2.5">
+          {items.map((it) => (
+            <li key={it.area}>
+              <p className="text-sm font-medium text-foreground">{it.area}</p>
+              <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+                {it.reason}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 
 
 
