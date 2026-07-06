@@ -2225,9 +2225,172 @@ function ExecutiveHero({
           likely to recover it.
         </p>
       </section>
+
+      {/* 11. ORGANISATIONAL CAPACITY */}
+      <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+        <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+          Organisational capacity
+        </p>
+        <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Where capacity is working, under pressure, or at risk.
+        </h3>
+        <p className="mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+          Hidden work quietly consumes organisational capacity. These are the areas
+          currently protected, under strain or likely to come under strain if nothing
+          changes.
+        </p>
+        <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-3">
+          <CapacityColumn
+            label="Working well"
+            accent="var(--signal-low)"
+            items={capacity.workingWell}
+            emptyText="No capacity area is currently free of hidden work."
+          />
+          <CapacityColumn
+            label="Under pressure"
+            accent="var(--signal-elevated)"
+            items={capacity.underPressure}
+            emptyText="No capacity area is currently under material pressure."
+          />
+          <CapacityColumn
+            label="At risk"
+            accent="var(--signal-critical)"
+            items={capacity.atRisk}
+            emptyText="No capacity area is currently trending toward risk."
+          />
+        </div>
+      </section>
+
+      {/* 12. HOW HIDDEN WORK CONSUMES CAPACITY */}
+      {capacity.hiddenWork.length > 0 ? (
+        <section className="border-t border-border/60 px-6 py-8 lg:px-12">
+          <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            How hidden work is consuming capacity
+          </p>
+          <ul className="mt-4 space-y-3">
+            {capacity.hiddenWork.map((h) => (
+              <li
+                key={h.mechanism}
+                className="rounded-lg border border-border/60 bg-surface px-4 py-3"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-base font-medium text-foreground">
+                    {h.plainName}
+                  </span>
+                  <span
+                    className="text-mono text-xs uppercase tracking-[0.16em]"
+                    style={{ color: "var(--primary)" }}
+                  >
+                    {h.capacityAffected}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-sm leading-snug text-muted-foreground">
+                  {h.explanation}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 13. CAPACITY FLOW */}
+      <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
+        <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+          How capacity changes
+        </p>
+        <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
+          {[
+            "System Conditions",
+            "Hidden Work",
+            "Capacity Under Pressure",
+            "Better Understanding",
+            "Better Decisions",
+            "Capacity Recovered or Redirected",
+          ].map((step, i, arr) => (
+            <li key={step} className="flex items-center gap-2">
+              <span className="rounded-md border border-border/60 bg-surface px-3 py-1.5 text-foreground">
+                {step}
+              </span>
+              {i < arr.length - 1 ? (
+                <span className="text-primary" aria-hidden>
+                  →
+                </span>
+              ) : null}
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* 14. CAPACITY SUMMARY */}
+      <section
+        className="border-t px-6 py-8 lg:px-12"
+        style={{
+          borderColor: "color-mix(in oklch, var(--primary) 30%, transparent)",
+          background: "color-mix(in oklch, var(--primary) 6%, transparent)",
+        }}
+      >
+        <p
+          className="text-mono text-[10px] uppercase tracking-[0.24em]"
+          style={{ color: "var(--primary)" }}
+        >
+          Organisational capacity summary
+        </p>
+        <p className="mt-3 max-w-3xl text-base leading-relaxed text-foreground sm:text-lg">
+          {capacity.summary}
+        </p>
+        <p className="text-mono mt-4 border-t border-border/40 pt-3 text-[10px] leading-relaxed text-muted-foreground">
+          Organisations do not always need more capacity — often they need to recover or
+          redirect the capacity they already have.
+        </p>
+      </section>
     </article>
   );
 }
+
+function CapacityColumn({
+  label,
+  accent,
+  items,
+  emptyText,
+}: {
+  label: string;
+  accent: string;
+  items: { area: string; reason: string }[];
+  emptyText: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border/60 bg-surface p-4">
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-block h-2 w-2 rounded-full"
+          style={{ backgroundColor: accent, boxShadow: `0 0 10px ${accent}` }}
+          aria-hidden
+        />
+        <p
+          className="text-mono text-[10px] uppercase tracking-[0.2em]"
+          style={{ color: accent }}
+        >
+          {label}
+        </p>
+      </div>
+      {items.length === 0 ? (
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{emptyText}</p>
+      ) : (
+        <ul className="mt-3 space-y-2.5">
+          {items.map((it) => (
+            <li key={it.area}>
+              <p className="text-sm font-medium text-foreground">{it.area}</p>
+              <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+                {it.reason}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 
 
 
