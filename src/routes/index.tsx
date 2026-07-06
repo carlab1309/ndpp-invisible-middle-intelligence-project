@@ -158,6 +158,10 @@ function Console() {
     () => computeCommercialIntelligence(conditions, executive),
     [conditions, executive]
   );
+  const capacity = useMemo(
+    () => computeCapacityIntelligence(conditions, executive),
+    [conditions, executive]
+  );
 
   const containmentScore = Math.max(
     0,
