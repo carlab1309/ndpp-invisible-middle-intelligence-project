@@ -2303,3 +2303,277 @@ export function computeCommercialIntelligence(
     whyThisMatters,
   };
 }
+
+// =====================================================================
+// V4.4 — ORGANISATIONAL CAPACITY INTELLIGENCE
+// Translates burden mechanisms into plain-language capacity effects so
+// leaders can see where hidden work is redirecting organisational effort.
+// =====================================================================
+
+export interface CapacityHiddenWork {
+  mechanism: string;         // canonical NDPP label
+  plainName: string;         // human phrase, e.g. "Repeated checking"
+  explanation: string;       // one sentence, human-first
+  capacityAffected: string;  // e.g. "Decision-making capacity"
+  pct: number;               // share of hidden effort (0..100)
+}
+
+export interface CapacityArea {
+  area: string;              // e.g. "Decision-making capacity"
+  reason: string;            // plain-language rationale
+}
+
+export interface CapacityIntelligence {
+  workingWell: CapacityArea[];
+  underPressure: CapacityArea[];
+  atRisk: CapacityArea[];
+  hiddenWork: CapacityHiddenWork[];
+  summary: string;
+}
+
+interface MechanismCapacityEntry {
+  plainName: string;
+  explanation: string;
+  capacityAffected: string;
+}
+
+const MECHANISM_CAPACITY: Record<string, MechanismCapacityEntry> = {
+  "Verification Burden": {
+    plainName: "Repeated checking",
+    explanation: "People are spending increasing time confirming information before acting.",
+    capacityAffected: "Decision-making capacity",
+  },
+  "Reassurance Dependency": {
+    plainName: "Repeated approvals",
+    explanation: "Unnecessary approval pathways are slowing progress.",
+    capacityAffected: "Leadership capacity",
+  },
+  "Closure Uncertainty": {
+    plainName: "Re-opening finished work",
+    explanation: "Work is repeatedly re-checked because it is unclear whether it is actually complete.",
+    capacityAffected: "Operational delivery capacity",
+  },
+  "Completion Ambiguity": {
+    plainName: "Chasing completion",
+    explanation: "People spend effort confirming whether outcomes have actually landed.",
+    capacityAffected: "Operational delivery capacity",
+  },
+  "Oversight Compensation": {
+    plainName: "Manual supervision",
+    explanation: "Managers are compensating for gaps the system should already cover.",
+    capacityAffected: "Management capacity",
+  },
+  "Interpretive Reliance": {
+    plainName: "Re-interpreting AI output",
+    explanation: "People are re-reading and translating AI output before acting on it.",
+    capacityAffected: "Analytical capacity",
+  },
+  "Threshold Reinterpretation": {
+    plainName: "Re-deciding thresholds",
+    explanation: "People repeatedly re-decide what should trigger action.",
+    capacityAffected: "Decision-making capacity",
+  },
+  "Severity Inconsistency": {
+    plainName: "Case-by-case severity calls",
+    explanation: "Similar cases receive different responses, so effort is spent re-judging severity.",
+    capacityAffected: "Operational delivery capacity",
+  },
+  "Recognition Latency": {
+    plainName: "Late recognition",
+    explanation: "Emerging issues are recognised late, so response becomes reactive.",
+    capacityAffected: "Coordination capacity",
+  },
+  "Duplicated Responsibility": {
+    plainName: "Duplicated ownership",
+    explanation: "Multiple people are carrying responsibility for the same work.",
+    capacityAffected: "Management capacity",
+  },
+  "Ownership Ambiguity": {
+    plainName: "Locating ownership",
+    explanation: "Effort is spent working out who owns the work before it can move.",
+    capacityAffected: "Coordination capacity",
+  },
+  "Handoff Gap": {
+    plainName: "Recovering handoffs",
+    explanation: "People spend effort catching work that falls between teams.",
+    capacityAffected: "Coordination capacity",
+  },
+  "Context Reconstruction": {
+    plainName: "Repeated clarification",
+    explanation: "People are repeatedly explaining information that should already be clear.",
+    capacityAffected: "Communication capacity",
+  },
+  "Context Loss": {
+    plainName: "Rebuilding shared meaning",
+    explanation: "Shared understanding is being lost between teams and systems.",
+    capacityAffected: "Communication capacity",
+  },
+  "Meaning Reconstruction": {
+    plainName: "Interpreting signals",
+    explanation: "People work out what the system is actually saying before responding.",
+    capacityAffected: "Analytical capacity",
+  },
+  "Urgency Inference": {
+    plainName: "Inferring urgency",
+    explanation: "Urgency is inferred rather than defined, driving inconsistent prioritisation.",
+    capacityAffected: "Decision-making capacity",
+  },
+  "Escalation Inflation": {
+    plainName: "Unnecessary escalation",
+    explanation: "Cases are escalated higher than they should be, absorbing leadership time.",
+    capacityAffected: "Leadership capacity",
+  },
+  "Threshold-Driven Escalation": {
+    plainName: "Precautionary escalation",
+    explanation: "Unclear thresholds cause escalation triggered by ambiguity, not risk.",
+    capacityAffected: "Leadership capacity",
+  },
+  "Workaround Proliferation": {
+    plainName: "Manual workarounds",
+    explanation: "People are completing tasks the system should already support.",
+    capacityAffected: "Operational delivery capacity",
+  },
+  "Duplicated Workflow": {
+    plainName: "Duplicated effort",
+    explanation: "The same activity is being performed in parallel by different people.",
+    capacityAffected: "Operational delivery capacity",
+  },
+  "Behavioural Hedging": {
+    plainName: "Protective behaviour",
+    explanation: "People are acting cautiously to protect themselves, slowing delivery.",
+    capacityAffected: "Delivery capacity",
+  },
+  "Workaround Persistence": {
+    plainName: "Embedded workarounds",
+    explanation: "Local workarounds have quietly become permanent parts of how work happens.",
+    capacityAffected: "Operational delivery capacity",
+  },
+  "Residual Compensation": {
+    plainName: "Absorbing system gaps",
+    explanation: "People are quietly absorbing effort the system did not plan for.",
+    capacityAffected: "Organisational capacity",
+  },
+};
+
+// Canonical set of capacity areas we track for the "working well / under
+// pressure / at risk" view. Order matters for stable rendering.
+const CAPACITY_AREAS = [
+  "Decision-making capacity",
+  "Leadership capacity",
+  "Management capacity",
+  "Coordination capacity",
+  "Communication capacity",
+  "Operational delivery capacity",
+  "Analytical capacity",
+];
+
+export function computeCapacityIntelligence(
+  conditions: StructuralCondition[],
+  executive: ExecutiveAssessment
+): CapacityIntelligence {
+  // 1. Hidden-work list from burden index (already ordered by share).
+  const hiddenWork: CapacityHiddenWork[] = [];
+  for (const b of executive.burdenIndex) {
+    const entry = MECHANISM_CAPACITY[b.mechanism];
+    if (!entry) continue;
+    hiddenWork.push({
+      mechanism: b.mechanism,
+      plainName: entry.plainName,
+      explanation: entry.explanation,
+      capacityAffected: entry.capacityAffected,
+      pct: b.pct,
+    });
+    if (hiddenWork.length >= 6) break;
+  }
+
+  // 2. Pressure per capacity area — sum burden share by capacityAffected.
+  const pressure = new Map<string, number>();
+  for (const b of executive.burdenIndex) {
+    const entry = MECHANISM_CAPACITY[b.mechanism];
+    if (!entry) continue;
+    pressure.set(
+      entry.capacityAffected,
+      (pressure.get(entry.capacityAffected) ?? 0) + b.pct
+    );
+  }
+
+  // 3. Which capacity areas are tied to escalating or entrenching conditions
+  //    (evidence of forward risk).
+  const atRiskAreas = new Set<string>();
+  for (const c of conditions) {
+    const t = c.trajectory?.direction;
+    if (t !== "Escalating" && t !== "Entrenching") continue;
+    for (const m of c.mechanisms) {
+      const entry = MECHANISM_CAPACITY[m.label];
+      if (entry) atRiskAreas.add(entry.capacityAffected);
+    }
+  }
+
+  const underPressure: CapacityArea[] = [];
+  const atRisk: CapacityArea[] = [];
+  const workingWell: CapacityArea[] = [];
+
+  for (const area of CAPACITY_AREAS) {
+    const load = pressure.get(area) ?? 0;
+    const risky = atRiskAreas.has(area);
+    if (load >= 15) {
+      underPressure.push({
+        area,
+        reason: `Hidden work is currently consuming a meaningful share of ${area.toLowerCase()}.`,
+      });
+    } else if (risky) {
+      atRisk.push({
+        area,
+        reason: `Conditions affecting ${area.toLowerCase()} are getting worse, not settling.`,
+      });
+    } else if (load > 0) {
+      // Light pressure but not enough to flag — still not "working well".
+      atRisk.push({
+        area,
+        reason: `Early signs of hidden work forming inside ${area.toLowerCase()}.`,
+      });
+    } else {
+      workingWell.push({
+        area,
+        reason: `No material hidden work is currently consuming ${area.toLowerCase()}.`,
+      });
+    }
+  }
+
+  // 4. Executive capacity summary — evidence-led, no numeric guesses.
+  let summary: string;
+  if (conditions.length === 0) {
+    summary =
+      "Organisational capacity currently appears to be directed toward purposeful work. No material hidden effort is being absorbed by people to keep the system functional.";
+  } else {
+    const areas = underPressure.slice(0, 3).map((a) => a.area.replace(/ capacity$/, ""));
+    const areaFragment =
+      areas.length > 0
+        ? `Capacity is most under pressure in ${joinList(areas)}.`
+        : "Capacity pressure is beginning to form across several areas.";
+    const topName = hiddenWork[0]?.plainName.toLowerCase();
+    const workFragment = topName
+      ? ` The largest current source of hidden work is ${topName}.`
+      : "";
+    summary =
+      "Current intelligence suggests organisational capacity is increasingly being redirected into verification, coordination and repeated decision support rather than purposeful work. " +
+      areaFragment +
+      workFragment +
+      " This does not necessarily indicate insufficient resources — it indicates that existing capacity is being consumed by hidden work.";
+  }
+
+  return {
+    workingWell,
+    underPressure,
+    atRisk,
+    hiddenWork,
+    summary,
+  };
+}
+
+function joinList(items: string[]): string {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
