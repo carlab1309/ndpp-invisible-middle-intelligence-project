@@ -12,6 +12,7 @@ import {
   type ExecutiveAssessment,
   type ContainmentStatus,
   type CommercialIntelligence,
+  type CapacityIntelligence,
   generateSignal,
   interpret,
   familyCounts,
@@ -21,6 +22,7 @@ import {
   computeContainment,
   computeExecutiveAssessment,
   computeCommercialIntelligence,
+  computeCapacityIntelligence,
   commercialForCondition,
   humanMechanismLabel,
 } from "@/lib/imi-engine";
