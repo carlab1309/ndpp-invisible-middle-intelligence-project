@@ -1792,9 +1792,11 @@ function EvidenceBlock({
 function ExecutiveHero({
   assessment,
   commercial,
+  capacity,
 }: {
   assessment: ExecutiveAssessment;
   commercial: CommercialIntelligence;
+  capacity: CapacityIntelligence;
 }) {
   const {
     containment,
