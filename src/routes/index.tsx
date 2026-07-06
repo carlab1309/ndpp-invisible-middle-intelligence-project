@@ -168,9 +168,29 @@ function Console() {
     Math.min(100, Math.round(100 - totalBurden * 18))
   );
 
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    try {
+      if (!window.localStorage.getItem("imi.onboarded.v44")) {
+        setShowOnboarding(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+  const dismissOnboarding = () => {
+    try {
+      window.localStorage.setItem("imi.onboarded.v44", "1");
+    } catch {
+      /* ignore */
+    }
+    setShowOnboarding(false);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header />
+      {showOnboarding ? <Onboarding onBegin={dismissOnboarding} /> : null}
+      <Header onOpenOnboarding={() => setShowOnboarding(true)} />
 
       <main className="mx-auto max-w-7xl px-6 pb-24 pt-6 lg:px-10">
         <Masthead />
@@ -184,8 +204,13 @@ function Console() {
         />
 
         <div className="mt-8">
-          <ExecutiveHero assessment={executive} commercial={commercial} />
+          <ExecutiveHero
+            assessment={executive}
+            commercial={commercial}
+            capacity={capacity}
+          />
         </div>
+
 
         <SupportingDivider />
 
