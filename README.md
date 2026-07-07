@@ -10,8 +10,6 @@ Developing the **Invisible Middle Intelligence Engine (IMIE)** - an executive in
 
 The Invisible Middle Intelligence Engine is an active executive prototype currently evolving through evidence-led design and real-world testing.
 
----
-
 ### Current capabilities
 
 - Executive Situation Intelligence
@@ -19,8 +17,6 @@ The Invisible Middle Intelligence Engine is an active executive prototype curren
 - Organisational Capacity Analysis
 - Executive Briefing Generation
 - Structural Intervention Recommendations
-
----
 
 ### Development status
 
