@@ -338,8 +338,11 @@ function Onboarding({ onBegin }: { onBegin: () => void }) {
             id="imi-onboarding-title"
             className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
           >
-            Welcome to the Invisible Middle Intelligence Engine
+            Welcome to Your Executive Intelligence Briefing
           </h2>
+          <p className="text-mono mt-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Powered by the Invisible Middle Intelligence Engine
+          </p>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             This platform helps leaders understand where hidden work is quietly reducing
             organisational capacity. Rather than reporting isolated issues, it identifies
@@ -1697,34 +1700,34 @@ function containmentTone(status: ContainmentStatus) {
   }
 }
 
-type ConfidenceLevel = "High" | "Moderate" | "Low";
+type EvidenceStrength = "High" | "Moderate" | "Limited";
 
 function confidenceFromScore(score: number): {
-  level: ConfidenceLevel;
+  level: EvidenceStrength;
   blurb: string;
 } {
   if (score >= 3) {
     return {
       level: "High",
       blurb:
-        "We're seeing the same pattern repeatedly across different parts of the system.",
+        "Supporting evidence includes the same pattern appearing repeatedly across different parts of the system.",
     };
   }
   if (score >= 2) {
     return {
       level: "Moderate",
       blurb:
-        "The pattern is emerging clearly, but we'd want to keep watching it before treating it as settled.",
+        "This interpretation is supported by a clearly emerging pattern, though further observation would strengthen it.",
     };
   }
   return {
-    level: "Low",
+    level: "Limited",
     blurb:
-      "Early indications only — worth noting, but more evidence is needed before drawing strong conclusions.",
+      "The available evidence indicates an early signal only — worth noting, but more evidence is needed before drawing strong conclusions.",
   };
 }
 
-function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
+function ConfidenceBadge({ level }: { level: EvidenceStrength }) {
   const tone =
     level === "High"
       ? "var(--flourish)"
@@ -1745,7 +1748,7 @@ function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
         style={{ backgroundColor: tone }}
         aria-hidden
       />
-      Confidence · {level}
+      Evidence Strength · {level}
     </span>
   );
 }
@@ -1757,7 +1760,7 @@ function EvidenceBlock({
 }: {
   title: string;
   points: string[];
-  confidence: { level: ConfidenceLevel; blurb: string };
+  confidence: { level: EvidenceStrength; blurb: string };
 }) {
   if (points.length === 0) return null;
   return (
