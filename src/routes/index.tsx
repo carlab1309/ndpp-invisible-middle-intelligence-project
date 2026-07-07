@@ -2072,7 +2072,7 @@ function ExecutiveHero({
       ) : null}
 
       {/* 5. IF NOTHING CHANGES */}
-      {ifNothingChanges.length > 0 ? (
+      {show("impact") && ifNothingChanges.length > 0 ? (
         <section className="border-t border-border/60 px-6 py-6 lg:px-12">
           <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
             If nothing changes
