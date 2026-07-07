@@ -2216,6 +2216,7 @@ function ExecutiveHero({
       ) : null}
 
       {/* 10. WHY THIS MATTERS */}
+      {show("impact") ? (
       <section
         className="border-t px-6 py-8 lg:px-12"
         style={{
