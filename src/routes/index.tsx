@@ -2337,8 +2337,10 @@ function ExecutiveHero({
           ))}
         </ol>
       </section>
+      ) : null}
 
       {/* 14. CAPACITY SUMMARY */}
+      {show("impact") ? (
       <section
         className="border-t px-6 py-8 lg:px-12"
         style={{
