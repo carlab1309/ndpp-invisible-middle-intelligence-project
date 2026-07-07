@@ -1,5 +1,8 @@
 # NDPP Invisible Middle Intelligence Engine (IMIL)
 
+<img width="1080" height="3974" alt="1000105912" src="https://github.com/user-attachments/assets/025d5fb4-e8e2-4a9a-96e1-605a87814a1b" />
+
+
 ## Current Status
 
 The Invisible Middle Intelligence Engine is an active executive prototype currently evolving through evidence-led design and real-world testing.
