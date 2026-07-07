@@ -1792,15 +1792,20 @@ function EvidenceBlock({
   );
 }
 
+type HeroView = "overview" | "evidence" | "impact";
+
 function ExecutiveHero({
   assessment,
   commercial,
   capacity,
+  view = "overview",
 }: {
   assessment: ExecutiveAssessment;
   commercial: CommercialIntelligence;
   capacity: CapacityIntelligence;
+  view?: HeroView;
 }) {
+  const show = (...views: HeroView[]) => views.includes(view);
   const {
     containment,
     primaryPressure,
