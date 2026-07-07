@@ -187,6 +187,10 @@ function Console() {
     setShowOnboarding(false);
   };
 
+  const [activeTab, setActiveTab] = useState<"overview" | "briefing" | "evidence" | "impact">(
+    "overview"
+  );
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {showOnboarding ? <Onboarding onBegin={dismissOnboarding} /> : null}
@@ -203,51 +207,107 @@ function Console() {
           onReset={() => setSignals([])}
         />
 
-        <div className="mt-8">
-          <ExecutiveHero
-            assessment={executive}
-            commercial={commercial}
-            capacity={capacity}
-          />
-        </div>
+        <SectionTabs active={activeTab} onChange={setActiveTab} />
 
-
-        <SupportingDivider />
-
-        <div className="mt-6 grid grid-cols-1 gap-6 opacity-95 lg:grid-cols-12">
-          {/* Left: signal stream + families */}
-          <section className="lg:col-span-5 flex flex-col gap-6">
-            <SignalStream signals={signals.slice().reverse()} />
-            <FamilyPanel counts={counts} />
-          </section>
-
-          {/* Right: structural conditions + score */}
-          <section className="lg:col-span-7 flex flex-col gap-6">
-            <ContainmentGauge
-              score={containmentScore}
-              burden={totalBurden}
-              conditionsCount={conditions.length}
+        <div className="mt-6">
+          {activeTab === "overview" ? (
+            <ExecutiveHero
+              assessment={executive}
+              commercial={commercial}
+              capacity={capacity}
+              view="overview"
             />
-            <ConditionsPanel conditions={conditions} />
-            <InteractionPanel interactions={interactions} />
-          </section>
-        </div>
+          ) : null}
 
-        <details className="mt-6 group">
-          <summary className="text-mono cursor-pointer list-none rounded-md border border-border/60 bg-surface/60 px-4 py-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-primary">
-            <span className="inline-block transition-transform group-open:rotate-90">▸</span>{" "}
-            Full executive briefing (all detail)
-          </summary>
-          <div className="mt-4">
+          {activeTab === "briefing" ? (
             <ExecutiveAssessmentPanel assessment={executive} />
-          </div>
-        </details>
+          ) : null}
+
+          {activeTab === "evidence" ? (
+            <div className="flex flex-col gap-6">
+              <ExecutiveHero
+                assessment={executive}
+                commercial={commercial}
+                capacity={capacity}
+                view="evidence"
+              />
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                <section className="lg:col-span-5 flex flex-col gap-6">
+                  <SignalStream signals={signals.slice().reverse()} />
+                  <FamilyPanel counts={counts} />
+                </section>
+                <section className="lg:col-span-7 flex flex-col gap-6">
+                  <ContainmentGauge
+                    score={containmentScore}
+                    burden={totalBurden}
+                    conditionsCount={conditions.length}
+                  />
+                  <ConditionsPanel conditions={conditions} />
+                  <InteractionPanel interactions={interactions} />
+                </section>
+              </div>
+            </div>
+          ) : null}
+
+          {activeTab === "impact" ? (
+            <ExecutiveHero
+              assessment={executive}
+              commercial={commercial}
+              capacity={capacity}
+              view="impact"
+            />
+          ) : null}
+        </div>
 
         <Footer />
       </main>
     </div>
   );
 }
+
+function SectionTabs({
+  active,
+  onChange,
+}: {
+  active: "overview" | "briefing" | "evidence" | "impact";
+  onChange: (t: "overview" | "briefing" | "evidence" | "impact") => void;
+}) {
+  const tabs: { id: "overview" | "briefing" | "evidence" | "impact"; label: string; hint: string }[] = [
+    { id: "overview", label: "Overview", hint: "What is happening" },
+    { id: "briefing", label: "Executive Briefing", hint: "The narrative summary" },
+    { id: "evidence", label: "Evidence", hint: "Why we're saying this" },
+    { id: "impact", label: "Impact", hint: "Why it matters" },
+  ];
+  return (
+    <nav
+      className="mt-6 flex flex-wrap gap-1 rounded-xl border border-border/60 bg-surface p-1"
+      aria-label="Report sections"
+    >
+      {tabs.map((t) => {
+        const isActive = active === t.id;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => onChange(t.id)}
+            className={`flex-1 min-w-[140px] cursor-pointer rounded-lg px-4 py-3 text-left transition-colors ${
+              isActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-surface-2/60 hover:text-foreground"
+            }`}
+            aria-current={isActive ? "page" : undefined}
+          >
+            <span className="block text-sm font-semibold tracking-tight">{t.label}</span>
+            <span className="text-mono block text-[10px] uppercase tracking-[0.16em] opacity-80">
+              {t.hint}
+            </span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 
 function SupportingDivider() {
   return (
