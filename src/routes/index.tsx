@@ -2019,7 +2019,7 @@ function ExecutiveHero({
       ) : null}
 
       {/* 4. HIGHEST IMPACT CHANGE */}
-      {highestLeverage ? (
+      {show("overview", "impact") && highestLeverage ? (
         <section
           className="border-t px-6 py-8 lg:px-12"
           style={{
