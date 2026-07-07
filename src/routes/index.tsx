@@ -2362,6 +2362,7 @@ function ExecutiveHero({
           redirect the capacity they already have.
         </p>
       </section>
+      ) : null}
     </article>
   );
 }
