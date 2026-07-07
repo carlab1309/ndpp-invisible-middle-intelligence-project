@@ -1640,12 +1640,12 @@ export type ScenarioId = "baseline" | "trust_collapse" | "ai_burden" | "handoff_
 
 export const SCENARIOS: Record<ScenarioId, { label: string; description: string; weighted: string[] }> = {
   baseline: {
-    label: "Baseline operations",
+    label: "Normal operations",
     description: "Mixed low-volume signals across families.",
     weighted: [],
   },
   trust_collapse: {
-    label: "Trust collapse forming",
+    label: "Ownership becoming unclear",
     description: "Verification, reassurance and reopen patterns rising.",
     weighted: [
       "Repeated dashboard checking",
@@ -1655,7 +1655,7 @@ export const SCENARIOS: Record<ScenarioId, { label: string; description: string;
     ],
   },
   ai_burden: {
-    label: "AI burden transfer",
+    label: "AI needs increasing human oversight",
     description: "AI-supported environment silently shifting load to humans.",
     weighted: [
       "Repeated AI override",
@@ -1664,7 +1664,7 @@ export const SCENARIOS: Record<ScenarioId, { label: string; description: string;
     ],
   },
   handoff_breakdown: {
-    label: "Handoff breakdown",
+    label: "Work falling between teams",
     description: "Ownership and context not surviving transitions.",
     weighted: [
       "Duplicated intervention",
@@ -1674,7 +1674,7 @@ export const SCENARIOS: Record<ScenarioId, { label: string; description: string;
     ],
   },
   flourishing: {
-    label: "Healthy containment",
+    label: "System operating well",
     description: "Closure confirmed, low compensation burden.",
     weighted: [
       "Stable closure confirmed",
