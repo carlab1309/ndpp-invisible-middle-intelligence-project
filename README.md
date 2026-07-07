@@ -85,3 +85,16 @@ It is to help leaders understand where capacity is being quietly consumed so the
 This repository contains the active prototype of the NDPP Invisible Middle Intelligence Engine.
 
 The platform is under active development, with ongoing improvements to executive intelligence, evidence transparency and organisational capacity modelling.
+
+---
+# Executive Demonstrations
+
+The Invisible Middle Intelligence Engine (IMIE) is currently available for executive demonstrations and strategic conversations while development continues.
+
+If you would like to explore the platform or discuss potential applications, please contact:
+
+**Carla Bowley**  
+Founder, NDPP
+
+📧 carla@ndpp.co.uk
+
