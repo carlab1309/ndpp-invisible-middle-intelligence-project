@@ -2123,7 +2123,7 @@ function ExecutiveHero({
       ) : null}
 
       {/* 7. CAPACITY BEING LOST */}
-      {commercial.capacityLoss.length > 0 ? (
+      {show("overview", "impact") && commercial.capacityLoss.length > 0 ? (
         <section
           className="border-t px-6 py-8 lg:px-12"
           style={{
