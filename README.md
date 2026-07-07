@@ -1,5 +1,21 @@
 # NDPP Invisible Middle Intelligence Engine (IMIL)
 
+## Current Status
+
+The Invisible Middle Intelligence Engine is an active executive prototype currently evolving through evidence-led design and real-world testing.
+
+### Current capabilities
+
+- Executive Situation Intelligence
+- Evidence-First Intelligence
+- Organisational Capacity Analysis
+- Executive Briefing Generation
+- Structural Intervention Recommendations
+
+### Development status
+
+Current focus is executive experience refinement, progressive disclosure and usability testing with leadership audiences before public release.
+
 ## Executive Intelligence for Hidden Organisational Capacity
 
 The Invisible Middle Intelligence Engine helps leaders understand where hidden work is quietly reducing organisational capacity.
