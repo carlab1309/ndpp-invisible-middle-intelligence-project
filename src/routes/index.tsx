@@ -2310,6 +2310,7 @@ function ExecutiveHero({
       ) : null}
 
       {/* 13. CAPACITY FLOW */}
+      {show("impact") ? (
       <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
         <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
           How capacity changes
