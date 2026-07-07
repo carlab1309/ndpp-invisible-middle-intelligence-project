@@ -1910,6 +1910,8 @@ function ExecutiveHero({
   return (
     <article className="overflow-hidden rounded-2xl border border-border/70 bg-surface">
       {/* 1. WHAT IS HAPPENING — hero status */}
+      {show("overview") ? (
+
       <header
         className="relative px-6 py-10 lg:px-12 lg:py-14"
         style={{
