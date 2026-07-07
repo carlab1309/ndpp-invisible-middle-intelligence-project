@@ -1947,9 +1947,11 @@ function ExecutiveHero({
           />
         </div>
       </header>
+      ) : null}
 
       {/* 2. PRIMARY SYSTEM PRESSURE */}
-      {primaryPressure ? (
+      {show("overview") && primaryPressure ? (
+
         <section className="border-t border-border/60 px-6 py-8 lg:px-12">
           <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
             Primary system pressure
