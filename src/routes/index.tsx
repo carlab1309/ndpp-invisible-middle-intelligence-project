@@ -2189,7 +2189,7 @@ function ExecutiveHero({
       ) : null}
 
       {/* 9. STRATEGIC CONSEQUENCES */}
-      {commercial.strategicConsequences.length > 0 ? (
+      {show("impact") && commercial.strategicConsequences.length > 0 ? (
         <section className="border-t border-border/60 bg-surface-2/40 px-6 py-8 lg:px-12">
           <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
             Strategic consequences
