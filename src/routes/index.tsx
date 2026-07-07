@@ -2275,9 +2275,10 @@ function ExecutiveHero({
           />
         </div>
       </section>
+      ) : null}
 
       {/* 12. HOW HIDDEN WORK CONSUMES CAPACITY */}
-      {capacity.hiddenWork.length > 0 ? (
+      {show("evidence") && capacity.hiddenWork.length > 0 ? (
         <section className="border-t border-border/60 px-6 py-8 lg:px-12">
           <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
             How hidden work is consuming capacity
