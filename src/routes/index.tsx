@@ -2165,7 +2165,7 @@ function ExecutiveHero({
       ) : null}
 
       {/* 8. LEADERSHIP IMPACT */}
-      {commercial.leadershipImpact.length > 0 ? (
+      {show("overview") && commercial.leadershipImpact.length > 0 ? (
         <section className="border-t border-border/60 px-6 py-8 lg:px-12">
           <p className="text-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
             What leaders are likely to experience
